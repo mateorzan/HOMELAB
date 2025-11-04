@@ -59,38 +59,21 @@ Verficamos:
 
 Creamos el Dashboard que vamos a utilizar en este caso Glance.
 
-`docker service create \`
-  `--name glance \`
-  `--constraint 'node.labels.arch == amd64' \`
-  `--publish 7000:8080 \`
-  `--mount type=volume,src=glance_config,dst=/app/config \`
-  `glanceapp/glance:latest`
+`mkdir glance && cd glance && curl -sL https://github.com/glanceapp/docker-compose-template/archive/refs/heads/main.tar.gz | tar -xzf - --strip-components 2`
 
-Creamos la config:
+Luego, edita los siguientes ficheros a tu gusto:
 
-`docker exec -it $(docker ps -q --filter name=glance) sh`
+`docker-compose.yml` to configure the port, volumes and other containery things
+`config/home.yml to` configure the widgets or layout of the home page
+`config/glance.yml` if you want to change the theme or add more pages
 
-`cat > /app/config/config.yml <<EOF`
-`title: "Mateo's Home Dashboard"`
-`links:`
-  `- name: Jellyfin`
-    `url: http://<IP_RASPBERRY>:8096`
-  - `name: Nextcloud`
-    `url: http://<IP_RASPBERRY>:8081`
-  - `name: Portainer`
-    `url: http://<IP_RASPBERRY>:9000`
-  - `name: Glance`
-    `url: http://<IP_RASPBERRY>:7070`
-`EOF`
-`exit`
+Cuando este listo, ejecuta:
 
-Refrescamos el servicio
+docker compose up -d
 
-`docker service update --force glance`
+If you encounter any issues, you can check the logs by running:
 
-Si ya lo intentaste crear y te dio error
-
-`docker service rm glance`
+docker compose logs
 
 El servidor deberia estar disponible en:
 
