@@ -1,0 +1,107 @@
+Estructura actual:
+
+Una raspberry pi con CasaOS instalado localmente con diferentes servicios creados a traves de CasaOS
+
+NextCloud, servicio Cloud
+Jellyfin, servicio de medios
+Nginx Proxy Manager, proxy que publica los servicios
+Prowlar
+Sonar, servicio de series
+Radarr, servicio de peliculas
+DdnsUpdater, servicio para actualizar la ip publica
+Sure, servicio finanzas
+
+Situacion actual:
+
+Dispongo de dos servidores mas, dos zimablades, queremos ampliar nuestro Homelab con dos servidores mas, para esto vamos a implementar un Swarm de docker. En este Swarm vamos a tener tres nodos, un nodo manager(raspberrypi) y dos workers(zimablades).
+
+La idea de esta estructura es crear un red de alta disponibilidad y respaldada y gestionar cargas de trabajo entre nodos, de todo esto se encarga swarm.
+
+Estructura final:
+
+Crearemos todos los servicios con swarm para que compartan la carga entre los diferentes nodos. La intencion es ir migrando poco a poco todos los servicios de la raspberry que se ejecutan con docker pasarlo a docker swarm.
+
+Problemas o inquietudes:
+
+Como la raspberry y zima tienen diferesntes arquitecturas no todos los servicios se pueden ejecutar en los dos servidores, por lo que hay servicios que no son multi-arch que hay que ejecutar por separado. 
+
+Soluciones y Progresos :
+
+Primero antes de hacer nada añadimos los equipos a tailscale que es una VPN gratuita que nos permite acceder a los equipos y que los equipos se vean entre si aunque no esten en la misma red interna. En este caso no seria necesario ya que tengo los equipos en la misma red local, pero esto añade disponibilidad a nuestro servidor y facilidades de añadir proximos dispositivos a la red y poder acceder a ellos desde fuera de la red local, sin tener que configurar proxys.
+
+`curl -fsSL https://tailscale.com/install.sh | sh
+`sudo tailscale up`
+
+Puedes ver que esta bien configurado con
+
+`tailscale status`
+`ping <ip_tailscale_otro_dispositivo>`
+
+Por ahora creamos el swarm, empezamos creando el manager y con el token del manager creamos los workers
+
+`docker swarm init --advertise-addr <ip_tailscale_pi>`
+`docker swarm join --token <token> <ip_tailscale_pi>:2377`
+
+Verificamos:
+
+`docker node ls`
+
+Para solucionar el problema de aquitecturas en swarm configuramos unas variables para que los servicios que no sean multi-arch se ejecuten en el servidor correcto.
+
+`docker node update --label-add arch=arm64 --label-add rol=manager raspberrypi`
+`docker node update --label-add arch=amd64 --label-add rol=worker zimablade1`
+`docker node update --label-add arch=amd64 --label-add rol=worker zimablade2`
+
+Verficamos:
+
+`docker node ls`
+`docker node inspect raspberrypi --format '{{.Spec.Labels}}'`
+
+Creamos el Dashboard que vamos a utilizar en este caso Glance.
+
+`docker service create \`
+  `--name glance \`
+  `--constraint 'node.labels.arch == amd64' \`
+  `--publish 7000:8080 \`
+  `--mount type=volume,src=glance_config,dst=/app/config \`
+  `glanceapp/glance:latest`
+
+Creamos la config:
+
+`docker exec -it $(docker ps -q --filter name=glance) sh`
+
+`cat > /app/config/config.yml <<EOF`
+`title: "Mateo's Home Dashboard"`
+`links:`
+  `- name: Jellyfin`
+    `url: http://<IP_RASPBERRY>:8096`
+  - `name: Nextcloud`
+    `url: http://<IP_RASPBERRY>:8081`
+  - `name: Portainer`
+    `url: http://<IP_RASPBERRY>:9000`
+  - `name: Glance`
+    `url: http://<IP_RASPBERRY>:7070`
+`EOF`
+`exit`
+
+Refrescamos el servicio
+
+`docker service update --force glance`
+
+Si ya lo intentaste crear y te dio error
+
+`docker service rm glance`
+
+El servidor deberia estar disponible en:
+
+`http://<IP_RASPBERRY>:7070`
+
+
+Creamos nuestro primer servicio, en este caso Portrainer
+
+`docker volume create portainer_data`
+`docker run -d -p 9000:9000 -p 8000:8000 \`
+  `--name portainer --restart=always \`
+  `-v /var/run/docker.sock:/var/run/docker.sock \`
+  `-v portainer_data:/data \`
+  `portainer/portainer-ce` 
