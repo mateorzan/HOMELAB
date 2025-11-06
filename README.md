@@ -22,6 +22,8 @@ Dispongo de dos servidores mas, dos zimablades, queremos ampliar nuestro Homelab
 
 La idea de esta estructura es crear un red de alta disponibilidad y respaldada y gestionar cargas de trabajo entre nodos, de todo esto se encarga swarm.
 
+
+# CAMBIAR TODO EN VEZ DE SWARM KUBERNETES
 ### Estructura final(Objetivo) :
 
 Crearemos todos los servicios con swarm para que compartan la carga entre los diferentes nodos. La intencion es ir migrando poco a poco todos los servicios de la raspberry que se ejecutan con docker pasarlo a docker swarm.
@@ -42,14 +44,6 @@ Puedes ver que esta bien configurado con
 `tailscale status`
 `ping <ip_tailscale_otro_dispositivo>`
 
-Vamos a crear un servidor NFS compartido para mas adelante crear los volumenes de los servicios
-
-
-
-HAY Q HACERLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-
-
-
 
 Por ahora creamos el swarm, empezamos creando el manager y con el token del manager creamos los workers
 
@@ -59,6 +53,7 @@ Por ahora creamos el swarm, empezamos creando el manager y con el token del mana
 Verificamos:
 
 `docker node ls`
+
 
 Para solucionar el problema de aquitecturas en swarm configuramos unas variables para que los servicios que no sean multi-arch se ejecuten en el servidor correcto.
 
@@ -70,6 +65,54 @@ Verficamos:
 
 `docker node ls`
 `docker node inspect raspberrypi --format '{{.Spec.Labels}}'`
+
+Vamos a crear un servidor NFS compartido para mas adelante crear los volumenes de los servicios. En este caso vamos a crear el servidor nfs en una instancia de docker metida en el swarm.
+
+Creamos el archivo `nfs-stack.yml`
+
+```bash
+version: "3.8"
+
+services:
+  nfs-server:
+    image: itsthenetwork/nfs-server-alpine:latest
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == raspberrypiCasa   # Cambia por el nombre real del nodo Raspberry
+      restart_policy:
+        condition: any
+    volumes:
+      - /mnt/ssd/nfs:/mnt/nfs
+    environment:
+      - SHARED_DIRECTORY=/mnt/nfs
+    ports:
+      - 2049:2049
+      - 111:111
+    privileged: true
+    networks:
+      - nfs_net
+
+networks:
+  nfs_net:
+    driver: overlay
+```
+
+Lo lanzamos como un servicio de docker swarm
+
+`docker stack deploy -c nfs-stack.yml nfs`
+
+Comprobamos:
+
+```bash
+docker service ls
+docker service ps nfs_nfs-server
+docker ps
+```
+
+Una vez creado montamos la carpeta o carpetas en el otro servidor.
+
+`sudo mount -t nfs 192.168.1.100:/data /mnt/nfs/glace_d`
 
 Creamos el Dashboard que vamos a utilizar en este caso Glance.
 
