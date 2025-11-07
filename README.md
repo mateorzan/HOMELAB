@@ -72,7 +72,7 @@ Vamos a crear un servidor NFS compartido para mas adelante crear los volumenes d
 Creamos el archivo `nfs-stack.yml`
 
 ```bash
-   # nfs-stack.yml
+ # nfs-stack.yml
 version: "3.9"
 services:
   nfs-server:
@@ -80,16 +80,26 @@ services:
     privileged: true
     restart: unless-stopped
     volumes:
-      - nfs_data:/mnt/ssd/nfs
+      - /mnt/ssd/nfs:/nfsshare
     environment:
-      - SHARED_DIRECTORY=/mnt/ssd/nfs
+      - SHARED_DIRECTORY=/nfsshare
     ports:
       - target: 2049
         published: 2049
         mode: host
+        protocol: tcp
+      - target: 2049
+        published: 2049
+        mode: host
+        protocol: udp
       - target: 111
         published: 111
         mode: host
+        protocol: tcp
+      - target: 111
+        published: 111
+        mode: host
+        protocol: udp
     networks:
       - nfs_net
     deploy:
@@ -99,9 +109,6 @@ services:
         constraints: [node.labels.arch == arm64]   # ← Se mueve entre managers
       restart_policy:
         condition: on-failure
-volumes:
-  nfs_data:
-    driver: local
 networks:
   nfs_net:
     driver: overlay
