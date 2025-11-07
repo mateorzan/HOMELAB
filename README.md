@@ -23,7 +23,6 @@ Dispongo de dos servidores mas, dos zimablades, queremos ampliar nuestro Homelab
 La idea de esta estructura es crear un red de alta disponibilidad y respaldada y gestionar cargas de trabajo entre nodos, de todo esto se encarga swarm.
 
 
-# CAMBIAR TODO EN VEZ DE SWARM KUBERNETES
 ### Estructura final(Objetivo) :
 
 Crearemos todos los servicios con swarm para que compartan la carga entre los diferentes nodos. La intencion es ir migrando poco a poco todos los servicios de la raspberry que se ejecutan con docker pasarlo a docker swarm.
@@ -71,28 +70,36 @@ Vamos a crear un servidor NFS compartido para mas adelante crear los volumenes d
 Creamos el archivo `nfs-stack.yml`
 
 ```bash
-version: "3.8"
-
+   # nfs-stack.yml
+version: "3.9"
 services:
   nfs-server:
-    image: itsthenetwork/nfs-server-alpine:latest
-    deploy:
-      placement:
-        constraints:
-          - node.hostname == raspberrypiCasa   # Cambia por el nombre real del nodo Raspberry
-      restart_policy:
-        condition: any
-    volumes:
-      - /mnt/ssd/nfs:/mnt/nfs
-    environment:
-      - SHARED_DIRECTORY=/mnt/nfs
-    ports:
-      - 2049:2049
-      - 111:111
+    image: octopusdeploy/nfs-server
     privileged: true
+    restart: unless-stopped
+    volumes:
+      - nfs_data:/mnt/ssd/nfs
+    environment:
+      - SHARED_DIRECTORY=/mnt/ssd/nfs
+    ports:
+      - target: 2049
+        published: 2049
+        mode: host
+      - target: 111
+        published: 111
+        mode: host
     networks:
       - nfs_net
-
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.labels.arch == arm64]   # ← Se mueve entre managers
+      restart_policy:
+        condition: on-failure
+volumes:
+  nfs_data:
+    driver: local
 networks:
   nfs_net:
     driver: overlay
@@ -107,7 +114,6 @@ Comprobamos:
 ```bash
 docker service ls
 docker service ps nfs_nfs-server
-docker ps
 ```
 
 Una vez creado montamos la carpeta o carpetas en el otro servidor.
