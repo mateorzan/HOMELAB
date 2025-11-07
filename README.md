@@ -31,6 +31,8 @@ Crearemos todos los servicios con swarm para que compartan la carga entre los di
 
 Como la raspberry y zima tienen diferentes arquitecturas no todos los servicios se pueden ejecutar en los dos servidores, por lo que hay servicios que no son multi-arch que hay que ejecutar por separado. 
 
+Tuve problemas para montar el servicio nfs como un servicio en docker swarm fíjate que todas las rutas, la els y imágenes estén bn elegidas y sean compatibles.
+
 ## Soluciones y Progresos :
 
 Primero antes de hacer nada añadimos los equipos a tailscale que es una VPN gratuita que nos permite acceder a los equipos y que los equipos se vean entre si aunque no esten en la misma red interna. En este caso no seria necesario ya que tengo los equipos en la misma red local, pero esto añade disponibilidad a nuestro servidor y facilidades de añadir proximos dispositivos a la red y poder acceder a ellos desde fuera de la red local, sin tener que configurar proxys.
@@ -118,7 +120,7 @@ docker service ps nfs_nfs-server
 
 Una vez creado montamos la carpeta o carpetas en el otro servidor.
 
-`sudo mount -t nfs 192.168.1.100:/data /mnt/nfs/glace_d`
+`sudo mount -t nfs 192.168.1.100:/mnt/ssd/nfs /mnt/nfs/glace_d`
 
 Creamos el Dashboard que vamos a utilizar en este caso Glance.
 
