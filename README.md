@@ -37,6 +37,14 @@ Debido a los problemas y poco soporte viste en docker swarm vamos a empezar de 0
 
 ## Soluciones y Progresos :
 
+Primero antes de hacer nada añadimos los equipos a tailscale que es una VPN gratuita que nos permite acceder a los equipos y que los equipos se vean entre si aunque no esten en la misma red interna. En este caso no seria necesario ya que tengo los equipos en la misma red local, pero esto añade disponibilidad a nuestro servidor y facilidades de añadir proximos dispositivos a la red y poder acceder a ellos desde fuera de la red local, sin tener que configurar proxys.
+
+curl -fsSL https://tailscale.com/install.sh | sh sudo tailscale up`
+
+Puedes ver que esta bien configurado con:
+
+`tailscale status ping <ip_tailscale_otro_dispositivo>`
+
 Instalamos K3s a traves de su pagina oficial (https://docs.k3s.io/quick-start) seguimos la guia.
 
 `curl -sfL https://get.k3s.io | sh -`
