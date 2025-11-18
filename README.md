@@ -37,3 +37,7 @@ Debido a los problemas y poco soporte viste en docker swarm vamos a empezar de 0
 
 ## Soluciones y Progresos :
 
+Instalamos K3s a traves de su pagina oficial (https://docs.k3s.io/quick-start) seguimos la guia.
+
+`curl -sfL https://get.k3s.io | sh -`
+
