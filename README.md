@@ -106,6 +106,34 @@ nano gateway.ini
 sudo systemctl restart casaos-gateway
 ```
 
+### Tailscale
+
+Error no me deja instalar Tailscale en proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito.
+
+```
+nano /etc/apt/sources.list.d/pve-enterprise.list
+```
+
+Comente la linea que aparece en y añade el repositorio que no tiene subscription, luego actualiza los paquetes.
+
+```
+# deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
+
+echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
+apt update
+```
+
+Hay que hacer lo mismo con el siguiente archivo.
+
+```
+nano /etc/apt/sources.list.d/ceph.list
+
+# deb https://enterprise.proxmox.com/debian/ceph-quincy bookworm InRelease
+
+echo "deb http://download.proxmox.com/debian/ceph-quincy bookworm main" > /etc/apt/sources.list.d/ceph-no-subscription.list
+apt update
+```
+
 ## Soluciones y Progresos :
 
 Usar IP local fija en todos los servidores, ejemplo de como configurar en los zimablades, cada equipo tiene su forma. Tambien vamos a cambiar el hostname para identificarlo mejor y la contraseña del usuario por defecto.
@@ -126,6 +154,8 @@ sudo nmtui
 ```
 
 Con este comando ya nos sale una interfaz con la que podemos configurar la IPV4 incluso aqui podemos configurar el hostname configurado anteriormente.
+
+### Tailscale
 
 Primero antes de hacer nada añadimos los equipos a tailscale que es una VPN gratuita que nos permite acceder a los equipos y que los equipos se vean entre si aunque no esten en la misma red interna. En este caso no seria necesario ya que tengo los equipos en la misma red local, pero esto añade disponibilidad a nuestro servidor y facilidades de añadir proximos dispositivos a la red y poder acceder a ellos desde fuera de la red local, sin tener que configurar proxys.
 
