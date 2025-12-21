@@ -146,3 +146,29 @@ tailscale status
 ```
 
 Puedes ver que esta bien configurado.
+
+### Proxmox
+
+Seguimos el tutorial creado por los propies creadores de zimablade ([ZimaBlade_proxmoxInstall](https://www.zimaspace.com/docs/es/zimaboard/ZimaBlades-Cluster-PVE-Makes-Your-Service-Migratable))
+
+El Hub si se inicia la zima con el no funciona hay q iniciar con el y mientras inicia meterlo.
+
+![1766319984358](image/README/1766319984358.png)
+
+Creamos el usb de instalacion con RUFUS y con esta configuracion, es importante que el esquema de la partición sea MBR.
+
+![1766322140289](image/README/1766322140289.png)
+
+Es importante que en la BIOS cambiar el Boot Options Priorities y seleccionar el usb como primero ya que sino iniciara con el almacenamiento interno y no instalara.
+
+![1766322179110](image/README/1766322179110.png)
+
+Una vez confugirado dentro de la BIOS en el ultimo menu seleccionamos save and exit con esto se nos guardara y se reiniciara solo.
+
+Una vez iniciado nos saldra el menu de instalacion en nuestro caso seleccionaremos modo terminal y seguiremos esta configuracion. IMPORTANTE NO INSTARLAR PROXMOX EN EL DISCO SSD INTERNO HAY QUE INTALARLO EN EL DISCO HDD EXTERNO.
+
+PONER FOTO
+
+Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalacion para que incie con el disco con el que hicimos la instalacion. Ahora nos pedira meternos en la web para hacer la instalacion inicial.
+
+![1766322669409](image/README/1766322669409.png)
