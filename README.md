@@ -35,7 +35,7 @@ La intencion final de este proyecto es crear una red de nodos de alta disponibil
 | :------: | :-----: | :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |    NO    |   SI   | Docker Swarm | No tiene soporte y es bastante limitado tengo que probar con otro<br />orquestador.                                                                                                                                                           |
 |    SI    |   SI   |  Tailscale  | Es una VPN que conecta todos los servidores entre si por una red<br />publica pero privada, hace accesible a todos los servidores desde <br />cualquier sitio si estas conectado a esta VPN.                                                  |
-|    NO    |   NO   |   Proxmox   | Es una plataforma de vistualizacion de servidores, tiene<br />una cierta orquestación ya que te permite gestionar nodos.<br />Esto seria una buena opción para mi caso, queda pendiente<br />necesito los discos duros para los zimablades. |
+|    SI    |   SI   |   Proxmox   | Es una plataforma de vistualizacion de servidores, tiene<br />una cierta orquestación ya que te permite gestionar nodos.<br />Esto seria una buena opción para mi caso, queda pendiente<br />necesito los discos duros para los zimablades. |
 |    NO    |   NO   |  Kubernetes  | Es el orquestador mas usado a nivel de servicios queda<br />pendiente de ver como funciona y si tiene sentido en <br />mi estructura.                                                                                                        |
 |    SI    |   SI   |    CasaOS    | Todos mis servidores tienen este sistema instalado<br />facilita mucho los crear servicios y implementarlos.                                                                                                                                  |
 
@@ -108,7 +108,7 @@ sudo systemctl restart casaos-gateway
 
 ### Tailscale
 
-Error no me deja instalar Tailscale en proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito.
+#### Error no me deja instalar Tailscale en proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito.
 
 ```
 nano /etc/apt/sources.list.d/pve-enterprise.list
@@ -133,6 +133,8 @@ nano /etc/apt/sources.list.d/ceph.list
 echo "deb http://download.proxmox.com/debian/ceph-quincy bookworm main" > /etc/apt/sources.list.d/ceph-no-subscription.list
 apt update
 ```
+
+### Proxmox
 
 ## Soluciones y Progresos :
 
@@ -202,3 +204,78 @@ PONER FOTO
 Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalacion para que incie con el disco con el que hicimos la instalacion. Ahora nos pedira meternos en la web para hacer la instalacion inicial.
 
 ![1766322669409](image/README/1766322669409.png)
+
+Creamos nuestro primera VM, vamos a crear un casaos para ello primero necesitamos un contenedor con sistema base debian con la siguiente configuración:
+
+![1766329574197](image/README/1766329574197.png)
+
+### CasaOS
+
+Instalamos Casaos con el comando de instalacion.
+
+```
+curl -fsSL https://get.casaos.io | sudo bash
+```
+
+Procedemos a copiar lo configuracion de nuestro CasaOS de la raspberry Pi a este zima, para ello conectamos el disco duro externo SSD a nuestro zima y lo montamos en nuestra VM.
+
+![1766334596629](image/README/1766334596629.png)
+
+Ahora vamos a montar el disco y realizar el copiado con los siguientes comandos.
+
+```
+lsblk
+```
+
+Mostramos los discos y vemos que el disco externo esta montado
+
+```
+sudo mkdir -p /mnt/rpi
+sudo mount /dev/sdb1 /mnt/rpi
+```
+
+Creamos la ruta para montar el disco externo y lo montamos en /mnt/rpi
+
+```
+lsblk -f
+```
+
+si da error puedes ver mas informacion de los discos aquí.
+
+```
+sudo systemctl stop casaos
+sudo systemctl stop docker
+```
+
+Paramos tanto docker como casaos para poder hacer el copiado.
+
+```
+sudo lvdisplay
+
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+
+df -h
+```
+
+Antes de copiar vamos a extender el almacenamiento para que nos entre todo
+
+```
+sudo rsync -avh --progress /mnt/rpi/DATA/ /DATA/
+```
+
+Hacemos el copiado de la carpeta DATA del disco externo a la carpeta data del zimablade1, copiamos esta carpeta ya que es la que contiene todos los datos y las configuraciones de los servicios el propio CasaOS no nos interesa ya que ya lo tenemos creado.
+
+```
+sudo chown -R root:root /DATA
+```
+
+Le damos permisos de root a la carpeta por si acaso.
+
+```
+sudo systemctl start docker
+sudo systemctl start casaos
+```
+
+Una vez todo funciono bien iniciamos Docker y CasaOS.
