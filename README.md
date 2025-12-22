@@ -263,12 +263,16 @@ Antes de copiar vamos a extender el almacenamiento para que nos entre todo
 
 ```
 sudo rsync -avh --progress /mnt/rpi/DATA/ /DATA/
+sudo rsync -avh /mnt/rpi/var/lib/casaos/ /var/lib/casaos/
+sudo rsync -avh /mnt/rpi/etc/casaos/ /etc/casaos/
 ```
 
-Hacemos el copiado de la carpeta DATA del disco externo a la carpeta data del zimablade1, copiamos esta carpeta ya que es la que contiene todos los datos y las configuraciones de los servicios el propio CasaOS no nos interesa ya que ya lo tenemos creado.
+Hacemos el copiado de la carpetas de configuracion y DATA del disco externo a la carpeta data del zimablade1, copiamos esta carpeta ya que es la que contiene todos los datos y las configuraciones de los servicios el propio CasaOS no nos interesa ya que ya lo tenemos creado.
 
 ```
 sudo chown -R root:root /DATA
+sudo chown -R root:root /var/lib/casaos
+sudo chown -R root:root /etc/casaos
 ```
 
 Le damos permisos de root a la carpeta por si acaso.
@@ -279,3 +283,13 @@ sudo systemctl start casaos
 ```
 
 Una vez todo funciono bien iniciamos Docker y CasaOS.
+
+Desmontamos disco SSD externo
+
+sudo lsof +D /mnt/rpi 2>/dev/null
+
+sudo umount /mnt/rpi
+
+lsblk
+
+Una vez desmontado retiramos el SSD externo y reiniciamos la VM ahora deberia de arrancar bien con el HDD.
