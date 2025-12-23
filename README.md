@@ -106,6 +106,30 @@ nano gateway.ini
 sudo systemctl restart casaos-gateway
 ```
 
+#### NEXTCLOUD borra carpeta DATA al instalarlo en CasaOS
+
+Hay que primero crear la aplicacion en CasaOS y luego hacer la sincronizacion de la carpeta DATA.
+
+```
+sudo systemctl stop casaos
+sudo systemctl stop docker
+```
+
+Paramas los servicios.
+
+```
+sudo rsync -avh --progress /mnt/rpi/DATA/AppData/big-bear-nextcloud/ /DATA/AppData/big-bear-nextcloud/
+```
+
+Copiamos la carpeta DATA pero en este caso solo la de nextcloud, que el resto no tuvimos problemas de borrado.
+
+```
+sudo systemctl start casaos
+sudo systemctl start docker
+```
+
+Una vez copiado uniciamos todo.
+
 ### Tailscale
 
 #### Error no me deja instalar Tailscale en proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito.
@@ -231,7 +255,7 @@ Mostramos los discos y vemos que el disco externo esta montado
 
 ```
 sudo mkdir -p /mnt/rpi
-sudo mount /dev/sdb1 /mnt/rpi
+sudo mount /dev/sdb2 /mnt/rpi
 ```
 
 Creamos la ruta para montar el disco externo y lo montamos en /mnt/rpi
@@ -265,6 +289,7 @@ Antes de copiar vamos a extender el almacenamiento para que nos entre todo
 sudo rsync -avh --progress /mnt/rpi/DATA/ /DATA/
 sudo rsync -avh /mnt/rpi/var/lib/casaos/ /var/lib/casaos/
 sudo rsync -avh /mnt/rpi/etc/casaos/ /etc/casaos/
+sudo rsync -avh /mnt/rpi/srv/lsio/ /srv/lsio/
 ```
 
 Hacemos el copiado de la carpetas de configuracion y DATA del disco externo a la carpeta data del zimablade1, copiamos esta carpeta ya que es la que contiene todos los datos y las configuraciones de los servicios el propio CasaOS no nos interesa ya que ya lo tenemos creado.
@@ -273,6 +298,7 @@ Hacemos el copiado de la carpetas de configuracion y DATA del disco externo a la
 sudo chown -R root:root /DATA
 sudo chown -R root:root /var/lib/casaos
 sudo chown -R root:root /etc/casaos
+sudo chown -R root:root /srv/lsio/
 ```
 
 Le damos permisos de root a la carpeta por si acaso.
