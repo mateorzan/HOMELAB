@@ -128,7 +128,25 @@ sudo systemctl start casaos
 sudo systemctl start docker
 ```
 
-Una vez copiado uniciamos todo.
+Una vez copiado iniciamos todo y empezara a migrar los datos.
+
+#### Nginx Proxy Manager
+
+Para que este servicio funcione como lo tenemos configurado en mi HOMELAB primero hay que abrir los puertos 80 y 443 del router para la ip de este servidor. 
+
+```
+http://192.168.1.1/
+```
+
+La ruta para acceder a tu router suele ser esta.
+
+Importante tambien hay que cambiar el puero del CasaOS ya que por defecto usa el 80, en mi caso le configure el 90 para la pagina de inicio.
+
+![1766580833807](image/README/1766580833807.png)
+
+Una vez configurado los pueros del router hay que modificar los Proxy Hosts ya que estan configurados para la ip del servidor anterior y hay que configurarle la IP de este nuevo servidor para que funcionen.
+
+![1766580747899](image/README/1766580747899.png)
 
 ### Tailscale
 
