@@ -148,6 +148,36 @@ Una vez configurado los pueros del router hay que modificar los Proxy Hosts ya q
 
 ![1766580747899](image/README/1766580747899.png)
 
+Para que el proxy de NEXTCLOUD tambien funcione hay que editar el siguiente archivo de configuracion con la ip de este servidor.
+
+```
+/DATA/AppData/big-bear-nextcloud/html/config/config.php
+```
+
+![1766581128725](image/README/1766581128725.png)
+
+#### Problema BD Postgres Nextcloud 
+
+La aplicacion Nextcloud no era capaz de iniciarse  ya que daba un error de que la base de datos estaba unhealthy. 
+
+Para solucionar este error probamos a borrar la carpeta /pgdata de nextcloud, esta carpeta solo contiene la informacion de la base de datos por lo que no perdemos informacion ni datos como tal, todos los datos o archivos estan almacenados en /html/data.
+
+Una vez borrado instalamos nextcloud otra vez y ahora no nos dio error, pero no consigue iniciar, esto se debe a que le falta los datos de las tablas para poder inicia, para ello tuvimos que copiar las tablas y los datos de la base de datos de la Raspberry.
+
+```
+docker exec -i db-postgres pg_dump -U nextcloud nextcloud > nextcloud.sql
+
+scp nextcloud.sql user@zima:/ruta/destino/
+```
+
+```
+sed -i 's/oc_admin/casaos/g' /ruta/destino/nextcloud.sql
+
+docker exec -i db-nextcloud psql -U casaos nextcloud < /ruta/destino/nextcloud.sql
+```
+
+En el archivo config.php tuvimos que cambiar el usuario y la contraseña con el que se conecta a la db por el usuario y contraseña que tenemos configurado en la pantalla de instalacion de la db postgres, ademas tuvimos que activar la actualizacion via web, modificando el archivo upgrade-disable.
+
 ### Tailscale
 
 #### Error no me deja instalar Tailscale en proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito.
