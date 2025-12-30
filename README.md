@@ -56,7 +56,7 @@ La intencion final de este proyecto es crear una red de nodos de alta disponibil
 |    NO    |    NO    |       Asenble       |                                                                                    |
 |    NO    |    NO    |       Coolify       |                                                                                    |
 
-## Problemas o inquietudes :
+## TroubleShooting :
 
 Como la raspberry y zima tienen diferentes arquitecturas no todos los servicios se pueden ejecutar en los dos servidores, por lo que hay servicios que no son multi-arch que hay que ejecutar por separado.
 
@@ -64,11 +64,9 @@ Tuve problemas para montar el servicio nfs como un servicio en docker swarm fíj
 
 Debido a los problemas y poco soporte viste en docker swarm vamos a empezar de 0 y probar a instalar K3s, el cual es una distribucion mas ligera de Kubernetes pensada para ahorrar memoria y recursos del sistema, lo cual es justo lo que necesitamos.
 
-## TroubleShooting
-
 ### CasaOS
 
-#### No funciona URL Web
+#### HOMEPAGE No funciona URL Web
 
 Reinstalar CasaOS
 
@@ -130,9 +128,9 @@ sudo systemctl start docker
 
 Una vez copiado iniciamos todo y empezara a migrar los datos.
 
-#### Nginx Proxy Manager
+#### NGINX Proxy Manager
 
-Para que este servicio funcione como lo tenemos configurado en mi HOMELAB primero hay que abrir los puertos 80 y 443 del router para la ip de este servidor. 
+Para que este servicio funcione como lo tenemos configurado en mi HOMELAB primero hay que abrir los puertos 80 y 443 del router para la ip de este servidor.
 
 ```
 http://192.168.1.1/
@@ -156,9 +154,9 @@ Para que el proxy de NEXTCLOUD tambien funcione hay que editar el siguiente arch
 
 ![1766581128725](image/README/1766581128725.png)
 
-#### Problema BD Postgres Nextcloud 
+#### NEXTCLOUD Problema BD Postgres
 
-La aplicacion Nextcloud no era capaz de iniciarse  ya que daba un error de que la base de datos estaba unhealthy. 
+La aplicacion Nextcloud no era capaz de iniciarse  ya que daba un error de que la base de datos estaba unhealthy.
 
 Para solucionar este error probamos a borrar la carpeta /pgdata de nextcloud, esta carpeta solo contiene la informacion de la base de datos por lo que no perdemos informacion ni datos como tal, todos los datos o archivos estan almacenados en /html/data.
 
@@ -177,6 +175,37 @@ docker exec -i db-nextcloud psql -U casaos nextcloud < /ruta/destino/nextcloud.s
 ```
 
 En el archivo config.php tuvimos que cambiar el usuario y la contraseña con el que se conecta a la db por el usuario y contraseña que tenemos configurado en la pantalla de instalacion de la db postgres, ademas tuvimos que activar la actualizacion via web, modificando el archivo upgrade-disable.
+
+#### NEXTCLOUD Problema iniciar sesien en cliente desktop
+
+No conseguia iniciar sesion se quedaba pillado, para soluciunar esto tuve que hacer que el servicio solo fuera accesible completamente local.
+
+![1766678767628](image/README/1766678767628.png)
+
+Primero desactive el proxy para nextcloud.
+
+![1766678801317](image/README/1766678801317.png)
+
+Luego en el archivo config.php de la carpete html/config hay que editar toda esta configuracion de esta manera.
+
+![1766678930956](image/README/1766678930956.png)
+
+Con esto ya deberia de funcionar luego ya puedes restablecer la configuracion como estaba antes y asi se pueda acceder online.
+
+![1766678981799](image/README/1766678981799.png)
+
+#### SONARR Problema permisos
+
+No importaba los epidsodias por que le faltaba permisos en la carpeta /tv, para ello ejecutamos los siguientes comandos.
+
+```
+sudo chown -R 1000:1000 /DATA/Media/TV
+sudo chown -R 1000:1000 /DATA/Downloads
+sudo chmod -R 775 /DATA/Media/TV
+sudo chmod -R 775 /DATA/Downloads
+```
+
+*Esto tiene que estar adaptado a tus rutas concretas.*
 
 ### Tailscale
 
