@@ -207,6 +207,47 @@ sudo chmod -R 775 /DATA/Downloads
 
 *Esto tiene que estar adaptado a tus rutas concretas.*
 
+#### ALMACENAMIENTO aumento de disco de la VM
+
+Queremos aumentar el almacenamiento para esto tuvimos que usar estos comandos dentro de la terminal de la VM.
+
+```
+sudo systemctl stop docker
+sudo systemctl stop casaos
+```
+
+Paramos tanto docker como casaos para asi evitar posibles problemas.
+
+```
+lsblk
+sudo growpart /dev/sda 3
+lsblk
+```
+
+Expandimos la partición.
+
+```
+sudo pvresize /dev/sda3
+sudo vgs
+```
+
+Hacmeos que la VM vea el nuevo almacenamiento.
+
+```
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+```
+
+Expandimos y redimensionamos el almacenamiento.
+
+```
+sudo systemctl start docker
+sudo systemctl start casaos
+```
+
+Iniciamos todo.
+
 ### Tailscale
 
 #### Error no me deja instalar Tailscale en proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito.
