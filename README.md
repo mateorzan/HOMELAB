@@ -184,11 +184,15 @@ No conseguia iniciar sesion se quedaba pillado, para soluciunar esto tuve que ha
 
 Primero desactive el proxy para nextcloud.
 
-![1766678801317](image/README/1766678801317.png)
+![1768053813964](image/README/1768053813964.png)
+
+![1768053837389](image/README/1768053837389.png)
 
 Luego en el archivo config.php de la carpete html/config hay que editar toda esta configuracion de esta manera.
 
-![1766678930956](image/README/1766678930956.png)
+![1768053862958](image/README/1768053862958.png)
+
+![1768053894262](image/README/1768053894262.png)
 
 Con esto ya deberia de funcionar luego ya puedes restablecer la configuracion como estaba antes y asi se pueda acceder online.
 
