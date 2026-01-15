@@ -194,6 +194,35 @@ sudo systemctl start casaos
 
 Iniciamos todo.
 
+#### ERROR AL CAMBIAR A IP FIJA NO VES LA RED LAN
+
+Al cambiar la red de mi PC a una ip fija local no consegui acceder a mi CasaOS para esto tuve que hacer lo siguiente.
+
+Abrir el CMD como administrador y ejecutar los siguientes comandos
+
+```
+route print
+```
+
+buscamos una linea como esta 
+
+```
+192.168.1.0    255.255.255.0      En vínculo      192.168.1.50   281
+```
+
+Si en puerta de enlace nos sale En vínculo tenemos que modificarla para q apunte a nuestro router con los siguientes comandos.
+
+```
+route delete 192.168.1.0 mask 255.255.255.0
+route add 192.168.1.0 mask 255.255.255.0 192.168.1.1 metric 1 -p
+```
+
+Una vez echo esto hacemos ping a nuestro servidor y vemos que ya tenemos conexión
+
+```
+ping IP_CASAOS
+```
+
 ### Tailscale
 
 #### Error no me deja instalar Tailscale en proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito.
