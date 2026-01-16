@@ -31,10 +31,9 @@ Sure, servicio finanzas
 
 Datacenter(proxmox)
   pve, zimablade1 nodo1  
-                                               ---->  Cluster proxmox
   pve2, zimablade2 nodo2/Backup Replicacion.
-
 Raspberry Pi5 PARADO ACTUALMENTE *servidor independiente corriendo servicios de IA*
+<img width="473" height="320" alt="image" src="https://github.com/user-attachments/assets/6931278e-79aa-40cd-81f6-7b54b103a276" />
 
 ### Situacion Objetivo :
 
@@ -51,11 +50,11 @@ La intencion final de este proyecto es crear una red de nodos de alta disponibil
 La estructura final tendria que ser la siguiente:
 
 Datacenter(proxmox)
-  pve, zimablade1 nodo1  
-                         ---->  Cluster proxmox                                  AÑADIR IMAGEN DIAGRAMA
+  pve, zimablade1 nodo1
   pve2, zimablade2 nodo2/Backup Replicacion.
-
 Raspberry Pi5 *servidor independiente corriendo servicios de IA*
+<img width="473" height="320" alt="image" src="https://github.com/user-attachments/assets/04040dc6-cce5-467f-847d-834250eb0b1b" />
+
 
 ### Ideas y pruebas que voy realizando:
 
