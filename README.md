@@ -33,7 +33,8 @@ Datacenter(proxmox)
   pve, zimablade1 nodo1  
   pve2, zimablade2 nodo2/Backup Replicacion.
 Raspberry Pi5 PARADO ACTUALMENTE *servidor independiente corriendo servicios de IA*
-<img width="473" height="320" alt="image" src="https://github.com/user-attachments/assets/6931278e-79aa-40cd-81f6-7b54b103a276" />
+
+<img width="464" height="305" alt="image" src="https://github.com/user-attachments/assets/7c9ffe26-e74b-4516-89f0-8c86da11d884" />
 
 ### Situacion Objetivo :
 
@@ -53,7 +54,8 @@ Datacenter(proxmox)
   pve, zimablade1 nodo1
   pve2, zimablade2 nodo2/Backup Replicacion.
 Raspberry Pi5 *servidor independiente corriendo servicios de IA*
-<img width="473" height="320" alt="image" src="https://github.com/user-attachments/assets/04040dc6-cce5-467f-847d-834250eb0b1b" />
+
+<img width="464" height="305" alt="image" src="https://github.com/user-attachments/assets/ba976872-2546-44f5-8718-6d2502ca63ec" />
 
 
 ### Ideas y pruebas que voy realizando:
