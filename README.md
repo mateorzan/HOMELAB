@@ -2,11 +2,21 @@
 
 En este repositorio voy a explicar como yo configure mi actual homelab, compartire algunos archivos de configuracion que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
 
+## Estructura del repositorio.
+Por ahora solo tenemos la documentacion que explica la configuracion de los diferentes dispositivos y a mayores un documento de Troubleshooting que contiene los errores que me fueron surgiendo y como los consegui solucionar.
+
+  - Portatil-Cliente.md, configuracion Portatil.
+  - Readme.md, Resumen contexto y registro.
+  - Raspberry_pi5.md, configuracion Raspberry Pi5.
+  - Troubleshooting.md, solución de errores varios.
+  - Zimablade1.md, configuracion e instalación Zimablade1. 
+  - Zimablade2.md, configuracion e instalación Zimablade2.
+
 ## Histórico
 
-### Estructura actual :
+### Estructura Inicial :
 
-Una raspberry pi con CasaOS instalado localmente con diferentes servicios creados a traves de CasaOS
+Una raspberry Pi5 con CasaOS instalado localmente con diferentes servicios creados a traves de CasaOS
 
 NextCloud, servicio Cloud
 Jellyfin, servicio de medios Multimedia
@@ -17,15 +27,35 @@ Radarr, servicio de peliculas
 DdnsUpdater, servicio para actualizar la ip publica
 Sure, servicio finanzas
 
-### Situacion actual :
+### Estructura Actual :
+
+Datacenter(proxmox)
+  pve, zimablade1 nodo1  
+                                               ---->  Cluster proxmox
+  pve2, zimablade2 nodo2/Backup Replicacion.
+
+Raspberry Pi5 PARADO ACTUALMENTE *servidor independiente corriendo servicios de IA*
+
+### Situacion Objetivo :
 
 Dispongo de dos servidores más, dos zimablades, queremos ampliar nuestro Homelab con dos servidores más, los cuales queremos poner tambien a funcionar y crear un nodo con tres servidores que corran diferentes servicios. Estos zimablades traen ya preinstalado CasaOS ya que son de los creadores de este sistema.
 
-La idea de esta estructura es crear un red de alta disponibilidad, respaldada y gestionar cargas de trabajo entre nodos, y disponer de los servicios 24/7.
+La idea de esta estructura es crear un red de alta disponibilidad, respaldada y gestionar cargas de trabajo entre nodos, y disponer de los servicios 24/7. Para conseguir esto vamos a instalar Proxmox VE y crear un nodo con repliacion y backups Diarias para asegurar esta alta disponibilidad y respaldo.
+
+Tambien vamos a utilizar la Rapsberry Pi5 sobrante para proyectos centrados en IA ya que esta no es compatible con Proxmox por su arquitectura ARM.
 
 ### Estructura final(Objetivo) :
 
-La intencion final de este proyecto es crear una red de nodos de alta disponibilidad y respaldada,este proyecto es muy ambicioso y aun no se el alcance de este mismo, ire actualizando con las novedades este Readme.
+La intencion final de este proyecto es crear una red de nodos de alta disponibilidad y respaldada,este proyecto es muy ambicioso y aun no se el alcance de este mismo, probablemente ira a mas, ire actualizando con las novedades este Readme. 
+
+La estructura final tendria que ser la siguiente:
+
+Datacenter(proxmox)
+  pve, zimablade1 nodo1  
+                         ---->  Cluster proxmox                                  AÑADIR IMAGEN DIAGRAMA
+  pve2, zimablade2 nodo2/Backup Replicacion.
+
+Raspberry Pi5 *servidor independiente corriendo servicios de IA*
 
 ### Ideas y pruebas que voy realizando:
 
@@ -55,3 +85,4 @@ La intencion final de este proyecto es crear una red de nodos de alta disponibil
 |    SI    |    SI    |    Ddns-Updater    | Serviucio que actualiza la ip publica de<br />nuestro router, conectado a duckdns. |
 |    NO    |    NO    |       Asenble       |                                                                                    |
 |    NO    |    NO    |       Coolify       |                                                                                    |
+|    NO    |    NO    |     Frigate NVR       |                                                                                    |
