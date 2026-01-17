@@ -3,14 +3,15 @@
 En este repositorio voy a explicar como yo configure mi actual homelab, compartire algunos archivos de configuracion que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
 
 ## Estructura del repositorio.
+
 Por ahora solo tenemos la documentacion que explica la configuracion de los diferentes dispositivos y a mayores un documento de Troubleshooting que contiene los errores que me fueron surgiendo y como los consegui solucionar.
 
-  - Portatil-Cliente.md, configuracion Portatil.
-  - Readme.md, Resumen contexto y registro.
-  - Raspberry_pi5.md, configuracion Raspberry Pi5.
-  - Troubleshooting.md, solución de errores varios.
-  - Zimablade1.md, configuracion e instalación Zimablade1. 
-  - Zimablade2.md, configuracion e instalación Zimablade2.
+- Portatil-Cliente.md, configuracion Portatil.
+- Readme.md, Resumen contexto y registro.
+- Raspberry_pi5.md, configuracion Raspberry Pi5.
+- Troubleshooting.md, solución de errores varios.
+- Zimablade1.md, configuracion e instalación Zimablade1.
+- Zimablade2.md, configuracion e instalación Zimablade2.
 
 ## Histórico
 
@@ -30,7 +31,7 @@ Sure, servicio finanzas
 ### Estructura Actual :
 
 Datacenter(proxmox)
-  pve, zimablade1 nodo1  
+  pve, zimablade1 nodo1
   pve2, zimablade2 nodo2/Backup Replicacion.
 Raspberry Pi5 PARADO ACTUALMENTE *servidor independiente corriendo servicios de IA*
 
@@ -46,7 +47,7 @@ Tambien vamos a utilizar la Rapsberry Pi5 sobrante para proyectos centrados en I
 
 ### Estructura final(Objetivo) :
 
-La intencion final de este proyecto es crear una red de nodos de alta disponibilidad y respaldada,este proyecto es muy ambicioso y aun no se el alcance de este mismo, probablemente ira a mas, ire actualizando con las novedades este Readme. 
+La intencion final de este proyecto es crear una red de nodos de alta disponibilidad y respaldada,este proyecto es muy ambicioso y aun no se el alcance de este mismo, probablemente ira a mas, ire actualizando con las novedades este Readme.
 
 La estructura final tendria que ser la siguiente:
 
@@ -57,18 +58,18 @@ Raspberry Pi5 *servidor independiente corriendo servicios de IA*
 
 <img width="464" height="305" alt="image" src="https://github.com/user-attachments/assets/ba976872-2546-44f5-8718-6d2502ca63ec" />
 
-
 ### Ideas y pruebas que voy realizando:
 
 #### Estructural
 
-| APLICADO | PROBADO | TECNOLOGÍA | NOTAS                                                                                                                                                                                                                                         |
-| :------: | :-----: | :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|    NO    |   SI   | Docker Swarm | No tiene soporte y es bastante limitado tengo que probar con otro<br />orquestador.                                                                                                                                                           |
-|    SI    |   SI   |  Tailscale  | Es una VPN que conecta todos los servidores entre si por una red<br />publica pero privada, hace accesible a todos los servidores desde <br />cualquier sitio si estas conectado a esta VPN.                                                  |
-|    SI    |   SI   |   Proxmox   | Es una plataforma de vistualizacion de servidores, tiene<br />una cierta orquestación ya que te permite gestionar nodos.<br />Esto seria una buena opción para mi caso, queda pendiente<br />necesito los discos duros para los zimablades. |
-|    NO    |   NO   |  Kubernetes  | Es el orquestador mas usado a nivel de servicios queda<br />pendiente de ver como funciona y si tiene sentido en <br />mi estructura.                                                                                                        |
-|    SI    |   SI   |    CasaOS    | Todos mis servidores tienen este sistema instalado<br />facilita mucho los crear servicios y implementarlos.                                                                                                                                  |
+| APLICADO | PROBADO | TECNOLOGÍA | NOTAS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------: | :-----: | :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|    NO    |   SI   | Docker Swarm | No tiene soporte y es bastante limitado tengo que probar con otro<br />orquestador.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|    SI    |   SI   |  Tailscale  | Es una VPN que conecta todos los servidores entre si por una red<br />publica pero privada, hace accesible a todos los servidores desde <br />cualquier sitio si estas conectado a esta VPN.                                                                                                                                                                                                                                                                                                                                      |
+|    SI    |   SI   |   Proxmox   | Es una plataforma de vistualizacion de servidores, tiene<br />una cierta orquestación ya que te permite gestionar nodos.<br />Esto seria una buena opción para mi caso, queda pendiente<br />necesito los discos duros para los zimablades.                                                                                                                                                                                                                                                                                     |
+|    NO    |   NO   |  Kubernetes  | Es el orquestador mas usado a nivel de servicios queda<br />pendiente de ver como funciona y si tiene sentido en <br />mi estructura.                                                                                                                                                                                                                                                                                                                                                                                            |
+|    SI    |   SI   |    CasaOS    | Todos mis servidores tienen este sistema instalado<br />facilita mucho los crear servicios y implementarlos.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+|    SI    |   SI   |  Proxmox BS  | Proxmox Backup Server (PBS) es una solución de copias de seguridad<br />empresarial, gratuita y de código abierto, diseñada específicamente para <br />proteger entornos virtualizados basados en Proxmox VE. Permite realizar <br />backups incrementales, rápidos y eficientes de máquinas virtuales, contenedores <br />y hosts, usando técnicas como deduplicación, compresión y cifrado, lo que <br />reduce mucho el espacio en disco y el tráfico de red. PBS se gestiona desde <br />una interfaz web sencilla. |
 
 #### Servicios
 
@@ -86,4 +87,4 @@ Raspberry Pi5 *servidor independiente corriendo servicios de IA*
 |    SI    |    SI    |    Ddns-Updater    | Serviucio que actualiza la ip publica de<br />nuestro router, conectado a duckdns. |
 |    NO    |    NO    |       Asenble       |                                                                                    |
 |    NO    |    NO    |       Coolify       |                                                                                    |
-|    NO    |    NO    |     Frigate NVR       |                                                                                    |
+|    NO    |    NO    |     Frigate NVR     |                                                                                    |

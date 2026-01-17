@@ -14,8 +14,6 @@ Usaremos uno de los zimablades como servidor principal, en este servidor vamos a
 
 ## Instalación
 
-### Software
-
 Vamos a empezar con la instalación, lo primero que necesitamos es desde otro dispositivo es descargar la iso de nuestro nuevo sistema operativo, Proxmox. Para ello vamos a la pagina oficial de Proxmox(https://www.proxmox.com/en/downloads), en ella entramos en el apartado de downloads, aqui tenemos los diferentes sistemas que hay disponibles en este caso vamos a usar Proxmox Virtual enviroment, lo seleccionamos y dentro de el veremos las diferentes versiones, este proyecto fue creado con la ultima version actual, Proxmox VE 8.4 ISO.
 
 ### Disco de arranque
