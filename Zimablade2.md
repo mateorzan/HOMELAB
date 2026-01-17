@@ -56,7 +56,7 @@ PONER FOTO
 
 SI VES QUE CON EL GRAFICO NO TE FUNCIONA PRUEBA CON EL TERMINAL CON LA MISMA CONFIGURACIÓN.
 
-> *Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalacion para que incie con el disco con el que hicimos la instalacion.* 
+> *Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalacion para que incie con el disco con el que hicimos la instalacion.*
 
 Ahora nos pedira meternos en la web para hacer la instalacion inicial.
 
@@ -110,7 +110,7 @@ tailscale status
 
 Puedes ver que esta bien configurado.
 
-### Cluster 
+### Cluster
 
 En este paso vamos a unir este nodo al cluster para que los dos nodos esten unidos.
 
@@ -128,6 +128,12 @@ Aqui pegamos la informacion, y nos pedira la contraseña del nodo principal y co
 
 ## Backup VM EN CONSTRUCCION
 
-Ahora vamos a configurar el Backup de nuestra VM de el nodo principal, que es el principal trabajo de este servidor.
+Ahora vamos a configurar el Backup de nuestra VM de el nodo principal, que es el principal trabajo de este servidor. Para realizar las Backups vamos a crear una VM dedicadada a esto, vamos a usar el sistema operativo Proxmox Backup Server, descargamos la ISO desde su sitio web(https://www.proxmox.com/en/downloads) en este caso la ultima version 4.1.
 
-Primero vamos a crear el almacenamiento compartido ZFS, lo vamos a configurar de la siguiente manera.
+Antes de nada vamos a crear los discos que vamos a usar en esta VM, en este caso son dos uno que lo vamos a llamar Sistema, este se va a encargar de alojar el sistema operativo PBS y otro que ya viene creado por defecto local-lvm es el encargado de guardar las Copias de seguridad.
+
+![1768650829336](image/Zimablade2/1768650829336.png)
+
+Iniciamos con la configuracion de la VM, creamos la VM en el nodo secundario pve2.
+
+![1768650986878](image/Zimablade2/1768650986878.png)
