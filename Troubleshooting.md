@@ -36,6 +36,7 @@ Reiniciar.
 cd /etc/casaos
 ```
 
+
 ```
 nano gateway.ini
 ```
@@ -82,7 +83,7 @@ La ruta para acceder a tu router suele ser esta.
 
 Importante tambien hay que cambiar el puero del CasaOS ya que por defecto usa el 80, en mi caso le configure el 90 para la pagina de inicio.
 
-![1766580833807](image/README/1766580833807.png)
+    ![1766580833807](image/README/1766580833807.png)
 
 Una vez configurado los pueros del router hay que modificar los Proxy Hosts ya que estan configurados para la ip del servidor anterior y hay que configurarle la IP de este nuevo servidor para que funcionen.
 
@@ -109,6 +110,7 @@ docker exec -i db-postgres pg_dump -U nextcloud nextcloud > nextcloud.sql
 
 scp nextcloud.sql user@zima:/ruta/destino/
 ```
+
 
 ```
 sed -i 's/oc_admin/casaos/g' /ruta/destino/nextcloud.sql
@@ -204,7 +206,7 @@ Abrir el CMD como administrador y ejecutar los siguientes comandos
 route print
 ```
 
-buscamos una linea como esta 
+buscamos una linea como esta
 
 ```
 192.168.1.0    255.255.255.0      En vínculo      192.168.1.50   281
@@ -250,3 +252,15 @@ nano /etc/apt/sources.list.d/ceph.list
 echo "deb http://download.proxmox.com/debian/ceph-quincy bookworm main" > /etc/apt/sources.list.d/ceph-no-subscription.list
 apt update
 ```
+
+### VirtualBox
+
+#### Activar virtualizacion en BIOS.
+
+VIRTUALBOX nos da el siguiente error al intentar iniciar la VM.
+
+VT-x is disabled in the BIOS
+
+Para que la VM funcione necesitamos activar esta opcion en la BIOS, para esto hay que reiniciar el dispositivo y pulsar F2 o DEL o la tecla correspondiente de tu dispositivo para entrar en la BIOS todo esto mientras se inicia.
+
+En mi caso particular tuve que activar tanto Intel-VT-d y la virtualizacion.

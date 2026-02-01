@@ -30,7 +30,7 @@ Mientras nuestro servidor inicia presionamos la teclar F2(MIRAR SI ES ESA TECLA)
 
 ### Proceso de instalacion.
 
-#### Proxmox
+Proxmox VE.
 
 Seguimos el tutorial creado por los propies creadores de zimablade ([ZimaBlade_proxmoxInstall](https://www.zimaspace.com/docs/es/zimaboard/ZimaBlades-Cluster-PVE-Makes-Your-Service-Migratable))
 
@@ -146,7 +146,7 @@ Creamos nuestro primera VM, vamos a crear un casaos para ello primero necesitamo
 
 ![1766329574197](image/README/1766329574197.png)
 
-### IP FIJA VIRTUAL MACHINE
+### IP estatica VM
 
 Usar IP local fija en todos los servidores, ejemplo de como configurar en los zimablades, cada equipo tiene su forma. Tambien vamos a cambiar el hostname para identificarlo mejor y la contraseña del usuario por defecto.
 
@@ -167,7 +167,7 @@ sudo nmtui
 
 Con este comando ya nos sale una interfaz con la que podemos configurar la IPV4 incluso aqui podemos configurar el hostname configurado anteriormente.
 
-#### CasaOS
+### CasaOS
 
 Una vez creada nuestra VM vamos a crear nuestro servidor CasaOS en esta guia no se va a explicar como se creo esta estructura ya que se va a migrar un servidor casaOS ya creado, el cual estaba alojado en una Raspberry Pi5, a este servidor Proxmox nuevo. La migración se basa en copiar la carptea /Data de nuestro antiguo servidor a este nuevo servidor, esto es simple ya que mi antiguo servidor tenia un disco SSD externo extraible, por lo cual es conectar este disco por USB a el nuevo servidor y seguir estos pasos.
 
@@ -248,10 +248,12 @@ Una vez todo funciono bien iniciamos Docker y CasaOS.
 
 Desmontamos disco SSD externo
 
+```
 sudo lsof +D /mnt/rpi 2>/dev/null
 
 sudo umount /mnt/rpi
 
 lsblk
+```
 
 Una vez desmontado retiramos el SSD externo y reiniciamos la VM ahora deberia de arrancar bien con el HDD.
