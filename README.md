@@ -74,17 +74,17 @@ Raspberry Pi5 *servidor independiente corriendo servicios de IA*
 
 #### Servicios
 
-| APLICADO | APROBADO |      SERVICIO      | NOTAS                                                                              |
-| :------: | :------: | :-----------------: | ---------------------------------------------------------------------------------- |
-|    SI    |    SI    |      NextCloud      | Almacenamiento Cloud Local.                                                        |
-|    SI    |    SI    |      Jellyfin      | Servicio Multimedia                                                                |
-|    SI    |    SI    |        Sure        | Servicio de gestion de gastos                                                      |
-|    SI    |    SI    |       Deluge       | Servicio Torrent                                                                   |
-|    SI    |    SI    |      Downtify      | Servicio Musica                                                                    |
-|    SI    |    SI    |        Sonar        | Servicio busqueda de Musica                                                        |
-|    SI    |    SI    |       Radarr       | Servicio busqueda de Pelis                                                         |
-|    SI    |    SI    | Nginx Proxy Manager | Servicio Proxy inverso para exponer servicios<br />con certificados SSL.           |
-|    SI    |    SI    |       Prowlar       | Servicio Indexer Torrent                                                           |
+| APLICADO | APROBADO |      SERVICIO      |                                       NOTAS                                       |
+| :------: | :------: | :-----------------: | :--------------------------------------------------------------------------------: |
+|    SI    |    SI    |      NextCloud      |                            Almacenamiento Cloud Local.                            |
+|    SI    |    SI    |      Jellyfin      |                                Servicio Multimedia                                |
+|    SI    |    SI    |        Sure        |                           Servicio de gestion de gastos                           |
+|    SI    |    SI    |       Deluge       |                                  Servicio Torrent                                  |
+|    SI    |    SI    |      Downtify      |                                  Servicio Musica                                  |
+|    SI    |    SI    |        Sonar        |                            Servicio busqueda de Musica                            |
+|    SI    |    SI    |       Radarr       |                             Servicio busqueda de Pelis                             |
+|    SI    |    SI    | Nginx Proxy Manager |      Servicio Proxy inverso para exponer servicios<br />con certificados SSL.      |
+|    SI    |    SI    |       Prowlar       |                              Servicio Indexer Torrent                              |
 |    SI    |    SI    |    Ddns-Updater    | Serviucio que actualiza la ip publica de<br />nuestro router, conectado a duckdns. |
 |    NO    |    NO    |       Asenble       |                                                                                    |
 |    NO    |    NO    |       Coolify       |                                                                                    |

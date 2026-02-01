@@ -80,3 +80,70 @@ Este comando nos dara una URL a la cual tenemos que acceder para aceptar el disp
 Con esto ya tenemos tailscale instalado y funcionando.
 
 ## Servicios
+
+### OLLAMA
+
+Vamos a probar a correr un modelo de IA local para ver como rinde.
+
+```
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+Una vez instalado vamos a correr un modelo ligero, vamos a probar con LFM2.5.
+
+```
+ollama run lfm2.5-thinking
+```
+
+Una vez instalado el modelo y que vemos que funciona bien vamos a instalar un chat para poder usar el modelo comodamente, en mi caso elegi Open-webui(https://github.com/open-webui/open-webui).
+
+Para usar este chat necesitamos tener Docker instalado.
+
+```
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+```
+
+```
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+Con este comando comprobamos que se instalo bien.
+
+```
+sudo docker run hello-world
+```
+
+Tambien vamos a comprobar que tengamos Python instalado.
+
+```
+sudo apt install python3
+sudo apt install python3-venv python3-pip
+```
+
+Una vez instalado todo ejecutamos el siguiente comando para ejecutar el contenedor docker.
+
+```
+span
+```
+
+Con el comando `sudo docker ps` podemos ver como esta el contenedor, si esta healthy podemos acceder a el con la IP de la maquina y el puerto 3000
+
+```
+http://192.168.1.52:8080
+```
