@@ -147,3 +147,11 @@ Con el comando `sudo docker ps` podemos ver como esta el contenedor, si esta hea
 ```
 http://192.168.1.52:8080
 ```
+
+### OpenClaw
+
+Instalamos OpenClaw con el siguiente comando.
+
+```
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
