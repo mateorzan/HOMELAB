@@ -196,6 +196,19 @@ Para conectar nuestro PBS al Datacenter vamos a ir a nuestro Datacenter y vamos 
 
 Ahora vamos a nuestro Datacenter y completamos los datos de conexion.
 
+## KeePass CT
+
+![1771228873525](image/Zimablade2/1771228873525.png)
+
+URL de descarga para Linux
+
+```
+https://keepassxc.org/download/#linux
+```
+
+
+
+
 ![1768652490238](image/Zimablade2/1768652490238.png)
 
 Si te da un error 401 probablemente la contraseña o el usuario estan mal.
