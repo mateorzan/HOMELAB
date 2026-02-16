@@ -196,23 +196,50 @@ Para conectar nuestro PBS al Datacenter vamos a ir a nuestro Datacenter y vamos 
 
 Ahora vamos a nuestro Datacenter y completamos los datos de conexion.
 
-## KeePass CT
-
-![1771228873525](image/Zimablade2/1771228873525.png)
-
-URL de descarga para Linux
-
-```
-https://keepassxc.org/download/#linux
-```
-
-
-
-
-![1768652490238](image/Zimablade2/1768652490238.png)
-
 Si te da un error 401 probablemente la contraseña o el usuario estan mal.
 
 Ahora ya podemos hacer nuestro primer Backup para esto vamos a la VM que queremos hacer el Backup y seleccionamos Backup Now, yo en este caso voy a usar el modo parar.
 
 ![1768652703900](image/Zimablade2/1768652703900.png)
+
+
+## VaultWarden CT
+
+### Config CT
+
+Creamos un CT con la siguiente configuración.
+
+![1771228873525](image/Zimablade2/1771228873525.png)
+
+### Tailscale
+
+Instalamos Tailscale en el CT, esto lo hacemos desde el panel de admin de la web de Tailscale.
+
+### Docker
+
+URL para instalar docker en Alpine Linux
+
+```
+https://voidnull.es/instalacion-de-docker-en-alpinelinux/
+```
+
+Para que docker funcionara en el CT tuvimos que pasarle la ruta /dev/net/tun 
+
+![1771247334792](image/Zimablade2/1771247334792.png)
+
+Una vez instalado lanzamos el docker run con el servicio Vaultwarden
+
+```
+docker run -d --name vaultwarden \
+  -e DOMAIN="http://192.168.1.53:8000" \
+  -v /vw-data/:/data/ \
+  --restart unless-stopped \
+  -p 8000:80 \
+  vaultwarden/server:latest
+```
+
+Una vez lanzado nos pide que usemos HTTPS para esto yo use Nginx Proxy Manager que ya lo tenia corriendo en mi segundo servidor por lo que solo tuve que configurar el Proxy.
+
+![1771247514107](image/Zimablade2/1771247514107.png)
+
+Ya con esto accedemos con la URL HTTPs y ya podemos usar vaultwarden sin problemas.
