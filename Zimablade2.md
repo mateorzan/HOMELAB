@@ -202,8 +202,7 @@ Ahora ya podemos hacer nuestro primer Backup para esto vamos a la VM que queremo
 
 ![1768652703900](image/Zimablade2/1768652703900.png)
 
-
-## VaultWarden CT
+## KeePass CT
 
 ### Config CT
 
@@ -223,11 +222,15 @@ URL para instalar docker en Alpine Linux
 https://voidnull.es/instalacion-de-docker-en-alpinelinux/
 ```
 
-Para que docker funcionara en el CT tuvimos que pasarle la ruta /dev/net/tun 
+Para que docker funcionara en el CT tuvimos que pasarle la ruta /dev/net/tun
 
 ![1771247334792](image/Zimablade2/1771247334792.png)
 
-Una vez instalado lanzamos el docker run con el servicio Vaultwarden
+## VaultWarden CT
+
+### Docker
+
+Una vez instalado docker, lanzamos el docker run con el servicio Vaultwarden
 
 ```
 docker run -d --name vaultwarden \
@@ -243,3 +246,47 @@ Una vez lanzado nos pide que usemos HTTPS para esto yo use Nginx Proxy Manager q
 ![1771247514107](image/Zimablade2/1771247514107.png)
 
 Ya con esto accedemos con la URL HTTPs y ya podemos usar vaultwarden sin problemas.
+
+## Portainer CT
+
+### Docker
+
+Para instalar este servicio simplemente lanzamos un docker run.
+
+```
+docker run -d \
+  -p 9000:9443 \
+  -p 8001:8001 \
+  --name portainer \
+  --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  portainer/portainer-ce:latest
+```
+
+## Beszel CT
+
+### Docker
+
+Para lanzar este servicio de monitorizacion seguimos los pasos de este GitHub.
+
+```
+https://beszel.dev/guide/getting-started
+```
+
+En mi caso voy a lanzarlo con docker run.
+
+```
+docker volume create beszel_data && \
+docker run -d \
+  --name beszel \
+  --restart=unless-stopped \
+  --volume beszel_data:/beszel_data \
+  -e APP_URL=http://localhost:8090 \
+  -p 8090:8090 \
+  henrygd/beszel
+```
+
+Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo puedes agregar com un binario o como un contenedor docker.
+
+![1771414254217](image/Zimablade2/1771414254217.png)

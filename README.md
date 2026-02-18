@@ -74,18 +74,21 @@ Raspberry Pi5 *servidor independiente corriendo servicios de IA*
 
 #### Servicios
 
-| APLICADO | APROBADO |      SERVICIO      |                                       NOTAS                                       |
-| :------: | :------: | :-----------------: | :--------------------------------------------------------------------------------: |
-|    SI    |    SI    |      NextCloud      |                            Almacenamiento Cloud Local.                            |
-|    SI    |    SI    |      Jellyfin      |                                Servicio Multimedia                                |
-|    SI    |    SI    |        Sure        |                           Servicio de gestion de gastos                           |
-|    SI    |    SI    |       Deluge       |                                  Servicio Torrent                                  |
-|    SI    |    SI    |      Downtify      |                                  Servicio Musica                                  |
-|    SI    |    SI    |        Sonar        |                            Servicio busqueda de Musica                            |
-|    SI    |    SI    |       Radarr       |                             Servicio busqueda de Pelis                             |
-|    SI    |    SI    | Nginx Proxy Manager |      Servicio Proxy inverso para exponer servicios<br />con certificados SSL.      |
-|    SI    |    SI    |       Prowlar       |                              Servicio Indexer Torrent                              |
-|    SI    |    SI    |    Ddns-Updater    | Serviucio que actualiza la ip publica de<br />nuestro router, conectado a duckdns. |
-|    NO    |    NO    |       Asenble       |                                                                                    |
-|    NO    |    NO    |       Coolify       |                                                                                    |
-|    NO    |    NO    |     Frigate NVR     |                                                                                    |
+| APLICADO | APROBADO |      SERVICIO      |                                                                                                      NOTAS                                                                                                      |
+| :------: | :------: | :-----------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|    SI    |    SI    |      NextCloud      |                                                                                           Almacenamiento Cloud Local.                                                                                           |
+|    SI    |    SI    |      Jellyfin      |                                                                                               Servicio Multimedia                                                                                               |
+|    SI    |    SI    |        Sure        |                                                                                          Servicio de gestion de gastos                                                                                          |
+|    SI    |    SI    |       Deluge       |                                                                                                Servicio Torrent                                                                                                |
+|    SI    |    SI    |      Downtify      |                                                                                                 Servicio Musica                                                                                                 |
+|    SI    |    SI    |        Sonar        |                                                                                           Servicio busqueda de Musica                                                                                           |
+|    SI    |    SI    |       Radarr       |                                                                                           Servicio busqueda de Pelis                                                                                           |
+|    SI    |    SI    | Nginx Proxy Manager |                                                                    Servicio Proxy inverso para exponer servicios<br />con certificados SSL.                                                                    |
+|    SI    |    SI    |       Prowlar       |                                                                                            Servicio Indexer Torrent                                                                                            |
+|    SI    |    SI    |    Ddns-Updater    |                                                               Serviucio que actualiza la ip publica de<br />nuestro router, conectado a duckdns.                                                               |
+|    NO    |    NO    |       Asenble       |                                                                                                                                                                                                                |
+|    NO    |    NO    |       Coolify       |                                                                                                                                                                                                                |
+|    NO    |    NO    |     Frigate NVR     |                                                                                                                                                                                                                |
+|    SI    |    SI    |       Beszel       |                                                                     Herramienta de monitorizacón de servidores<br />y contenedores docker.                                                                     |
+|    SI    |    SI    |      Portainer      | Portainer es una interfaz gráfica para gestionar contenedores Docker y <br />entornos como Kubernetes, facilitando la administración de <br />contenedores, imágenes y redes sin usar la línea de comandos. |
+|    SI    |    SI    |     VaultWarden     |                                                                               Gestor de contraseñas y sesiones<br />autoalojado.                                                                               |
