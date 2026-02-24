@@ -1,94 +1,220 @@
-# HOMELAB PROJECT CON RASPBERRY Y ZIMABLADE SERVERS
+# 🏠 HOMELAB INFRASTRUCTURE PROJECT
+
+### 🚀 High Availability Cluster with ZimaBlade & Raspberry Pi
+
+<p align="center">
+
+![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox-blue?style=for-the-badge)
+![Containers](https://img.shields.io/badge/Containers-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![VPN](https://img.shields.io/badge/Network-Tailscale-1F1F1F?style=for-the-badge)
+![Backups](https://img.shields.io/badge/Backups-PBS-success?style=for-the-badge)
+![ARM Node](https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)
+
+</p>
+
+---
+
+# 📖 Descripción
 
 En este repositorio voy a explicar como yo configure mi actual homelab, compartire algunos archivos de configuracion que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
 
-## Estructura del repositorio.
+Este proyecto tiene como objetivo construir una infraestructura doméstica orientada a:
 
-Por ahora solo tenemos la documentacion que explica la configuracion de los diferentes dispositivos y a mayores un documento de Troubleshooting que contiene los errores que me fueron surgiendo y como los consegui solucionar.
+- 🏗️ Alta disponibilidad
+- 🔁 Replicación entre nodos
+- 💾 Backups incrementales diarios
+- ⚖️ Balance estructural
+- 🌍 Servicios 24/7
+- 🤖 Nodo independiente para IA
 
-- Portatil-Cliente.md, configuracion Portatil.
-- Readme.md, Resumen contexto y registro.
-- Raspberry_pi5.md, configuracion Raspberry Pi5.
-- Troubleshooting.md, solución de errores varios.
-- Zimablade1.md, configuracion e instalación Zimablade1.
-- Zimablade2.md, configuracion e instalación Zimablade2.
+---
 
-## Histórico
+# 🏗️ Arquitectura General
 
-### Estructura Inicial :
+## 🔹 Diagrama de Infraestructura
 
-Una raspberry Pi5 con CasaOS instalado localmente con diferentes servicios creados a traves de CasaOS
+```mermaid
+graph TD
 
-NextCloud, servicio Cloud
-Jellyfin, servicio de medios Multimedia
-Nginx Proxy Manager, proxy que publica los servicios
-Prowlar, indexer
-Sonar, servicio de series
-Radarr, servicio de peliculas
-DdnsUpdater, servicio para actualizar la ip publica
-Sure, servicio finanzas
+    Router --> Tailscale
+    Tailscale --> ProxmoxCluster
+    Tailscale --> RaspberryPi
 
-### Estructura Actual :
+    subgraph Datacenter
+        ProxmoxCluster --> Nodo1[ZimaBlade 1]
+        ProxmoxCluster --> Nodo2[ZimaBlade 2]
+        Nodo1 --> Servicios
+        Nodo2 --> PBS[Backup Server]
+    end
 
-Datacenter(proxmox)
-  pve, zimablade1 nodo1
-  pve2, zimablade2 nodo2/Backup Replicacion.
-Raspberry Pi5 PARADO ACTUALMENTE *servidor independiente corriendo servicios de IA*
+    RaspberryPi --> IA[Servicios IA]
+```
 
-<img width="464" height="305" alt="image" src="https://github.com/user-attachments/assets/7c9ffe26-e74b-4516-89f0-8c86da11d884" />
+---
 
-### Situacion Objetivo :
+## 🔹 Estructura Actual
 
-Dispongo de dos servidores más, dos zimablades, queremos ampliar nuestro Homelab con dos servidores más, los cuales queremos poner tambien a funcionar y crear un nodo con tres servidores que corran diferentes servicios. Estos zimablades traen ya preinstalado CasaOS ya que son de los creadores de este sistema.
+```
+Datacenter (Proxmox Cluster)
+│
+├── pve     → zimablade1 (Nodo 1)
+├── pve2    → zimablade2 (Nodo 2 - Backup / Replicacion)
+│
+└── Raspberry Pi 5
+    └── Servidor independiente corriendo servicios de IA
+```
 
-La idea de esta estructura es crear un red de alta disponibilidad, respaldada y gestionar cargas de trabajo entre nodos, y disponer de los servicios 24/7. Para conseguir esto vamos a instalar Proxmox VE y crear un nodo con repliacion y backups Diarias para asegurar esta alta disponibilidad y respaldo.
+---
 
-Tambien vamos a utilizar la Rapsberry Pi5 sobrante para proyectos centrados en IA ya que esta no es compatible con Proxmox por su arquitectura ARM.
+## 🎯 Estructura Objetivo
 
-### Estructura final(Objetivo) :
+```
+Datacenter (Alta Disponibilidad)
+│
+├── Nodo 1 → Servicios principales
+├── Nodo 2 → Replicación + Backups
+├── Nodo 3 → Expansión futura (Quorum)
+│
+└── Raspberry Pi 5 → Laboratorio IA (ARM)
+```
 
-La intencion final de este proyecto es crear una red de nodos de alta disponibilidad y respaldada,este proyecto es muy ambicioso y aun no se el alcance de este mismo, probablemente ira a mas, ire actualizando con las novedades este Readme.
+---
 
-La estructura final tendria que ser la siguiente:
+# 🧠 Arquitectura Técnica
 
-Datacenter(proxmox)
-  pve, zimablade1 nodo1
-  pve2, zimablade2 nodo2/Backup Replicacion.
-Raspberry Pi5 *servidor independiente corriendo servicios de IA*
+## 🔹 Virtualización
 
-<img width="464" height="305" alt="image" src="https://github.com/user-attachments/assets/ba976872-2546-44f5-8718-6d2502ca63ec" />
+- Cluster basado en Proxmox VE
+- Contenedores LXC para servicios ligeros
+- Máquinas virtuales para servicios críticos
+- Snapshots periódicos
 
-### Ideas y pruebas que voy realizando:
+## 🔹 Backups
 
-#### Estructural
+- Backups incrementales diarios
+- Deduplicación
+- Compresión
+- Replicación entre nodos
 
-| APLICADO | PROBADO | TECNOLOGÍA |                                                                                                                                                                                                                                                               NOTAS                                                                                                                                                                                                                                                               |
-| :------: | :-----: | :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|    NO    |   SI   | Docker Swarm |                                                                                                                                                                                                                        No tiene soporte y es bastante limitado tengo que probar con otro<br />orquestador.                                                                                                                                                                                                                        |
-|    SI    |   SI   |  Tailscale  |                                                                                                                                                                   Es una VPN que conecta todos los servidores entre si por una red<br />publica pero privada, hace accesible a todos los servidores desde <br />cualquier sitio si estas conectado a esta VPN.                                                                                                                                                                   |
-|    SI    |   SI   |   Proxmox   |                                                                                                                                           Es una plataforma de vistualizacion de servidores, tiene<br />una cierta orquestación ya que te permite gestionar nodos.<br />Esto seria una buena opción para mi caso, queda pendiente<br />necesito los discos duros para los zimablades.                                                                                                                                           |
-|    NO    |   NO   |  Kubernetes  |                                                                                                                                                                                              Es el orquestador mas usado a nivel de servicios queda<br />pendiente de ver como funciona y si tiene sentido en <br />mi estructura.                                                                                                                                                                                              |
-|    SI    |   SI   |    CasaOS    |                                                                                                                                                                                                           Todos mis servidores tienen este sistema instalado<br />facilita mucho los crear servicios y implementarlos.                                                                                                                                                                                                           |
-|    SI    |   SI   |  Proxmox BS  | Proxmox Backup Server (PBS) es una solución de copias de seguridad<br />empresarial, gratuita y de código abierto, diseñada específicamente para <br />proteger entornos virtualizados basados en Proxmox VE. Permite realizar <br />backups incrementales, rápidos y eficientes de máquinas virtuales, contenedores <br />y hosts, usando técnicas como deduplicación, compresión y cifrado, lo que <br />reduce mucho el espacio en disco y el tráfico de red. PBS se gestiona desde <br />una interfaz web sencilla. |
-|    SI    |   SI   |  Proxmox VE  |                                                  Proxmox VE es una plataforma**open-source de virtualización** basada en Debian que permite gestionar **máquinas <br />virtuales (KVM) y contenedores (LXC)** desde una interfaz web. Ofrece funciones como  **backups, snapshots, <br />clustering y alta disponibilidad** , siendo muy utilizada tanto en servidores profesionales como en homelabs por su<br />  **potencia y facilidad de uso** .                                                  |
+## 🔹 Red
 
-#### Servicios
+- VPN Mesh privada
+- Acceso remoto seguro
+- Servicios expuestos mediante proxy inverso
+- Certificados SSL
 
-| APLICADO | APROBADO |      SERVICIO      |                                                                                                      NOTAS                                                                                                      |
-| :------: | :------: | :-----------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|    SI    |    SI    |      NextCloud      |                                                                                           Almacenamiento Cloud Local.                                                                                           |
-|    SI    |    SI    |      Jellyfin      |                                                                                               Servicio Multimedia                                                                                               |
-|    SI    |    SI    |        Sure        |                                                                                          Servicio de gestion de gastos                                                                                          |
-|    SI    |    SI    |       Deluge       |                                                                                                Servicio Torrent                                                                                                |
-|    SI    |    SI    |      Downtify      |                                                                                                 Servicio Musica                                                                                                 |
-|    SI    |    SI    |        Sonar        |                                                                                           Servicio busqueda de Musica                                                                                           |
-|    SI    |    SI    |       Radarr       |                                                                                           Servicio busqueda de Pelis                                                                                           |
-|    SI    |    SI    | Nginx Proxy Manager |                                                                    Servicio Proxy inverso para exponer servicios<br />con certificados SSL.                                                                    |
-|    SI    |    SI    |       Prowlar       |                                                                                            Servicio Indexer Torrent                                                                                            |
-|    SI    |    SI    |    Ddns-Updater    |                                                               Serviucio que actualiza la ip publica de<br />nuestro router, conectado a duckdns.                                                               |
-|    NO    |    NO    |       Asenble       |                                                                                                                                                                                                                |
-|    NO    |    NO    |       Coolify       |                                                                                                                                                                                                                |
-|    NO    |    NO    |     Frigate NVR     |                                                                                                                                                                                                                |
-|    SI    |    SI    |       Beszel       |                                                                     Herramienta de monitorizacón de servidores<br />y contenedores docker.                                                                     |
-|    SI    |    SI    |      Portainer      | Portainer es una interfaz gráfica para gestionar contenedores Docker y <br />entornos como Kubernetes, facilitando la administración de <br />contenedores, imágenes y redes sin usar la línea de comandos. |
-|    SI    |    SI    |     VaultWarden     |                                                                               Gestor de contraseñas y sesiones<br />autoalojado.                                                                               |
+## 🔹 Orquestación
+
+- Gestión manual estructurada
+- Evaluación futura de Kubernetes
+- Segmentación por tipo de servicio
+
+---
+
+# 📊 Servicios Activos
+
+## 🔹 Infraestructura
+
+| Servicio              | Función              |
+| --------------------- | --------------------- |
+| Proxmox VE            | Virtualización       |
+| Proxmox Backup Server | Backups               |
+| CasaOS                | Gestión de servicios |
+| Tailscale             | VPN privada           |
+| Portainer             | Gestión Docker       |
+| Beszel                | Monitorización       |
+
+---
+
+## 🔹 Servicios Usuario
+
+| Servicio            | Función                   |
+| ------------------- | -------------------------- |
+| NextCloud           | Almacenamiento Cloud Local |
+| Jellyfin            | Servicio Multimedia        |
+| Nginx Proxy Manager | Proxy inverso              |
+| Radarr              | Gestión Películas        |
+| Sonar               | Gestión Series            |
+| Prowlar             | Indexer Torrent            |
+| Deluge              | Cliente Torrent            |
+| Downtify            | Música                    |
+| Sure                | Gestión de gastos         |
+| Ddns-Updater        | Actualización IP pública |
+| VaultWarden         | Gestor de contraseñas     |
+
+---
+
+# 📈 Métricas de Infraestructura
+
+*(Sección preparada para actualizar con métricas reales)*
+
+- 🖥️ Nodos activos: 2
+- 💾 Tipo almacenamiento: HDD
+- 🌐 Acceso remoto: VPN privada
+- 🔄 Backups: Incrementales diarios
+- ⏱️ Objetivo disponibilidad: 24/7
+
+---
+
+# 🛣️ Roadmap Técnico
+
+## Infraestructura
+
+- [X] Migración a Proxmox
+- [X] Implementación de PBS
+- [X] Integración VPN privada
+- [ ] Añadir nodo para quorum
+- [ ] Migración a almacenamiento SSD
+- [ ] Monitorización avanzada (Grafana / Prometheus)
+
+## Automatización
+
+- [ ] Backups automáticos verificados
+- [ ] Alertas por caída de servicios
+- [ ] CI/CD para despliegues
+
+## IA (Raspberry Pi 5)
+
+- [ ] Servidor IA local
+- [ ] Automatización inteligente
+- [ ] Experimentos ML
+- [ ] Integración futura con cluster principal
+
+---
+
+# 🧪 Evolución del Proyecto
+
+## 🏗 Fase Inicial
+
+Una raspberry Pi5 con CasaOS instalado localmente con diferentes servicios creados a traves de CasaOS:
+
+- NextCloud
+- Jellyfin
+- Nginx Proxy Manager
+- Prowlar
+- Sonar
+- Radarr
+- DdnsUpdater
+- Sure
+
+---
+
+# 🎯 Objetivo Final
+
+Crear una red de nodos de alta disponibilidad y respaldada, este proyecto es muy ambicioso y aun no se el alcance de este mismo, probablemente ira a mas, ire actualizando con las novedades este Readme.
+
+Este proyecto funciona como:
+
+- 🧠 Laboratorio personal de infraestructura
+- 🏗️ Entorno de pruebas DevOps
+- 🔬 Plataforma de experimentación IA
+- 📚 Proyecto documentado como portfolio técnico
+
+---
+
+# 👨‍💻 Autor
+
+Proyecto desarrollado como laboratorio personal de infraestructura, virtualización y servicios autoalojados.
+
+Infraestructura en evolución constante 🚀
