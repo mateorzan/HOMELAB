@@ -52,13 +52,29 @@ Una vez confugirado dentro de la BIOS en el ultimo menu seleccionamos save and e
 
 Una vez iniciado nos saldra el menu de instalacion en nuestro caso seleccionaremos modo graphical y seguiremos esta configuracion. IMPORTANTE NO INSTARLAR PROXMOX EN EL DISCO SSD INTERNO HAY QUE INTALARLO EN EL DISCO HDD EXTERNO.
 
-# PONER FOTO
-
 SI VES QUE CON EL GRAFICO NO TE FUNCIONA PRUEBA CON EL TERMINAL CON LA MISMA CONFIGURACIÓN.
 
 > *Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalacion para que incie con el disco con el que hicimos la instalacion.*
 
 Ahora nos pedira meternos en la web para hacer la instalacion inicial.
+
+![1772005781602](image/Zimablade2/1772005781602.png)
+
+Luego de seleccionar el disco seleccionamos la region y nuestra franja horaria.
+
+![1772005826958](image/Zimablade2/1772005826958.png)
+
+Añadimos la cuenta de admin con un correo y una contraseña.
+
+![1772005858892](image/Zimablade2/1772005858892.png)
+
+Por ultimo configuramos el hostname y la red, este paso es muy importante hacerlo bien.
+
+![1772005915807](image/Zimablade2/1772005915807.png)
+
+Si todo esta bien nos quedaria algo asi. 
+
+![1772005940294](image/Zimablade2/1772005940294.png)
 
 ## Configuración
 
@@ -290,3 +306,5 @@ docker run -d \
 Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo puedes agregar com un binario o como un contenedor docker.
 
 ![1771414254217](image/Zimablade2/1771414254217.png)
+
+### Alertas
