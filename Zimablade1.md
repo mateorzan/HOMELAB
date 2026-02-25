@@ -50,9 +50,7 @@ Una vez confugirado dentro de la BIOS en el ultimo menu seleccionamos save and e
 
 Una vez iniciado nos saldra el menu de instalacion en nuestro caso seleccionaremos modo terminal y seguiremos esta configuracion. IMPORTANTE NO INSTARLAR PROXMOX EN EL DISCO SSD INTERNO HAY QUE INTALARLO EN EL DISCO HDD EXTERNO.
 
-PONER FOTO
-
-Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalacion para que incie con el disco con el que hicimos la instalacion. Ahora nos pedira meternos en la web para hacer la instalacion inicial.
+Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalacion para que inicie con el disco con el que hicimos la instalacion. Ahora nos pedira meternos en la web para hacer la instalacion inicial.
 
 ## Configuración
 
@@ -110,39 +108,35 @@ En nuestro caso dentro de este servidor vamos a crear una Maquina Virtual que va
 
 Creamos la VM, pulsamos el boton Create VM
 
-IMAGEN
-
 Aqui seleccionamos el ID unico de la maquina y su nombre, en este caso CasaOSZima1
+
+![1772007202097](image/Zimablade1/1772007202097.png)
 
 Luego vamos a la segunda seccion OS, aqui tenemos que seleccionar un sistema operativo que nosotros elijamos, en este caso Ubuntu-24-04-03. Previamente a esto si no queremos complicaciones vamos a descargar la imagen ISO desde promox, para ellos nos vamos a nuestro servidor, en este caso pve y dentro de el local (pve).
 
-IMAGEN
+![1772007240410](image/Zimablade1/1772007240410.png)
 
 Aqui podemos o subir la imagen o proporcionar la url con la imagen ISO para su descarga.
 
 Una vez subida la ISO ya nos aparece para seleccionar la imagen ISO.
 
-IMAGEN
+![1772007279229](image/Zimablade1/1772007279229.png)
 
-En system vamos a selccionar machine q35
+En system vamos a selccionar machine q35 y Disk vamos a dejar todo por defecto salvo el tamaño en nuestro caso tenemos hasta 2TB pero vamos a utilizar hasta 1.35TB.
 
-IMAGEN
-
-En Disk vamos a dejar todo por defecto salvo el tamaño en nuestro caso tenemos hasta 2TB pero vamos a utilizar hasta 1.35TB.
-
-IMAGEN
+![1772007351920](image/Zimablade1/1772007351920.png)
 
 En CPU vamos a añadir dos cores, que es lo maximo que tiene disponible este servidor, el resto por defecto.
 
-IMAGEN
+![1772007369750](image/Zimablade1/1772007369750.png)
 
 En memory vamos a poner 7800 que equivale a 7.62gb de 8gb que tenemos disponibles.
 
-IMAGEN
+![1772007386549](image/Zimablade1/1772007386549.png)
 
 En Network lo vamos a dejar por defecto.
 
-Creamos nuestro primera VM, vamos a crear un casaos para ello primero necesitamos un contenedor con sistema base debian con la siguiente configuración:
+Con todo esto ya tenemos nuesta VM con Ubuntu24 para crear nuestro CasaOS, la configuracion tnedria que quedar algo asi.
 
 ![1766329574197](image/README/1766329574197.png)
 

@@ -4,12 +4,12 @@
 
 <p align="center">
 
-![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox-blue?style=for-the-badge)
-![Containers](https://img.shields.io/badge/Containers-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![VPN](https://img.shields.io/badge/Network-Tailscale-1F1F1F?style=for-the-badge)
-![Backups](https://img.shields.io/badge/Backups-PBS-success?style=for-the-badge)
-![ARM Node](https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)
+[![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox%20VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white)](https://www.proxmox.com/en/proxmox-virtual-environment)
+[![Containers](https://img.shields.io/badge/Containers-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![VPN](https://img.shields.io/badge/Network-Tailscale-000000?style=for-the-badge&logo=tailscale&logoColor=white)](https://tailscale.com/)
+[![Backups](https://img.shields.io/badge/Backups-Proxmox%20Backup%20Server-009688?style=for-the-badge&logo=proxmox&logoColor=white)](https://www.proxmox.com/en/proxmox-backup-server)
+[![ARM Node](https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.raspberrypi.com/products/raspberry-pi-5/)
+[![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](#)
 
 </p>
 
@@ -42,10 +42,11 @@ graph TD
     Tailscale --> RaspberryPi
 
     subgraph Datacenter
-        ProxmoxCluster --> Nodo1[ZimaBlade 1]
-        ProxmoxCluster --> Nodo2[ZimaBlade 2]
-        Nodo1 --> Servicios
+        ProxmoxCluster --> Nodo1[ZimaBlade1 PVE]
+        ProxmoxCluster --> Nodo2[ZimaBlade2 PVE2]
+        Nodo1 --> CasaOS
         Nodo2 --> PBS[Backup Server]
+	Nodo2 --> CT_Keepas
     end
 
     RaspberryPi --> IA[Servicios IA]
@@ -58,8 +59,8 @@ graph TD
 ```
 Datacenter (Proxmox Cluster)
 │
-├── pve     → zimablade1 (Nodo 1)
-├── pve2    → zimablade2 (Nodo 2 - Backup / Replicacion)
+├── pve     → zimablade1 (Nodo 1 - Servicios)
+├── pve2    → zimablade2 (Nodo 2 - Backup / Replicacion / Servicios)
 │
 └── Raspberry Pi 5
     └── Servidor independiente corriendo servicios de IA
