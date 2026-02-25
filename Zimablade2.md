@@ -72,7 +72,7 @@ Por ultimo configuramos el hostname y la red, este paso es muy importante hacerl
 
 ![1772005915807](image/Zimablade2/1772005915807.png)
 
-Si todo esta bien nos quedaria algo asi. 
+Si todo esta bien nos quedaria algo asi.
 
 ![1772005940294](image/Zimablade2/1772005940294.png)
 
@@ -308,3 +308,30 @@ Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo pue
 ![1771414254217](image/Zimablade2/1771414254217.png)
 
 ### Alertas
+
+Para configurar las alertas vamos a usar un Servicio de Chat llamado Gotify, este es compatible y esta implementado en Proxmox por lo que simplemente tendremos que lanzar un docker y conectarlo a nuestro Datacenter.
+
+Docker
+
+```
+docker run -d \
+  --name gotify \
+  -p 8081:80 \
+  gotify/server
+```
+
+Luego podemos accerder al gotify en `http://IP_DE_TU_SERVIDOR:8081` 
+
+*El usuario y contraseña por defecto es admin*
+
+Dentro de Gotify vamos a crear una App en mi caso la voy a llamar Alertas, esto nos dara un Token que es el que vamos a usar para conectar Gotify a Proxmox.
+
+![1772013082633](image/Zimablade2/1772013082633.png)
+
+Luego vamos a nuestro Datacenter Promox, vamos a configurar las notificaciones y a añadir nuestro gotify.
+
+![1772013182734](image/Zimablade2/1772013182734.png)
+
+Aqui añades la URL y el token que acabamos de crear, con esto ya tienes Gotify vinculado y operativo para usar en alertas. Para probar que funciona puedes usar la funcion test que te ofrece proxmox, este te enviara un mensaje de prueba si te llega es que funciona.
+
+![1772013293463](image/Zimablade2/1772013293463.png)
