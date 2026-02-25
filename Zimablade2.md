@@ -307,7 +307,7 @@ Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo pue
 
 ![1771414254217](image/Zimablade2/1771414254217.png)
 
-### Alertas
+## Alertas
 
 Para configurar las alertas vamos a usar un Servicio de Chat llamado Gotify, este es compatible y esta implementado en Proxmox por lo que simplemente tendremos que lanzar un docker y conectarlo a nuestro Datacenter.
 
@@ -335,3 +335,53 @@ Luego vamos a nuestro Datacenter Promox, vamos a configurar las notificaciones y
 Aqui añades la URL y el token que acabamos de crear, con esto ya tienes Gotify vinculado y operativo para usar en alertas. Para probar que funciona puedes usar la funcion test que te ofrece proxmox, este te enviara un mensaje de prueba si te llega es que funciona.
 
 ![1772013293463](image/Zimablade2/1772013293463.png)
+
+En mi caso voy a crear diferentes targets y matchers para organizar las diferntes alertas pero es hacer lo mismo pero creando mas tokens.
+
+![1772019122242](image/Zimablade2/1772019122242.png)
+
+En Gotify se veria asi.
+
+![1772019176934](image/Zimablade2/1772019176934.png)
+
+### Uptime Kuma
+
+Ahora para configurar alertras de nuestros servidores mas especificas como CPU, Disco, etc... vamos a implementar Uptime Kuma
+
+Docker
+
+```
+docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:2
+```
+
+Entramos a la interfaz web para empezar con la instalacion `http://keepass:3001/ `
+
+Nos pide configurar la base de datos yo voy a elegir embedded maridadb, asi no tengo que configurar nada.
+
+![1772017596506](image/Zimablade2/1772017596506.png)
+
+Una vez termine de crearse la base de datos nos pedira crear un usuario y una contraseña con todo esto ya podemos empezar a monitorizar todos los servidores o servicios que queramos 
+
+![1772018156893](image/Zimablade2/1772018156893.png)
+
+Vamos a configurar Gotify para que envia las notificaciones, en mi caso lo voy a usar para monitorizar los servicios por lo que lo voy a conectar a mi chat dedicado a esto.
+
+![1772019808154](image/Zimablade2/1772019808154.png)
+
+Una vez configurado lo podemos testear, tendria que salir algo asi. 
+
+![1772019849017](image/Zimablade2/1772019849017.png)
+
+Vamos a hacer una prueba con un servicio.
+
+![1772020025832](image/Zimablade2/1772020025832.png)
+
+Ahora lo voy a apagar el contenedor a ver si funciona y nos envia la notificación.
+
+![1772020129263](image/Zimablade2/1772020129263.png)
+
+Y cuando lo restablecemos tambien nos envia una notificacion.
+
+![1772020322338](image/Zimablade2/1772020322338.png)
+
+Funciona, ahora la idea es hacer esto pero con todos los servicios que tenemos corriendo.
