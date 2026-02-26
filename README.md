@@ -125,6 +125,7 @@ Datacenter (Alta Disponibilidad)
 | Tailscale             | VPN privada           |
 | Portainer             | Gestión Docker       |
 | Beszel                | Monitorización       |
+| Uptime Kuma           | Monitorización       |
 
 ---
 
@@ -143,6 +144,7 @@ Datacenter (Alta Disponibilidad)
 | Sure                | Gestión de gastos         |
 | Ddns-Updater        | Actualización IP pública |
 | VaultWarden         | Gestor de contraseñas     |
+| Gotify              | Chat de alertas            |
 
 ---
 
