@@ -307,7 +307,7 @@ Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo pue
 
 ![1771414254217](image/Zimablade2/1771414254217.png)
 
-## Alertas
+## Alertas CT
 
 Para configurar las alertas vamos a usar un Servicio de Chat llamado Gotify, este es compatible y esta implementado en Proxmox por lo que simplemente tendremos que lanzar un docker y conectarlo a nuestro Datacenter.
 
@@ -320,7 +320,7 @@ docker run -d \
   gotify/server
 ```
 
-Luego podemos accerder al gotify en `http://IP_DE_TU_SERVIDOR:8081` 
+Luego podemos accerder al gotify en `http://IP_DE_TU_SERVIDOR:8081`
 
 *El usuario y contraseña por defecto es admin*
 
@@ -360,7 +360,7 @@ Nos pide configurar la base de datos yo voy a elegir embedded maridadb, asi no t
 
 ![1772017596506](image/Zimablade2/1772017596506.png)
 
-Una vez termine de crearse la base de datos nos pedira crear un usuario y una contraseña con todo esto ya podemos empezar a monitorizar todos los servidores o servicios que queramos 
+Una vez termine de crearse la base de datos nos pedira crear un usuario y una contraseña con todo esto ya podemos empezar a monitorizar todos los servidores o servicios que queramos
 
 ![1772018156893](image/Zimablade2/1772018156893.png)
 
@@ -368,7 +368,7 @@ Vamos a configurar Gotify para que envia las notificaciones, en mi caso lo voy a
 
 ![1772019808154](image/Zimablade2/1772019808154.png)
 
-Una vez configurado lo podemos testear, tendria que salir algo asi. 
+Una vez configurado lo podemos testear, tendria que salir algo asi.
 
 ![1772019849017](image/Zimablade2/1772019849017.png)
 
@@ -385,3 +385,73 @@ Y cuando lo restablecemos tambien nos envia una notificacion.
 ![1772020322338](image/Zimablade2/1772020322338.png)
 
 Funciona, ahora la idea es hacer esto pero con todos los servicios que tenemos corriendo.
+
+## N8N Automatizaciones CT
+
+### Docker
+
+Vamos a crear el contenedor en docker.
+
+
+docker run -d
+  --name n8n
+  --restart unless-stopped
+  -p 5678:5678
+  -e WEBHOOK_URL="https://automate.micloudm.duckdns.org/"
+  -v n8n_data:/home/node/.n8n
+  docker.n8n.io/n8nio/n8n
+
+```
+docker volume create n8n_data
+
+docker run -d \
+  --name n8n \
+  -p 5678:5678 \
+  --restart unless-stopped \
+  -v n8n_data:/home/node/.n8n \
+  docker.n8n.io/n8nio/n8n
+```
+
+Este servicio necesita HTTPS por lo que le vamos a configurar un reserve proxy
+
+![1772615794072](image/Zimablade2/1772615794072.png)
+
+Una vez creado entramos y ya podemos empezar a usar n8n
+
+![1772615843823](image/Zimablade2/1772615843823.png)
+
+### Meta Developers
+
+La automatizacion que voy a preparar es envio de recordatorios por Whatsapp, para esto necesitamos la API de whatsapp y por ello una cuenta en Meta Developers. Para esto voy a seguir la guía oficial de [Meta](https://developers.facebook.com/documentation/business-messaging/whatsapp/get-started).
+
+Una vez creada y estando en el panel de mis apliaciones vamos a crear nuestra primera apliacion.
+
+![1772612058947](image/Zimablade2/1772612058947.png)
+
+![1772612087213](image/Zimablade2/1772612087213.png)
+
+Ahora nos manda crear un portfolio nuevo si no tenemos ninguno, vamos a crearlo.
+
+![1772612224860](image/Zimablade2/1772612224860.png)
+
+Una vez creado ya nos sale para seleccionarlo
+
+![1772612333514](image/Zimablade2/1772612333514.png)
+
+La configuracion nos quedaria asi
+
+![1772612372153](image/Zimablade2/1772612372153.png)
+
+Ahora vamos a caso de uso y personalizamos el que seleccionamos al crear la API, y vamos a configurar la API.
+
+![1772613107708](image/Zimablade2/1772613107708.png)
+
+### Workflow
+
+Vamos a configurar un workflow para que envie mensajes periodicos a los que se les pueda responder para saber si lo hiciste o no y asi llevar un seguiemiento, y que si lo hiciste o no te envie un mensaje en respuesta a eso.
+
+Voy a integrar una IA local para clasificar respuestas por lo que voy a usar Ollama.
+
+```
+docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+```
