@@ -16,15 +16,15 @@ Usaremos uno de los zimablades como servidor secundario, en este servidor vamos 
 
 ### Software
 
-Vamos a empezar con la instalación, lo primero que necesitamos es desde otro dispositivo es descargar la iso de nuestro nuevo sistema operativo, Proxmox. Para ello vamos a la pagina oficial de Proxmox(https://www.proxmox.com/en/downloads), en ella entramos en el apartado de downloads, aqui tenemos los diferentes sistemas que hay disponibles en este caso vamos a usar Proxmox Virtual enviroment, lo seleccionamos y dentro de el veremos las diferentes versiones, este proyecto fue creado con la ultima version actual, Proxmox VE 8.4 ISO.
+Vamos a empezar con la instalación, lo primero que necesitamos es desde otro dispositivo es descargar la iso de nuestro nuevo sistema operativo, Proxmox. Para ello vamos a la pagina oficial de Proxmox([https://www.proxmox.com/en/downloads](https://www.proxmox.com/en/downloads)), en ella entramos en el apartado de downloads, aqui tenemos los diferentes sistemas que hay disponibles en este caso vamos a usar Proxmox Virtual enviroment, lo seleccionamos y dentro de el veremos las diferentes versiones, este proyecto fue creado con la ultima version actual, Proxmox VE 8.4 ISO.
 
 ### Disco de arranque
 
 Una vez instalado nuestro archivo de instalacion ISO necesitamos crear el dispositivo de arranque con el que realizaremos la instalacion, para esto necesitamos una unidad de almacenamiento, por ejemplo, un USB. En este proyecto se uso un usb cualquiera de 8 gb, puedes usar cualquiera unidad extraile que supere el tamaño de la ISO.
 
-Para poder crear nuestro dispositivo de arranque necesitamos un programa, en este caso utilizamos Rufus, lo puedes descargar en su pagina oficial(https://rufus.ie/es/#download).
+Para poder crear nuestro dispositivo de arranque necesitamos un programa, en este caso utilizamos Rufus, lo puedes descargar en su pagina oficial([https://rufus.ie/es/#download](https://rufus.ie/es/#download)).
 
-## Proceso de instalacion.
+## Proceso de instalacion
 
 #### Proxmox
 
@@ -36,7 +36,7 @@ Creamos el usb de instalacion con RUFUS y con esta configuracion, es importante 
 
 ![1766319984358](image/README/1766319984358.png)
 
-### Inicio de instalación.
+### Inicio de instalación
 
 Una vez tenemos los pasos previos completados pasamos a la instalacion del software para instalar el sistema opetativo es como cualquier otro sistema operativo, arrancamos el servidor conectado a una pantalla, un teclado y con el disco de instalación, por esto es necesario el hub USB.
 
@@ -144,7 +144,7 @@ Aqui pegamos la informacion, y nos pedira la contraseña del nodo principal y co
 
 ## Backup VM
 
-Ahora vamos a configurar el Backup de nuestra VM de el nodo principal, que es el principal trabajo de este servidor. Para realizar las Backups vamos a crear una VM dedicadada a esto, vamos a usar el sistema operativo Proxmox Backup Server, descargamos la ISO desde su sitio web(https://www.proxmox.com/en/downloads) en este caso la ultima version 4.1.
+Ahora vamos a configurar el Backup de nuestra VM de el nodo principal, que es el principal trabajo de este servidor. Para realizar las Backups vamos a crear una VM dedicadada a esto, vamos a usar el sistema operativo Proxmox Backup Server, descargamos la ISO desde su sitio web([https://www.proxmox.com/en/downloads](https://www.proxmox.com/en/downloads)) en este caso la ultima version 4.1.
 
 ### Config VM
 
@@ -316,6 +316,7 @@ Docker
 ```
 docker run -d \
   --name gotify \
+  --restart unless-stopped \
   -p 8081:80 \
   gotify/server
 ```
@@ -354,7 +355,7 @@ Docker
 docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:2
 ```
 
-Entramos a la interfaz web para empezar con la instalacion `http://keepass:3001/ `
+Entramos a la interfaz web para empezar con la instalacion `http://keepass:3001/`
 
 Nos pide configurar la base de datos yo voy a elegir embedded maridadb, asi no tengo que configurar nada.
 
@@ -391,15 +392,6 @@ Funciona, ahora la idea es hacer esto pero con todos los servicios que tenemos c
 ### Docker
 
 Vamos a crear el contenedor en docker.
-
-
-docker run -d
-  --name n8n
-  --restart unless-stopped
-  -p 5678:5678
-  -e WEBHOOK_URL="https://automate.micloudm.duckdns.org/"
-  -v n8n_data:/home/node/.n8n
-  docker.n8n.io/n8nio/n8n
 
 ```
 docker volume create n8n_data
@@ -446,9 +438,17 @@ Ahora vamos a caso de uso y personalizamos el que seleccionamos al crear la API,
 
 ![1772613107708](image/Zimablade2/1772613107708.png)
 
+Ahora las credenciales que necesitamos para enviar mensajes son, el identificador de WhatsApp Busisness que se puede ver en la captura de arriba, y a mayares un usuario del sistema que tenga acceso total a esta App con el que crearemos el token con el que nos conectaremos.
+
+![1772810151465](image/Zimablade2/1772810151465.png)
+
+Una vez creado seria simplemente Generar el identificador y guardarnos el token de acceso para usarlo en N8N.
+
 ### Workflow
 
-Vamos a configurar un workflow para que envie mensajes periodicos a los que se les pueda responder para saber si lo hiciste o no y asi llevar un seguiemiento, y que si lo hiciste o no te envie un mensaje en respuesta a eso.
+Vamos a configurar un workflow para que envie mensajes periodicos a los que se les pueda responder para saber si lo hiciste o no y asi llevar un seguiemiento, y que si lo hiciste o no te envie un mensaje en respuesta a eso. El workflow basico que solo envia un mensaje todos los dias a una hora exacta seria asi.
+
+![1772809914047](image/Zimablade2/1772809914047.png)
 
 Voy a integrar una IA local para clasificar respuestas por lo que voy a usar Ollama.
 
