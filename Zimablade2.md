@@ -450,8 +450,89 @@ Vamos a configurar un workflow para que envie mensajes periodicos a los que se l
 
 ![1772809914047](image/Zimablade2/1772809914047.png)
 
-Voy a integrar una IA local para clasificar respuestas por lo que voy a usar Ollama.
+#### Opcion 1
+
+Voy a integrar una IA local para clasificar respuestas por lo que voy a usar Ollama. Para no saturar este dispositivo voy a correr esta IA local en una Raspberry Pi 5 que tengo, lo puedes hacer istalando directamente ollama o con docker.
 
 ```
 docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
+
+```
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+Ahora nos vamos a meter en el contenedor y instalar llama3.2
+
+```
+docker exec -it ollama bash
+
+ollama run llama3.2
+```
+
+Una vez en ollama en mi caso quiero personalizar la IA local para que responda como yo quiero que respondo para esto vamos a crear una IA personalizada a traves de un archivo Modelfile que le va a decir a la IA como tiene que responder.
+
+```
+FROM llama3.2
+
+SYSTEM """
+Eres un asistente cariñoso y gracioso. Respondes a si una chica se ha tomado su medicación diaria.
+
+REGLAS:
+- SOLO la frase, nada más.
+- Máximo 5 palabras.
+- Siempre en español.
+- Máximo 1 emoji por respuesta.
+"""
+
+PARAMETER temperature 0.85
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.5
+```
+
+Ahora creamos la IA personalizada y probamos que funciona.
+
+```
+ollama create pastilla-bot -f ./Modelfile
+ollama run pastilla-bot "si me la tomé"
+```
+
+Ahora pasamos al flujo N8N que es el que va a recibir el mensaje y va a mandar la respuesta a la IA local y va a responder.
+
+![1772891632271](image/Zimablade2/1772891632271.png)
+
+#### Opcion 2
+
+Vamos a añdir un nodo Code para que genere una lista de respuestas ya que llama3.2 no es muy potente y tiene bastantes alucinaciones.
+
+```
+const frasesSi = [
+  "Como siempre, perfecta 🙄❤️",
+  "Mi favorita 🥰",
+  "Qué responsable 😌",
+  "Eres la mejor 🥰",
+  "Hoy me alegras el día 🥹",
+  "Ya era hora 😏",
+  "Menos mal 😅"
+];
+
+const frasesNo = [
+  "Ahora mismo 💊",
+  "Que no se te olvide eh 👀",
+  "Dale, que es importante 🙄",
+  "No me falles 😤",
+  "Corre 💨💊",
+  "Que te conozco 😏"
+];
+
+const msg = $json.messages[0].text.body.toLowerCase();
+const confirma = ["si","sí","sip","ya","tomada","listo","hecha","dale","amor"];
+const esSi = confirma.some(p => msg.includes(p));
+
+const lista = esSi ? frasesSi : frasesNo;
+const frase = lista[Math.floor(Math.random() * lista.length)];
+
+return [{ json: { ...($json), frase } }];
+```
+
+![1772895533394](image/Zimablade2/1772895533394.png)
