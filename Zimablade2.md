@@ -458,6 +458,7 @@ Voy a integrar una IA local para clasificar respuestas por lo que voy a usar Oll
 docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
 
+
 ```
 curl -fsSL https://ollama.com/install.sh | sh
 ```
@@ -507,22 +508,17 @@ Vamos a añdir un nodo Code para que genere una lista de respuestas ya que llama
 
 ```
 const frasesSi = [
-  "Como siempre, perfecta 🙄❤️",
-  "Mi favorita 🥰",
   "Qué responsable 😌",
   "Eres la mejor 🥰",
-  "Hoy me alegras el día 🥹",
   "Ya era hora 😏",
   "Menos mal 😅"
 ];
 
 const frasesNo = [
-  "Ahora mismo 💊",
   "Que no se te olvide eh 👀",
   "Dale, que es importante 🙄",
   "No me falles 😤",
-  "Corre 💨💊",
-  "Que te conozco 😏"
+  "Corre 💨💊"
 ];
 
 const msg = $json.messages[0].text.body.toLowerCase();
