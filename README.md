@@ -145,6 +145,7 @@ Datacenter (Alta Disponibilidad)
 | Ddns-Updater        | Actualización IP pública |
 | VaultWarden         | Gestor de contraseñas     |
 | Gotify              | Chat de alertas            |
+| N8N                 | Automatizacion             |
 
 ---
 
@@ -167,22 +168,21 @@ Datacenter (Alta Disponibilidad)
 - [X] Migración a Proxmox
 - [X] Implementación de PBS
 - [X] Integración VPN privada
+- [X] Monitorización avanzada
 - [ ] Añadir nodo para quorum
 - [ ] Migración a almacenamiento SSD
-- [ ] Monitorización avanzada (Grafana / Prometheus)
 
 ## Automatización
 
-- [ ] Backups automáticos verificados
-- [ ] Alertas por caída de servicios
+- [X] Backups automáticos verificados
+- [X] Alertas por caída de servicios
 - [ ] CI/CD para despliegues
 
 ## IA (Raspberry Pi 5)
 
-- [ ] Servidor IA local
+- [ ] Servidor IA local Asistente
 - [ ] Automatización inteligente
 - [ ] Experimentos ML
-- [ ] Integración futura con cluster principal
 
 ---
 
