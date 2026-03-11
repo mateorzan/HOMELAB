@@ -142,7 +142,9 @@ Aqui pegamos la informacion, y nos pedira la contraseña del nodo principal y co
 
 ![1768588484598](image/Zimablade2/1768588484598.png)
 
-## Backup VM
+# Virtual Machine PBS
+
+## Backup
 
 Ahora vamos a configurar el Backup de nuestra VM de el nodo principal, que es el principal trabajo de este servidor. Para realizar las Backups vamos a crear una VM dedicadada a esto, vamos a usar el sistema operativo Proxmox Backup Server, descargamos la ISO desde su sitio web([https://www.proxmox.com/en/downloads](https://www.proxmox.com/en/downloads)) en este caso la ultima version 4.1.
 
@@ -218,9 +220,9 @@ Ahora ya podemos hacer nuestro primer Backup para esto vamos a la VM que queremo
 
 ![1768652703900](image/Zimablade2/1768652703900.png)
 
-## KeePass CT
+# KeePass Container LXC
 
-### Config CT
+## Config CT
 
 Creamos un CT con la siguiente configuración.
 
@@ -242,7 +244,7 @@ Para que docker funcionara en el CT tuvimos que pasarle la ruta /dev/net/tun
 
 ![1771247334792](image/Zimablade2/1771247334792.png)
 
-## VaultWarden CT
+## VaultWarden
 
 ### Docker
 
@@ -263,7 +265,7 @@ Una vez lanzado nos pide que usemos HTTPS para esto yo use Nginx Proxy Manager q
 
 Ya con esto accedemos con la URL HTTPs y ya podemos usar vaultwarden sin problemas.
 
-## Portainer CT
+## Portainer
 
 ### Docker
 
@@ -280,7 +282,7 @@ docker run -d \
   portainer/portainer-ce:latest
 ```
 
-## Beszel CT
+## Beszel
 
 ### Docker
 
@@ -307,7 +309,7 @@ Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo pue
 
 ![1771414254217](image/Zimablade2/1771414254217.png)
 
-## Alertas CT
+## Alertas
 
 Para configurar las alertas vamos a usar un Servicio de Chat llamado Gotify, este es compatible y esta implementado en Proxmox por lo que simplemente tendremos que lanzar un docker y conectarlo a nuestro Datacenter.
 
@@ -387,7 +389,7 @@ Y cuando lo restablecemos tambien nos envia una notificacion.
 
 Funciona, ahora la idea es hacer esto pero con todos los servicios que tenemos corriendo.
 
-## N8N Automatizaciones CT
+## N8N
 
 ### Docker
 
@@ -457,7 +459,6 @@ Voy a integrar una IA local para clasificar respuestas por lo que voy a usar Oll
 ```
 docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
-
 
 ```
 curl -fsSL https://ollama.com/install.sh | sh
@@ -532,3 +533,63 @@ return [{ json: { ...($json), frase } }];
 ```
 
 ![1772895533394](image/Zimablade2/1772895533394.png)
+
+## UpSnap
+
+Quiero ser capaz de poder apagar o encender los diferentes dispositivos de mi Homelab dese cualquier lado para esto vamos a configurar una Wake On LAN, aqui es donde entra este servicio UpSnap. Con este servicio vamos a poder configurar el apagado y encendido de nuestros servidores, ordenadores, etc...
+
+### Docker
+
+Vamos a levantar este servicio con Docker-Compose como usando el docker-compose de ejemplo.
+
+```
+services:
+  upsnap:
+    container_name: upsnap
+    image: ghcr.io/seriousm4x/upsnap:5
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/pb_data
+    environment:                          # ← indentación corregida (estaba con 5 espacios extra)
+      - TZ=Europe/Madrid
+      - UPSNAP_HTTP_LISTEN=0.0.0.0:8090  # ← cambiado de 127.0.0.1 a 0.0.0.0
+      - UPSNAP_INTERVAL=*/10 * * * * *
+      - UPSNAP_SCAN_RANGE=192.168.1.0/24
+      - UPSNAP_SCAN_TIMEOUT=500ms
+      - UPSNAP_PING_PRIVILEGED=true
+      - UPSNAP_WEBSITE_TITLE=HOMELAB
+    entrypoint: /bin/sh -c "apk update && apk add --no-cache openssh-client && rm -rf /var/cache/apk/* && ./upsnap serve"
+```
+
+Ahora creamos el docker-compose.yml y lo levantamos
+
+```
+docker-compose up -d
+```
+
+Una vez levantado con `docker ps` podemos ver si se levanto bien o mal, si se lavanto bien ya podemos acceder a la web.
+
+```
+http://IP_DE_TU_SERVIDOR:8090
+```
+
+![1773232600332](image/Zimablade2/1773232600332.png)
+
+### Configuración
+
+Ahora seguimos los pasos para configurar la cuenta esto no tiene mucha complicacion es crear una cuenta de inicio de sesion.
+
+Vamos a añadir nuestro primer dispositivo, con este servicio tenemos dos opciones hacer un escaneo de nuestra red local en el rango que le digamos o rellenar los datos de forma manual, yo en mi caso voy a escanear mi red local y añadir los dispositivos que yo quiera.
+
+![1773233284535](image/Zimablade2/1773233284535.png)
+
+Una vez los añadimos ya los tenemos y los podemos editar.
+
+![1773233372028](image/Zimablade2/1773233372028.png)
+
+Es importante ahora aclarar que esto es el ultimo paso primero dentro de cada dispositivo que quieras añadir para usar Wake On LAN tienes que configurarlo previamente, normalmente esto se basa en activar la Wake On LAN en la BIOS del sistema de cada equipo, por lo que si solo haces esto no te funcionara.
+
+En mi caso la Raspberry Pi no permite wake on lan por como funciona pero si le puedo configurar el apagado.
+
+![1773235424380](image/Zimablade2/1773235424380.png)
