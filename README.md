@@ -126,6 +126,7 @@ Datacenter (Alta Disponibilidad)
 | Portainer             | Gestión Docker       |
 | Beszel                | Monitorización       |
 | Uptime Kuma           | Monitorización       |
+| UpSnap                | WakeOnLAN             |
 
 ---
 
