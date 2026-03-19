@@ -309,6 +309,30 @@ Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo pue
 
 ![1771414254217](image/Zimablade2/1771414254217.png)
 
+### Notificaciones
+
+Vamos a configurar que envie las notificaciones a Gotify, para esto necesitamos una URL HTTPS por lo que vamos a configurar una con tailscales.
+
+```
+tailscale serve --bg --https=443 http://127.0.0.1:8081
+```
+
+Esto nos dara una URL tipo
+
+```
+https://tu-maquina.ts.net
+```
+
+Con esto ya podemos usar esta url para que envie las notificaciones, utilizamos el formato de ejemplo que nos proporciona beszel y lo cambiamos con nuestros datos.
+
+```
+gotify://gotify.example.com:443/AzyoeNS.D4iJLVa/?priority=1
+```
+
+![1773929277185](image/Zimablade2/1773929277185.png)
+
+Una vez añadida con nuestra url concreta ya deberia de mandar todas las notificaciones.
+
 ## Alertas
 
 Para configurar las alertas vamos a usar un Servicio de Chat llamado Gotify, este es compatible y esta implementado en Proxmox por lo que simplemente tendremos que lanzar un docker y conectarlo a nuestro Datacenter.
