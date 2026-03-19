@@ -534,6 +534,18 @@ return [{ json: { ...($json), frase } }];
 
 ![1772895533394](image/Zimablade2/1772895533394.png)
 
+Ahora para que yo pueda saber si se la tomo o no sin que ella me tenga que avisar voy a configurar un bot de telegram para que me envie por telegram el mensaje que ella le envie a mi bot de Whatsapp. *PD: no voy a explicar como se cree el bot de telegram ya que es algo que es muy sencillo de hacer y puedes buscar tu mismo en Youtube*
+
+![1773926246775](image/Zimablade2/1773926246775.png)
+
+El flujo quedaria asi ahora hay que configurar dentro del modulo de telegram el access token del Bot y añadir tu chat ID
+
+![1773926322620](image/Zimablade2/1773926322620.png)
+
+![1773926356680](image/Zimablade2/1773926356680.png)
+
+Con todo esto ya podemos probar y ver que funciona el bot y envia el mensaje a telegram, debo aclarar que opte por esta opción ya que tengo problemas con el bot de Whatsapp y si no le respondes cada cierto tiempo te deja de enviar los mensajes, es como si entrara en modo suspensión.
+
 ## UpSnap
 
 Quiero ser capaz de poder apagar o encender los diferentes dispositivos de mi Homelab dese cualquier lado para esto vamos a configurar una Wake On LAN, aqui es donde entra este servicio UpSnap. Con este servicio vamos a poder configurar el apagado y encendido de nuestros servidores, ordenadores, etc...
