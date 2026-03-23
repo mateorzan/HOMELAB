@@ -570,6 +570,14 @@ El flujo quedaria asi ahora hay que configurar dentro del modulo de telegram el 
 
 Con todo esto ya podemos probar y ver que funciona el bot y envia el mensaje a telegram, debo aclarar que opte por esta opción ya que tengo problemas con el bot de Whatsapp y si no le respondes cada cierto tiempo te deja de enviar los mensajes, es como si entrara en modo suspensión.
 
+###### Mejoras
+
+Aquí voy a ir documentando todas las mejoras y actualizaciones de mi flujo, asi tengo un histórico de como lo fui mejorando.
+
+![1774272801236](image/Zimablade2/1774272801236.png)
+
+Mejore bastante el flujo y le añadí nuevas funcionaliadades en resuemen el flujo ahora te permite consultar cuantos días llevas tomando la medicación desde la última vez que te bajo todo a través de comandos de texto por Whatsapp, esto lo va almacenando en una base de datos con la que hace las consultas.
+
 ## UpSnap
 
 Quiero ser capaz de poder apagar o encender los diferentes dispositivos de mi Homelab dese cualquier lado para esto vamos a configurar una Wake On LAN, aqui es donde entra este servicio UpSnap. Con este servicio vamos a poder configurar el apagado y encendido de nuestros servidores, ordenadores, etc...
