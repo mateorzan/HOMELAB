@@ -60,7 +60,7 @@ Arrancamos y instalamos proxmox.
 
 > Una vez iniciado nos dara una url que podremos usar para conectarnos a nuestro proxmox VE y ya estaria configurado.
 
-### Unimos el proxmox al nodo de nuestro HOMELAB
+### Unimos el proxmox al nodo de nuestro HOMELAB (Deprecated)
 
 Desde las opciones del Datacenter de nuestro HOMELAB en cluester copiamos la informacion de union.
 

@@ -95,7 +95,7 @@ Una vez instalado vamos a correr un modelo ligero, vamos a probar con LFM2.5.
 ollama run lfm2.5-thinking
 ```
 
-Una vez instalado el modelo y que vemos que funciona bien vamos a instalar un chat para poder usar el modelo comodamente, en mi caso elegi Open-webui(https://github.com/open-webui/open-webui).
+Una vez instalado el modelo y que vemos que funciona bien vamos a instalar un chat para poder usar el modelo comodamente, en mi caso elegi Open-webui(<https://github.com/open-webui/open-webui>).
 
 Para usar este chat necesitamos tener Docker instalado.
 
@@ -155,3 +155,7 @@ Instalamos OpenClaw con el siguiente comando.
 ```
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
+
+Una vez instalado configuramos y añadimos un proveedor de IA en mi caso estoy usando codex, no voy a explicar como hice esto ya que es algo que me puede comprometer, pero actualmente tengo codex conectado a mi OpenClaw y me comunico con el a traves de un bot de telegram.
+
+Con este servicio actualmente me encuentro haciendo pruebas pero no tengo nada corriendo lo uso mas como un asistente ya que ahora mismo uso la raspberry como herramienta de monitorización de el resto de mis maquinas virtuales y servicios.

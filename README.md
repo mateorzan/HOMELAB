@@ -1,6 +1,6 @@
 # 🏠 HOMELAB INFRASTRUCTURE PROJECT
 
-### 🚀 High Availability Cluster with ZimaBlade & Raspberry Pi
+## 🚀 High Availability Cluster with ZimaBlade & Raspberry Pi
 
 <p align="center">
 
@@ -9,13 +9,13 @@
 [![VPN](https://img.shields.io/badge/Network-Tailscale-000000?style=for-the-badge&logo=tailscale&logoColor=white)](https://tailscale.com/)
 [![Backups](https://img.shields.io/badge/Backups-Proxmox%20Backup%20Server-009688?style=for-the-badge&logo=proxmox&logoColor=white)](https://www.proxmox.com/en/proxmox-backup-server)
 [![ARM Node](https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.raspberrypi.com/products/raspberry-pi-5/)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)](#)
+[![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)]()
 
 </p>
 
 ---
 
-# 📖 Descripción
+## 📖 Descripción
 
 En este repositorio voy a explicar como yo configure mi actual homelab, compartire algunos archivos de configuracion que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
 
@@ -30,9 +30,9 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ---
 
-# 🏗️ Arquitectura General
+## 🏗️ Arquitectura General
 
-## 🔹 Diagrama de Infraestructura
+### 🔹 Diagrama de Infraestructura
 
 ```mermaid
 graph TD
@@ -46,7 +46,7 @@ graph TD
         ProxmoxCluster --> Nodo2[ZimaBlade2 PVE2]
         Nodo1 --> CasaOS
         Nodo2 --> PBS[Backup Server]
-	Nodo2 --> CT_Keepas
+ Nodo2 --> CT_Keepas
     end
 
     RaspberryPi --> IA[Servicios IA]
@@ -54,9 +54,9 @@ graph TD
 
 ---
 
-## 🔹 Estructura Actual
+### 🔹 Estructura Actual
 
-```
+``` text
 Datacenter (Proxmox Cluster)
 │
 ├── pve     → zimablade1 (Nodo 1 - Servicios)
@@ -68,9 +68,9 @@ Datacenter (Proxmox Cluster)
 
 ---
 
-## 🎯 Estructura Objetivo
+### 🎯 Estructura Objetivo
 
-```
+``` text
 Datacenter (Alta Disponibilidad)
 │
 ├── Nodo 1 → Servicios principales
@@ -82,30 +82,30 @@ Datacenter (Alta Disponibilidad)
 
 ---
 
-# 🧠 Arquitectura Técnica
+## 🧠 Arquitectura Técnica
 
-## 🔹 Virtualización
+### 🔹 Virtualización
 
 - Cluster basado en Proxmox VE
 - Contenedores LXC para servicios ligeros
 - Máquinas virtuales para servicios críticos
 - Snapshots periódicos
 
-## 🔹 Backups
+### 🔹 Backups
 
 - Backups incrementales diarios
 - Deduplicación
 - Compresión
 - Replicación entre nodos
 
-## 🔹 Red
+### 🔹 Red
 
 - VPN Mesh privada
 - Acceso remoto seguro
 - Servicios expuestos mediante proxy inverso
 - Certificados SSL
 
-## 🔹 Orquestación
+### 🔹 Orquestación
 
 - Gestión manual estructurada
 - Evaluación futura de Kubernetes
@@ -113,44 +113,44 @@ Datacenter (Alta Disponibilidad)
 
 ---
 
-# 📊 Servicios Activos
+## 📊 Servicios Activos
 
-## 🔹 Infraestructura
+### 🔹 Infraestructura
 
 | Servicio              | Función              |
-| --------------------- | --------------------- |
+| --------------------- | ---------------------|
 | Proxmox VE            | Virtualización       |
-| Proxmox Backup Server | Backups               |
+| Proxmox Backup Server | Backups              |
 | CasaOS                | Gestión de servicios |
-| Tailscale             | VPN privada           |
+| Tailscale             | VPN privada          |
 | Portainer             | Gestión Docker       |
 | Beszel                | Monitorización       |
 | Uptime Kuma           | Monitorización       |
-| UpSnap                | WakeOnLAN             |
+| UpSnap                | WakeOnLAN            |
 
 ---
 
-## 🔹 Servicios Usuario
+### 🔹 Servicios Usuario
 
-| Servicio            | Función                   |
+| Servicio            | Función                    |
 | ------------------- | -------------------------- |
 | NextCloud           | Almacenamiento Cloud Local |
 | Jellyfin            | Servicio Multimedia        |
 | Nginx Proxy Manager | Proxy inverso              |
-| Radarr              | Gestión Películas        |
-| Sonar               | Gestión Series            |
+| Radarr              | Gestión Películas          |
+| Sonar               | Gestión Series             |
 | Prowlar             | Indexer Torrent            |
 | Deluge              | Cliente Torrent            |
-| Downtify            | Música                    |
-| Sure                | Gestión de gastos         |
-| Ddns-Updater        | Actualización IP pública |
-| VaultWarden         | Gestor de contraseñas     |
+| Downtify            | Música                     |
+| Sure                | Gestión de gastos          |
+| Ddns-Updater        | Actualización IP pública   |
+| VaultWarden         | Gestor de contraseñas      |
 | Gotify              | Chat de alertas            |
 | N8N                 | Automatizacion             |
 
 ---
 
-# 📈 Métricas de Infraestructura
+## 📈 Métricas de Infraestructura
 
 *(Sección preparada para actualizar con métricas reales)*
 
@@ -162,9 +162,9 @@ Datacenter (Alta Disponibilidad)
 
 ---
 
-# 🛣️ Roadmap Técnico
+## 🛣️ Roadmap Técnico
 
-## Infraestructura
+### Infraestructura
 
 - [X] Migración a Proxmox
 - [X] Implementación de PBS
@@ -173,13 +173,13 @@ Datacenter (Alta Disponibilidad)
 - [ ] Añadir nodo para quorum
 - [ ] Migración a almacenamiento SSD
 
-## Automatización
+### Automatización
 
 - [X] Backups automáticos verificados
 - [X] Alertas por caída de servicios
 - [ ] CI/CD para despliegues
 
-## IA (Raspberry Pi 5)
+### IA (Raspberry Pi 5)
 
 - [ ] Servidor IA local Asistente
 - [ ] Automatización inteligente
@@ -187,9 +187,9 @@ Datacenter (Alta Disponibilidad)
 
 ---
 
-# 🧪 Evolución del Proyecto
+## 🧪 Evolución del Proyecto
 
-## 🏗 Fase Inicial
+### 🏗 Fase Inicial
 
 Una raspberry Pi5 con CasaOS instalado localmente con diferentes servicios creados a traves de CasaOS:
 
@@ -204,7 +204,7 @@ Una raspberry Pi5 con CasaOS instalado localmente con diferentes servicios cread
 
 ---
 
-# 🎯 Objetivo Final
+## 🎯 Objetivo Final
 
 Crear una red de nodos de alta disponibilidad y respaldada, este proyecto es muy ambicioso y aun no se el alcance de este mismo, probablemente ira a mas, ire actualizando con las novedades este Readme.
 
@@ -217,7 +217,7 @@ Este proyecto funciona como:
 
 ---
 
-# 👨‍💻 Autor
+## 👨‍💻 Autor
 
 Proyecto desarrollado como laboratorio personal de infraestructura, virtualización y servicios autoalojados.
 
