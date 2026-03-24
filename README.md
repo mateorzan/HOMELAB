@@ -17,7 +17,7 @@
 
 ## 📖 Descripción
 
-En este repositorio voy a explicar como yo configure mi actual homelab, compartire algunos archivos de configuracion que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
+En este repositorio voy a explicar como yo configure mi actual homelab, compartiré algunos archivos de configuración que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
 
 Este proyecto tiene como objetivo construir una infraestructura doméstica orientada a:
 
@@ -41,7 +41,7 @@ graph TD
     Tailscale --> ProxmoxCluster
     Tailscale --> RaspberryPi
 
-    subgraph Datacenter
+    subgraph DataCenter
         ProxmoxCluster --> Nodo1[ZimaBlade1 PVE]
         ProxmoxCluster --> Nodo2[ZimaBlade2 PVE2]
         Nodo1 --> CasaOS
@@ -57,10 +57,10 @@ graph TD
 ### 🔹 Estructura Actual
 
 ``` text
-Datacenter (Proxmox Cluster)
+DataCenter (Proxmox Cluster)
 │
 ├── pve     → zimablade1 (Nodo 1 - Servicios)
-├── pve2    → zimablade2 (Nodo 2 - Backup / Replicacion / Servicios)
+├── pve2    → zimablade2 (Nodo 2 - Backup / Replicación / Servicios)
 │
 └── Raspberry Pi 5
     └── Servidor independiente corriendo servicios de IA
@@ -71,7 +71,7 @@ Datacenter (Proxmox Cluster)
 ### 🎯 Estructura Objetivo
 
 ``` text
-Datacenter (Alta Disponibilidad)
+DataCenter (Alta Disponibilidad)
 │
 ├── Nodo 1 → Servicios principales
 ├── Nodo 2 → Replicación + Backups
@@ -84,7 +84,7 @@ Datacenter (Alta Disponibilidad)
 
 ## 🧠 Arquitectura Técnica
 
-### 🔹 Virtualización
+### 🔹 Virtualizacion
 
 - Cluster basado en Proxmox VE
 - Contenedores LXC para servicios ligeros
@@ -146,7 +146,7 @@ Datacenter (Alta Disponibilidad)
 | Ddns-Updater        | Actualización IP pública   |
 | VaultWarden         | Gestor de contraseñas      |
 | Gotify              | Chat de alertas            |
-| N8N                 | Automatizacion             |
+| N8N                 | Automatización             |
 
 ---
 
