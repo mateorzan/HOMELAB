@@ -254,18 +254,47 @@ Una vez desmontado retiramos el SSD externo y reiniciamos la VM ahora debería d
 
 ## LXC Network-Services
 
-Creamos esta LXC para descentralizar los servicios encargados de la exposicion de ciertos servicios y asi sean mas accesibles y replicables el proceso de migracion de estos servicios esta explicado en Migration.md de este Repositorio. Con esto vamos a aprovechar esta LXC para ademas crear un dashboard para poder ver que servicios hay en todo mi servidor y tener una vista general.
+Creamos esta LXC para descentralizar los servicios encargados de la exposición de ciertos servicios y asi sean mas accesibles y replicables el proceso de migración de estos servicios esta explicado en Migration.md de este Repositorio. Con esto vamos a aprovechar esta LXC para ademas crear un dashboard para poder ver que servicios hay en todo mi servidor y tener una vista general.
 
 ### Glance
 
-Como dashboard elegí [Glance](https://github.com/glanceapp/glance?tab=readme-ov-file#installation) ya que me gusta su estetica y sus funcionalidades, aunque no es un dashboard facil de configurar. Vamos a seguir la instalacion recomendad a traves de docker compose.
+Como dashboard elegí [Glance](https://github.com/glanceapp/glance?tab=readme-ov-file#installation) ya que me gusta su estética y sus funcionalidades, aunque no es un dashboard fácil de configurar. Vamos a seguir la instalación recomendad a traves de docker compose.
 
-```
+``` bash
 mkdir glance && cd glance && curl -sL https://github.com/glanceapp/docker-compose-template/archive/refs/heads/main.tar.gz | tar -xzf - --strip-components 2
 ```
 
 Una vez instalado lanzamos el contenedor con docker compose.
 
-```
+``` bash
 docker compose up -d
+```
+
+Una vez lo tenemos corriendo podemos configurar a nuestra manera dentro de la carpeta `./glance/config/` ahi tenemos dos archivos que vienen ya con configuraciones de ejemplo `/home` es la pagina inicial y `glance` en la configuración del dashboard en general.
+
+Yo borre esta configuración y cree la mia propia aunque aun sigue en proceso de construcción.
+
+![1775650674189](image/Zimablade1/1775650674189.png)
+
+Para acceder al dashboard es desde la url que hayas configurado en tu docker-compose, por ejemplo `http://192.168.1.xx:8080/`
+
+La configuración de server stats lo hice tanto usando el binaria como usando el docker-compose.yml para obtener las métricas de los contenedores.
+
+``` bash
+services:
+  glance-agent:
+    container_name: glance-agent
+    image: glanceapp/agent:latest
+    restart: unless-stopped
+    # environment:
+      # TOKEN: your_auth_token_here
+    volumes:
+      - /:/host:ro
+      - /proc:/proc:ro
+      - /sys:/sys:ro
+      - /dev:/dev:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+    ports:
+      - "27973:27973"
 ```
