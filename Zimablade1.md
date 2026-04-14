@@ -52,11 +52,11 @@ Una vez iniciado nos saldrá el menu de instalación en nuestro caso seleccionar
 
 Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalación para que inicie con el disco con el que hicimos la instalación. Ahora nos pedirá meternos en la web para hacer la instalación inicial.
 
-## Configuración
+## Configuración VM
 
 Una vez instalado Proxmox nos da una URL con la cual tenemos todo el panel de administración de el servidor.
 
-``` text
+```text
 https://192.168.1.47:8006/
 ```
 
@@ -84,19 +84,19 @@ Primero antes de hacer nada añadimos los equipos a Tailscale que es una VPN gra
 
 ### Tailscale
 
-``` bash
+```bash
 curl -fsSL https://tailscale.com/install.sh | sh
 ```
 
 Instalamos Tailscale.
 
-``` bash
+```bash
 sudo tailscale up
 ```
 
 Activamos Tailscale y seguimos las indicaciones par vincularlo.
 
-``` bash
+```bash
 tailscale status
 ```
 
@@ -144,7 +144,7 @@ Con todo esto ya tenemos nuestra VM con Ubuntu24 para crear nuestro CasaOS, la c
 
 Usar IP local fija en todos los servidores, ejemplo de como configurar en los Zimablades, cada equipo tiene su forma. También vamos a cambiar el hostname para identificarlo mejor y la contraseña del usuario por defecto.
 
-``` bash
+```bash
 hostnamectl
 sudo hostnamectl set-hostname NUEVO_NOMBRE
 sudo nano /etc/hosts
@@ -155,7 +155,7 @@ sudo reboot
 
 Cambio de IP a IP fija.
 
-``` bash
+```bash
 sudo nmtui
 ```
 
@@ -167,7 +167,7 @@ Una vez creada nuestra VM vamos a crear nuestro servidor CasaOS en esta guía no
 
 Instalamos Casaos con el comando de instalación.
 
-``` bash
+```bash
 curl -fsSL https://get.casaos.io | sudo bash
 ```
 
@@ -177,33 +177,33 @@ Procedemos a copiar lo configuración de nuestro CasaOS de la raspberry Pi a est
 
 Ahora vamos a montar el disco y realizar el copiado con los siguientes comandos.
 
-``` bash
+```bash
 lsblk
 ```
 
 Mostramos los discos y vemos que el disco externo esta montado
 
-``` bash
+```bash
 sudo mkdir -p /mnt/rpi
 sudo mount /dev/sdb2 /mnt/rpi
 ```
 
 Creamos la ruta para montar el disco externo y lo montamos en /mnt/rpi
 
-``` bash
+```bash
 lsblk -f
 ```
 
 Si da error puedes ver mas información de los discos aquí.
 
-``` bash
+```bash
 sudo systemctl stop casaos
 sudo systemctl stop docker
 ```
 
 Paramos tanto docker como casaos para poder hacer el copiado.
 
-``` bash
+```bash
 sudo lvdisplay
 
 sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
@@ -215,7 +215,7 @@ df -h
 
 Antes de copiar vamos a extender el almacenamiento para que nos entre todo
 
-``` bash
+```bash
 sudo rsync -avh --progress /mnt/rpi/DATA/ /DATA/
 sudo rsync -avh /mnt/rpi/var/lib/casaos/ /var/lib/casaos/
 sudo rsync -avh /mnt/rpi/etc/casaos/ /etc/casaos/
@@ -224,7 +224,7 @@ sudo rsync -avh /mnt/rpi/srv/lsio/ /srv/lsio/
 
 Hacemos el copiado de la carpetas de configuración y DATA del disco externo a la carpeta data del Zimablade1, copiamos esta carpeta ya que es la que contiene todos los datos y las configuraciones de los servicios el propio CasaOS no nos interesa ya que ya lo tenemos creado.
 
-``` bash
+```bash
 sudo chown -R root:root /DATA
 sudo chown -R root:root /var/lib/casaos
 sudo chown -R root:root /etc/casaos
@@ -233,7 +233,7 @@ sudo chown -R root:root /srv/lsio/
 
 Le damos permisos de root a la carpeta por si acaso.
 
-``` bash
+```bash
 sudo systemctl start docker
 sudo systemctl start casaos
 ```
@@ -242,7 +242,7 @@ Una vez todo funciono bien iniciamos Docker y CasaOS.
 
 Desmontamos disco SSD externo
 
-``` bash
+```bash
 sudo lsof +D /mnt/rpi 2>/dev/null
 
 sudo umount /mnt/rpi
@@ -251,3 +251,50 @@ lsblk
 ```
 
 Una vez desmontado retiramos el SSD externo y reiniciamos la VM ahora debería de arrancar bien con el HDD.
+
+## LXC Network-Services
+
+Creamos esta LXC para descentralizar los servicios encargados de la exposición de ciertos servicios y asi sean mas accesibles y replicables el proceso de migración de estos servicios esta explicado en Migration.md de este Repositorio. Con esto vamos a aprovechar esta LXC para ademas crear un dashboard para poder ver que servicios hay en todo mi servidor y tener una vista general.
+
+### Glance
+
+Como dashboard elegí [Glance](https://github.com/glanceapp/glance?tab=readme-ov-file#installation) ya que me gusta su estética y sus funcionalidades, aunque no es un dashboard fácil de configurar. Vamos a seguir la instalación recomendad a traves de docker compose.
+
+``` bash
+mkdir glance && cd glance && curl -sL https://github.com/glanceapp/docker-compose-template/archive/refs/heads/main.tar.gz | tar -xzf - --strip-components 2
+```
+
+Una vez instalado lanzamos el contenedor con docker compose.
+
+``` bash
+docker compose up -d
+```
+
+Una vez lo tenemos corriendo podemos configurar a nuestra manera dentro de la carpeta `./glance/config/` ahi tenemos dos archivos que vienen ya con configuraciones de ejemplo `/home` es la pagina inicial y `glance` en la configuración del dashboard en general.
+
+Yo borre esta configuración y cree la mia propia aunque aun sigue en proceso de construcción.
+
+![1775650674189](image/Zimablade1/1775650674189.png)
+
+Para acceder al dashboard es desde la url que hayas configurado en tu docker-compose, por ejemplo `http://192.168.1.xx:8080/`
+
+La configuración de server stats lo hice tanto usando el binaria como usando el docker-compose.yml para obtener las métricas de los contenedores.
+
+``` bash
+services:
+  glance-agent:
+    container_name: glance-agent
+    image: glanceapp/agent:latest
+    restart: unless-stopped
+    # environment:
+      # TOKEN: your_auth_token_here
+    volumes:
+      - /:/host:ro
+      - /proc:/proc:ro
+      - /sys:/sys:ro
+      - /dev:/dev:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+    ports:
+      - "27973:27973"
+```
