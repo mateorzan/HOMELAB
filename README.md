@@ -56,7 +56,7 @@ graph TD
 
 ### 🔹 Estructura Actual
 
-``` text
+```text
 DataCenter (Proxmox Cluster)
 │
 ├── pve     → zimablade1 (Nodo 1 - Servicios)
@@ -70,7 +70,7 @@ DataCenter (Proxmox Cluster)
 
 ### 🎯 Estructura Objetivo
 
-``` text
+```text
 DataCenter (Alta Disponibilidad)
 │
 ├── Nodo 1 → Servicios principales
@@ -118,35 +118,35 @@ DataCenter (Alta Disponibilidad)
 ### 🔹 Infraestructura
 
 | Servicio              | Función              |
-| --------------------- | ---------------------|
+| --------------------- | --------------------- |
 | Proxmox VE            | Virtualización       |
-| Proxmox Backup Server | Backups              |
+| Proxmox Backup Server | Backups               |
 | CasaOS                | Gestión de servicios |
-| Tailscale             | VPN privada          |
+| Tailscale             | VPN privada           |
 | Portainer             | Gestión Docker       |
 | Beszel                | Monitorización       |
 | Uptime Kuma           | Monitorización       |
-| UpSnap                | WakeOnLAN            |
+| UpSnap                | WakeOnLAN             |
 
 ---
 
 ### 🔹 Servicios Usuario
 
-| Servicio            | Función                    |
+| Servicio            | Función                   |
 | ------------------- | -------------------------- |
 | NextCloud           | Almacenamiento Cloud Local |
 | Jellyfin            | Servicio Multimedia        |
 | Nginx Proxy Manager | Proxy inverso              |
-| Radarr              | Gestión Películas          |
-| Sonar               | Gestión Series             |
+| Radarr              | Gestión Películas        |
+| Sonar               | Gestión Series            |
 | Prowlar             | Indexer Torrent            |
 | Deluge              | Cliente Torrent            |
-| Downtify            | Música                     |
-| Sure                | Gestión de gastos          |
-| Ddns-Updater        | Actualización IP pública   |
-| VaultWarden         | Gestor de contraseñas      |
+| Downtify            | Música                    |
+| Sure                | Gestión de gastos         |
+| Ddns-Updater        | Actualización IP pública |
+| VaultWarden         | Gestor de contraseñas     |
 | Gotify              | Chat de alertas            |
-| N8N                 | Automatización             |
+| N8N                 | Automatización            |
 
 ---
 
