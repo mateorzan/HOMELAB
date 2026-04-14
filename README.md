@@ -17,7 +17,7 @@
 
 ## 📖 Descripción
 
-En este repositorio voy a explicar como yo configure mi actual homelab, compartiré algunos archivos de configuración que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
+En este repositorio voy a explicar como yo configure mi actual Homelab, compartiré algunos archivos de configuración que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
 
 Este proyecto tiene como objetivo construir una infraestructura doméstica orientada a:
 
@@ -45,8 +45,9 @@ graph TD
         ProxmoxCluster --> Nodo1[ZimaBlade1 PVE]
         ProxmoxCluster --> Nodo2[ZimaBlade2 PVE2]
         Nodo1 --> CasaOS
+        Nodo1 --> Network-Services
         Nodo2 --> PBS[Backup Server]
- Nodo2 --> CT_Keepas
+        Nodo2 --> Keepas
     end
 
     RaspberryPi --> IA[Servicios IA]
@@ -56,7 +57,7 @@ graph TD
 
 ### 🔹 Estructura Actual
 
-``` text
+```text
 DataCenter (Proxmox Cluster)
 │
 ├── pve     → zimablade1 (Nodo 1 - Servicios)
@@ -70,7 +71,7 @@ DataCenter (Proxmox Cluster)
 
 ### 🎯 Estructura Objetivo
 
-``` text
+```text
 DataCenter (Alta Disponibilidad)
 │
 ├── Nodo 1 → Servicios principales
@@ -118,35 +119,36 @@ DataCenter (Alta Disponibilidad)
 ### 🔹 Infraestructura
 
 | Servicio              | Función              |
-| --------------------- | ---------------------|
+| --------------------- | --------------------- |
 | Proxmox VE            | Virtualización       |
-| Proxmox Backup Server | Backups              |
+| Proxmox Backup Server | Backups               |
 | CasaOS                | Gestión de servicios |
-| Tailscale             | VPN privada          |
+| Tailscale             | VPN privada           |
 | Portainer             | Gestión Docker       |
 | Beszel                | Monitorización       |
 | Uptime Kuma           | Monitorización       |
-| UpSnap                | WakeOnLAN            |
+| UpSnap                | WakeOnLAN             |
+| Glance                | Dashboard             |
 
 ---
 
 ### 🔹 Servicios Usuario
 
-| Servicio            | Función                    |
+| Servicio            | Función                   |
 | ------------------- | -------------------------- |
 | NextCloud           | Almacenamiento Cloud Local |
 | Jellyfin            | Servicio Multimedia        |
 | Nginx Proxy Manager | Proxy inverso              |
-| Radarr              | Gestión Películas          |
-| Sonar               | Gestión Series             |
+| Radarr              | Gestión Películas        |
+| Sonar               | Gestión Series            |
 | Prowlar             | Indexer Torrent            |
 | Deluge              | Cliente Torrent            |
-| Downtify            | Música                     |
-| Sure                | Gestión de gastos          |
-| Ddns-Updater        | Actualización IP pública   |
-| VaultWarden         | Gestor de contraseñas      |
+| Downtify            | Música                    |
+| Sure                | Gestión de gastos         |
+| Ddns-Updater        | Actualización IP pública |
+| VaultWarden         | Gestor de contraseñas     |
 | Gotify              | Chat de alertas            |
-| N8N                 | Automatización             |
+| N8N                 | Automatización            |
 
 ---
 
@@ -171,7 +173,7 @@ DataCenter (Alta Disponibilidad)
 - [X] Integración VPN privada
 - [X] Monitorización avanzada
 - [ ] Añadir nodo para quorum
-- [ ] Migración a almacenamiento SSD
+- [ ] Migración/Expansión a almacenamiento SSD
 
 ### Automatización
 
@@ -181,6 +183,7 @@ DataCenter (Alta Disponibilidad)
 
 ### IA (Raspberry Pi 5)
 
+- [X] Pantalla de monitorización
 - [ ] Servidor IA local Asistente
 - [ ] Automatización inteligente
 - [ ] Experimentos ML
@@ -222,3 +225,5 @@ Este proyecto funciona como:
 Proyecto desarrollado como laboratorio personal de infraestructura, virtualización y servicios autoalojados.
 
 Infraestructura en evolución constante 🚀
+
+@mateorzan
