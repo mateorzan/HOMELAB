@@ -686,7 +686,7 @@ cp .env.example .env
 cp caddy/Caddyfile.example caddy/Caddyfile
 ```
 
-Yo en mi configuracion voy a comentar el SMTP temporalmente ya que no configure ninguno aun, ademas voy a usar mi NPM que ya tengo configurado con mi dominio para que Ghost lo use por lo que no voy a hacer uso de Caddy. 
+Yo en mi configuracion voy a comentar el SMTP temporalmente ya que no configure ninguno aun, ademas voy a usar mi NPM que ya tengo configurado con mi dominio para que Ghost lo use por lo que no voy a hacer uso de Caddy.
 
 Voy a configurar el compose.yml a mi caso en concreto por lo que todo lo que tengo que ver con caddy lo voy a comentar.
 
@@ -770,3 +770,26 @@ mail__options__port=1025
 mail__options__secure=false
 mail__from="'Tu Blog' <noreply@tusubdominio.duckdns.org>"
 ```
+
+ahora ya tenemos todas las funcionalidades basicas para crear nuestro blog pero nos hace falta que la conexión que hagan los visitantes sea segura por lo que vamos a crear un tunnel de cloudfare.
+
+## Cloudfare
+
+Ahora vamos a configurar un tunnel de Cloudfare para poder acceder a nuestro blog pero desde un dominio personalizado y seguro.
+
+### Requisitos
+
+* Tener un dominio de tu propiedad o comprar uno
+* Tener una cuenta de Cloudfare
+
+Una vez tengas estos requisitos es fácil dese la web de cloudfare con nuestra cuenta iniciada vamos a Zero Trust.
+
+Ahi dentro desde el apartado Networks creamos un tunnel lo nombramos como queramos y lo configuramos segun nuestro entorno, te va a pedir que instales cloudfared en mi caso lo instale en la VM con un docker run.
+
+Una vez todo esto se veria algo asi
+
+![1777303622932](image/Zimablade2/1777303622932.png)
+
+Con esto ya nos podemos meter a nuestro dominio y ver que nos carga nuestro blog
+
+![1777303658444](image/Zimablade2/1777303658444.png)
