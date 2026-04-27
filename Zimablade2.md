@@ -80,7 +80,7 @@ Si todo esta bien nos quedaría algo asi.
 
 Una vez instalado Proxmox nos da una URL con la cual tenemos todo el panel de administración de el servidor.
 
-``` text
+```text
 https://192.168.1.49:8006/
 ```
 
@@ -108,19 +108,19 @@ Una vez actualizado el servidor añadimos el equipos a Tailscale que es una VPN 
 
 ### Tailscale
 
-``` bash
+```bash
 curl -fsSL https://tailscale.com/install.sh | sh
 ```
 
 Instalamos Tailscale.
 
-``` bash
+```bash
 sudo tailscale up
 ```
 
 Activamos Tailscale y seguimos las indicaciones para vincularlo.
 
-``` bash
+```bash
 tailscale status
 ```
 
@@ -194,7 +194,7 @@ Una vez creada la iniciamos y pasamos a la configuración del servidor PBS, esta
 
 Una vez instalado nos metemos a su sitio web.
 
-``` text
+```text
 https://192.168.1.51:8007
 ```
 
@@ -236,7 +236,7 @@ Instalamos Tailscale en el CT, esto lo hacemos desde el panel de admin de la web
 
 URL para instalar docker en Alpine Linux
 
-``` text
+```text
 https://voidnull.es/instalacion-de-docker-en-alpinelinux/
 ```
 
@@ -250,7 +250,7 @@ Para que docker funcionara en el CT tuvimos que pasar la ruta /dev/net/tun
 
 Una vez instalado docker, lanzamos el docker run con el servicio Vaultwarden
 
-``` bash
+```bash
 docker run -d --name vaultwarden \
   -e DOMAIN="http://192.168.1.53:8000" \
   -v /vw-data/:/data/ \
@@ -271,7 +271,7 @@ Ya con esto accedemos con la URL HTTPs y ya podemos usar vaultwarden sin problem
 
 Para instalar este servicio simplemente lanzamos un docker run.
 
-``` bash
+```bash
 docker run -d \
   -p 9000:9443 \
   -p 8001:8001 \
@@ -288,13 +288,13 @@ docker run -d \
 
 Para lanzar este servicio de monitorización seguimos los pasos de este GitHub.
 
-``` text
+```text
 https://beszel.dev/guide/getting-started
 ```
 
 En mi caso voy a lanzarlo con docker run.
 
-``` bash
+```bash
 docker volume create beszel_data && \
 docker run -d \
   --name beszel \
@@ -313,19 +313,19 @@ Luego agregamos el Agente a los servidores que queramos monitorizar, esto lo pue
 
 Vamos a configurar que envié las notificaciones a Gotify, para esto necesitamos una URL HTTPS por lo que vamos a configurar una con Tailscale.
 
-``` bash
+```bash
 tailscale serve --bg --https=443 http://127.0.0.1:8081
 ```
 
 Esto nos dará una URL tipo
 
-``` text
+```text
 https://tu-maquina.ts.net
 ```
 
 Con esto ya podemos usar esta url para que envié las notificaciones, utilizamos el formato de ejemplo que nos proporciona beszel y lo cambiamos con nuestros datos.
 
-``` text
+```text
 gotify://gotify.example.com:443/AzyoeNS.D4iJLVa/?priority=1
 ```
 
@@ -339,7 +339,7 @@ Para configurar las alertas vamos a usar un Servicio de Chat llamado Gotify, est
 
 Docker
 
-``` bash
+```bash
 docker run -d \
   --name gotify \
   --restart unless-stopped \
@@ -377,7 +377,7 @@ Ahora para configurar alertas de nuestros servidores mas especificas como CPU, D
 
 Docker
 
-``` bash
+```bash
 docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data --name uptime-kuma louislam/uptime-kuma:2
 ```
 
@@ -419,7 +419,7 @@ Funciona, ahora la idea es hacer esto pero con todos los servicios que tenemos c
 
 Vamos a crear el contenedor en docker.
 
-``` bash
+```bash
 docker volume create n8n_data
 
 docker run -d \
@@ -480,17 +480,17 @@ Vamos a configurar un workflow para que envié mensajes periódicos a los que se
 
 Voy a integrar una IA local para clasificar respuestas por lo que voy a usar Ollama. Para no saturar este dispositivo voy a correr esta IA local en una Raspberry Pi 5 que tengo, lo puedes hacer instalando directamente ollama o con docker.
 
-``` bash
+```bash
 docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
 ```
 
-``` bash
+```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 Ahora nos vamos a meter en el contenedor y instalar llama3.2
 
-``` bash
+```bash
 docker exec -it ollama bash
 
 ollama run llama3.2
@@ -498,7 +498,7 @@ ollama run llama3.2
 
 Una vez en ollama en mi caso quiero personalizar la IA local para que responda como yo quiero que respondo para esto vamos a crear una IA personalizada a traves de un archivo Modelfile que le va a decir a la IA como tiene que responder.
 
-``` bash
+```bash
 FROM llama3.2
 
 SYSTEM """
@@ -518,7 +518,7 @@ PARAMETER repeat_penalty 1.5
 
 Ahora creamos la IA personalizada y probamos que funciona.
 
-``` bahs
+```bahs
 ollama create pastilla-bot -f ./Modelfile
 ollama run pastilla-bot "si me la tomé"
 ```
@@ -531,7 +531,7 @@ Ahora pasamos al flujo N8N que es el que va a recibir el mensaje y va a mandar l
 
 Vamos a añadir un nodo Code para que genere una lista de respuestas ya que llama3.2 no es muy potente y tiene bastantes alucinaciones.
 
-``` bash
+```bash
 const frasesSi = [
   "Qué responsable 😌",
   "Eres la mejor 🥰",
@@ -586,7 +586,7 @@ Quiero ser capaz de poder apagar o encender los diferentes dispositivos de mi Ho
 
 Vamos a levantar este servicio con Docker-Compose como usando el docker-compose de ejemplo.
 
-``` bash
+```bash
 services:
   upsnap:
     container_name: upsnap
@@ -608,13 +608,13 @@ services:
 
 Ahora creamos el docker-compose.yml y lo levantamos
 
-``` bash
+```bash
 docker-compose up -d
 ```
 
 Una vez levantado con `docker ps` podemos ver si se levanto bien o mal, si se levanto bien ya podemos acceder a la web.
 
-``` text
+```text
 http://IP_DE_TU_SERVIDOR:8090
 ```
 
@@ -637,3 +637,136 @@ Es importante ahora aclarar que esto es el ultimo paso primero dentro de cada di
 En mi caso la Raspberry Pi no permite wake on lan por como funciona pero si le puedo configurar el apagado.
 
 ![1773235424380](image/Zimablade2/1773235424380.png)
+
+# Ghost VM
+
+Aquí vamos a crear una nueva VM el proceso es el mismo que en el resto, esta VM se va a usar para autohospedar nuestra web sobre nuestro Homelab y todos los tutoriales que publiquemos a traves de una newsletter. Usamos una VM ya que docker en las LXC tiene muchas limitaciones y funciona muy mal.
+
+Descargamos la imagen ISO de Ubuntu24.04 desde la web [oficial]('https://releases.ubuntu.com/24.04/?_ga=2.149898549.2084151835.1707729318-1126754318.1683186906&_gl=1*fjkj0i*_gcl_au*MjA3Mzc4NjMzOC4xNzc3Mjg4ODkz'), yo en caso instale la version Server una vez instalada la subimos a proxmox en un storage.
+
+![1777290236812](image/Zimablade2/1777290236812.png)
+
+Con esto ya podemos iniciar la VM y empezar la instalación, en la instalacion se puede configurarar la IP estática tambien configuras el usuario y importante activar el servicio Openssh.
+
+## Requisitos
+
+* Docker y Docker Compose 20.10.13 o mayor
+* Un Dominio con un DNS que apunte a este servidor
+* Un servicio SMTP
+* (Opcional) Cuenta en [TinyBird]('https://www.tinybird.co/')
+
+Como primer paso vamos a iniciar sesión con el usuario y la contraseña que configuraste.
+
+```bash
+apt update && apt upgrade -y
+```
+
+Ahora ya podemos empezar con la instalación de Docker
+
+## Docker
+
+Para instalar docker vamos a seguir la Guía oficial de instalación que es la mejor manera y más segura.
+
+[Instalación Docker]('https://docs.docker.com/engine/install/ubuntu/')
+
+Una vez tenemos Docker y Docker compose ya podemos empezar la instalación de [Ghost]('https://docs.ghost.org/install/docker').
+
+## Ghost
+
+Empezamos instalando el repositorio.
+
+```
+span
+```
+
+Una vez clonado copiamos el archivo de ejemplo y lo configuramos para nuestro caso.
+
+```
+cp .env.example .env
+cp caddy/Caddyfile.example caddy/Caddyfile
+```
+
+Yo en mi configuracion voy a comentar el SMTP temporalmente ya que no configure ninguno aun, ademas voy a usar mi NPM que ya tengo configurado con mi dominio para que Ghost lo use por lo que no voy a hacer uso de Caddy. 
+
+Voy a configurar el compose.yml a mi caso en concreto por lo que todo lo que tengo que ver con caddy lo voy a comentar.
+
+```
+#  caddy:
+#    image: caddy:2.10.2-alpine@sha256:953131cfea8e12bfe1c631a36308e9660e4389f0c3dfb3be957044d3ac92d446
+#    restart: always
+#    ports:
+#      - "${HTTP_PORT:-80}:80"
+#      - "${HTTPS_PORT:-443}:443"
+#    environment:
+#      DOMAIN: ${DOMAIN:?DOMAIN environment variable is required}
+#      ADMIN_DOMAIN: ${ADMIN_DOMAIN:-}
+#      ACTIVITYPUB_TARGET: ${ACTIVITYPUB_TARGET:-https://ap.ghost.org}
+#    volumes:
+#      - ./caddy:/etc/caddy
+#      - caddy_data:/data
+#      - caddy_config:/config
+#    depends_on:
+#      - ghost
+#    networks:
+#      - ghost_network
+
+
+
+# Tambien los volumenes
+
+volumes:
+#  caddy_data:
+#  caddy_config:
+  tinybird_files:
+  tinybird_home:
+  traffic_analytics_data:
+
+```
+
+Tambien el ghost: vamos a añadir el puerto personalizado que le configuramos en el .env justo debajo de restart: always.
+
+```
+ports:
+      - "2368:2368"
+```
+
+Una vez tenemos tanto el compose.yml, como el .env configurados a nuestro gusto podemos ejecutar el contenedor.
+
+```
+docker compose pull
+docker compose up -d
+```
+
+Es útil mirar los logs y ver si esta haciendo las cosas bien o tiene errores.
+
+```
+sudo docker logs ghost-ghost-1 -f
+```
+
+Una vez iniciado puedes acceder a la URL y empezar la configuracion de tu sitio.
+
+```
+https://ghost.micloudm.duckdns.org/ghost/#/setup
+```
+
+Una vez vemos que con esta configuración básica funciona le vamos a configurar un servicio SMTP de prueba para poder iniciar sesion y enviar los primeros correos, en este caso voy a usar MailPit que lo vamos a lanzar junto al compose.yml.
+
+```
+mailpit:
+    image: axllent/mailpit:latest
+    restart: always
+    ports:
+      - "8025:8025"  # Interfaz web para ver los emails
+    networks:
+      - ghost_network
+```
+
+Luego configuramos las credenciales en el .env.
+
+```
+mail__transport=SMTP
+mail__options__host=mailpit
+mail__options__port=1025
+mail__options__secure=false
+mail__from="'Tu Blog' <noreply@tusubdominio.duckdns.org>"
+```
