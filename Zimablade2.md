@@ -686,7 +686,7 @@ cp .env.example .env
 cp caddy/Caddyfile.example caddy/Caddyfile
 ```
 
-Yo en mi configuracion voy a comentar el SMTP temporalmente ya que no configure ninguno aun, ademas voy a usar mi NPM que ya tengo configurado con mi dominio para que Ghost lo use por lo que no voy a hacer uso de Caddy.
+Yo en mi configuracion voy a comentar el SMTP temporalmente ya que no configure ninguno aun, ademas voy a usar Cloudfare que ya tengo configurado con mi dominio para que Ghost lo use por lo que no voy a hacer uso de Caddy.
 
 Voy a configurar el compose.yml a mi caso en concreto por lo que todo lo que tengo que ver con caddy lo voy a comentar.
 
@@ -793,3 +793,29 @@ Una vez todo esto se veria algo asi
 Con esto ya nos podemos meter a nuestro dominio y ver que nos carga nuestro blog
 
 ![1777303658444](image/Zimablade2/1777303658444.png)
+
+Con esto ya tenemos la web funcionando.
+
+## Brevo
+
+Ahora que ya tenemos todo funcional vamos a configurar el servidor SMTP definitivo, en mi caso voy a rpbar con Brevo ya que para empezar tiene un plan gratuito mas generoso y ahora mismo no tengo volumen para tener que usar Mailgun.
+
+Lo primero que hay que hacer es crearse una cuenta gratuita en [Brevo]('https://brevo.com/').
+
+Una vez tenemos la cuenta configurada simplemente tenemos que ir a la configuracion y en el apartado de SMTP y Api crear las claves para luego usarlas en nuestro .env
+
+![1777366842498](image/Zimablade2/1777366842498.png)
+
+Una vez la tienes creada es simplemente ir al .env y configurarlo de la siguiente manera.
+
+```
+mail__transport=SMTP
+mail__options__host=smtp-relay.brevo.com
+mail__options__port=587
+mail__options__secure=false
+mail__options__auth__user=tuemail@smtp-brevo.com
+mail__options__auth__pass=TuClaveSmtpDeBrevo
+mail__from="'Tu Blog' <tuemail@ejemplo.com>"
+```
+
+Con esto ya tenemos todo funcionando yo a mayores voy a añadir esta VM  a mi PBS para que haga Backups diarios de mi servidor por si pasa algo.
