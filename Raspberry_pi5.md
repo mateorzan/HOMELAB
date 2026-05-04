@@ -13,7 +13,7 @@ Este equipo lo vamos a centrar en IA, no es un equipo muy potente para esta tare
 
 Vamos a empezar con la instalación, en este caso vamos a usar el software Raspberry Pi Imager para crear nuestra disco de arranque.
 
-``` text
+```text
 https://www.raspberrypi.com/software/
 ```
 
@@ -37,13 +37,13 @@ Conectamos el disco externo a uno de los USB de nuestra Raspberry Pi y la inicia
 
 Una vez iniciado vamos a la pagina web local de nuestro Router para ver la IP local de nuestra Raspberry Pi y asi poder conectarnos por SSH.
 
-``` text
+```text
 http://192.168.1.1/
 ```
 
 Una vez sabemos la IP nos conectamos con el nombre de usuario (el que configuraste en Raspberry Pi Imager) y la IP local.
 
-``` bash
+```bash
 ssh mateorzan@192.168.1.44
 ```
 
@@ -53,7 +53,7 @@ Con todo esto ya tenemos todo instalado ahora vamos a pasar con la configuració
 
 El primer paso que vamos a hacer es configurar un IP estática, ejecutamos en la terminal el siguiente comando.
 
-``` bash
+```bash
 sudo nmtui
 ```
 
@@ -65,13 +65,13 @@ Con esto ya tenemos la IP estática configurada.
 
 Lo siguiente que vamos a configurar va a ser Tailscale para poder acceder al dispositivo desde fuera de la red local, para ello desde la propia web de Tailscale seleccionamos para añadir un cliente Linux y nos dará el comando de instalación.
 
-``` bash
+```bash
 curl -fsSL https://tailscale.com/install.sh | sh
 ```
 
 Una vez instale nos mandara ejecutar otro comando
 
-``` bash
+```bash
 sudo tailscale up
 ```
 
@@ -85,13 +85,13 @@ Con esto ya tenemos Tailscale instalado y funcionando.
 
 Vamos a probar a correr un modelo de IA local para ver como rinde.
 
-``` bash
+```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 Una vez instalado vamos a correr un modelo ligero, vamos a probar con LFM2.5.
 
-``` bash
+```bash
 ollama run lfm2.5-thinking
 ```
 
@@ -99,7 +99,7 @@ Una vez instalado el modelo y que vemos que funciona bien vamos a instalar un ch
 
 Para usar este chat necesitamos tener Docker instalado.
 
-``` bash
+```bash
 # Add Docker's official GPG key:
 sudo apt update
 sudo apt install ca-certificates curl
@@ -119,32 +119,32 @@ EOF
 sudo apt update
 ```
 
-``` bash
+```bash
 sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 Con este comando comprobamos que se instalo bien.
 
-``` bash
+```bash
 sudo docker run hello-world
 ```
 
 También vamos a comprobar que tengamos Python instalado.
 
-``` bash
+```bash
 sudo apt install python3
 sudo apt install python3-venv python3-pip
 ```
 
 Una vez instalado todo ejecutamos el siguiente comando para ejecutar el contenedor docker.
 
-``` bash
+```bash
 span
 ```
 
 Con el comando `sudo docker ps` podemos ver como esta el contenedor, si esta healthy podemos acceder a el con la IP de la maquina y el puerto 3000
 
-``` text
+```text
 http://192.168.1.52:8080
 ```
 
@@ -152,10 +152,12 @@ http://192.168.1.52:8080
 
 Instalamos OpenClaw con el siguiente comando.
 
-``` bash
+```bash
 curl -fsSL https://openclaw.ai/install.sh | bash
 ```
 
 Una vez instalado configuramos y añadimos un proveedor de IA en mi caso estoy usando codex, no voy a explicar como hice esto ya que es algo que me puede comprometer, pero actualmente tengo codex conectado a mi OpenClaw y me comunico con el a traves de un bot de telegram.
 
 Con este servicio actualmente me encuentro haciendo pruebas pero no tengo nada corriendo lo uso mas como un asistente ya que ahora mismo uso la raspberry como herramienta de monitorización de el resto de mis maquinas virtuales y servicios.
+
+### Opencode

@@ -773,11 +773,11 @@ mail__from="'Tu Blog' <noreply@tusubdominio.duckdns.org>"
 
 ahora ya tenemos todas las funcionalidades basicas para crear nuestro blog pero nos hace falta que la conexión que hagan los visitantes sea segura por lo que vamos a crear un tunnel de cloudfare.
 
-## Cloudfare
+### Cloudfare
 
 Ahora vamos a configurar un tunnel de Cloudfare para poder acceder a nuestro blog pero desde un dominio personalizado y seguro.
 
-### Requisitos
+#### Requisitos
 
 * Tener un dominio de tu propiedad o comprar uno
 * Tener una cuenta de Cloudfare
@@ -796,7 +796,7 @@ Con esto ya nos podemos meter a nuestro dominio y ver que nos carga nuestro blog
 
 Con esto ya tenemos la web funcionando.
 
-## Brevo
+### Brevo
 
 Ahora que ya tenemos todo funcional vamos a configurar el servidor SMTP definitivo, en mi caso voy a rpbar con Brevo ya que para empezar tiene un plan gratuito mas generoso y ahora mismo no tengo volumen para tener que usar Mailgun.
 
