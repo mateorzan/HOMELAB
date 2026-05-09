@@ -299,6 +299,30 @@ services:
       - "27973:27973"
 ```
 
+### Homepage Dashboard
+
+Vamos a crear un Dashboard para nuestro Homelab
+
+#### Docker
+
+Instalación con docker compose.
+
+```
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - 3000:3000
+    volumes:
+      - ./config:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: 192.168.1.55:3000 # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+    restart: unless-stopped
+
+```
+
 ## OPNsense VM
 
 Ya empiezo a tener bastantes servicios y contenedores por lo que le voy a añadir una casa de seguridad más grande a mi red, por ello vamos a instalar un VM con [OPNsense]('https://opnsense.org/#'), un firewall Open-source muy potente.
@@ -361,7 +385,7 @@ Asi es como configure la red IPV4
 
 Una vez tenemos configurada la IP del host ya podemos acceder a la GUI web de OPNsense
 
-![1778065487707](image/Zimablade1/1778065487707.png) 
+![1778065487707](image/Zimablade1/1778065487707.png)
 
 Una vez dentro vamos a ir al wizard y vamos a revisar la configuración básica.
 
