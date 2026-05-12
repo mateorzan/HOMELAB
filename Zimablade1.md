@@ -323,6 +323,38 @@ services:
 
 ```
 
+## Obsidian-remote
+
+Voy a instarlar obsidian para gestionar todo mi servidores desde ahi y tener toda mi informacion bien documentada alli, algo parecido a lo que ya tengo en mi Notion.
+
+### Docker Compose
+
+```
+services:
+  obsidian:
+    image: 'ghcr.io/sytone/obsidian-remote:latest'
+    container_name: obsidian-remote
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+      - 8443:8443
+    volumes:
+      - /home/obsidian/vaults:/vaults
+      - /home/obsidian/config:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - DOCKER_MODS=linuxserver/mods:universal-git
+      - CUSTOM_PORT="8080"
+      - CUSTOM_HTTPS_PORT="8443" 
+      - CUSTOM_USER=""
+      - PASSWORD=""
+      - SUBFOLDER=""
+```
+
+Importante completar las tres ultimas variables.
+
 ## OPNsense VM
 
 Ya empiezo a tener bastantes servicios y contenedores por lo que le voy a añadir una casa de seguridad más grande a mi red, por ello vamos a instalar un VM con [OPNsense]('https://opnsense.org/#'), un firewall Open-source muy potente.
