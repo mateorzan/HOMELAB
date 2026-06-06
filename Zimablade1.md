@@ -52,7 +52,7 @@ Una vez iniciado nos saldrá el menu de instalación en nuestro caso seleccionar
 
 Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalación para que inicie con el disco con el que hicimos la instalación. Ahora nos pedirá meternos en la web para hacer la instalación inicial.
 
-## Configuración VM
+## VM CasaOS
 
 Una vez instalado Proxmox nos da una URL con la cual tenemos todo el panel de administración de el servidor.
 
@@ -252,9 +252,17 @@ lsblk
 
 Una vez desmontado retiramos el SSD externo y reiniciamos la VM ahora debería de arrancar bien con el HDD.
 
-## LXC Network-Services
+## LXC Network-Services / Migrada hacia PVE2
 
 Creamos esta LXC para descentralizar los servicios encargados de la exposición de ciertos servicios y asi sean mas accesibles y replicables el proceso de migración de estos servicios esta explicado en Migration.md de este Repositorio. Con esto vamos a aprovechar esta LXC para ademas crear un dashboard para poder ver que servicios hay en todo mi servidor y tener una vista general.
+
+### Ddns-Updater
+
+Actualiza la IP Pública la cual esta asociada a mi dominio.
+
+### NPM
+
+Gestor de URL públicas proxy, redirecciona las urls hacia los servicios que yo quiero que sean accesibles publicamente.
 
 ### Glance
 
@@ -323,38 +331,6 @@ services:
 
 ```
 
-## Obsidian-remote
-
-Voy a instarlar obsidian para gestionar todo mi servidores desde ahi y tener toda mi informacion bien documentada alli, algo parecido a lo que ya tengo en mi Notion.
-
-### Docker Compose
-
-```
-services:
-  obsidian:
-    image: 'ghcr.io/sytone/obsidian-remote:latest'
-    container_name: obsidian-remote
-    restart: unless-stopped
-    ports:
-      - 8080:8080
-      - 8443:8443
-    volumes:
-      - /home/obsidian/vaults:/vaults
-      - /home/obsidian/config:/config
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Madrid
-      - DOCKER_MODS=linuxserver/mods:universal-git
-      - CUSTOM_PORT="8080"
-      - CUSTOM_HTTPS_PORT="8443" 
-      - CUSTOM_USER=""
-      - PASSWORD=""
-      - SUBFOLDER=""
-```
-
-Importante completar las tres ultimas variables.
-
 ## OPNsense VM
 
 Ya empiezo a tener bastantes servicios y contenedores por lo que le voy a añadir una casa de seguridad más grande a mi red, por ello vamos a instalar un VM con [OPNsense]('https://opnsense.org/#'), un firewall Open-source muy potente.
@@ -422,3 +398,9 @@ Una vez tenemos configurada la IP del host ya podemos acceder a la GUI web de OP
 Una vez dentro vamos a ir al wizard y vamos a revisar la configuración básica.
 
 ![1778066810911](image/Zimablade1/1778066810911.png)
+
+## VM ZimaOS
+
+Migración de CasaOS hacia ZimaOS, evolucion de este sofware con multiples mejoras y soporte actual, ya que casaos ya no recibia actualizaciones ni mejoras. En el apartado de migraciones esta documentado todo el proceso de migración y como consegui mover un disco de 800gb de una VM a otra con sus particularidades, ya que ZimaOS es bastante mas restrictivo que su version antigua CasaOS.
+
+![1780744271486](image/Zimablade1/1780744271486.png)

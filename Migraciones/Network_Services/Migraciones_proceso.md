@@ -1,8 +1,8 @@
-# Migration of Network Services
+# Migración of Network Services
 
 Actualmente tengo diferentes servicios de red como un proxy inverso y otros para gestionar diferentes servicios que necesitan ser accesibles desde fuera de la red o que simplemente necesitan HTTP's. Estos servicios son esenciales ya que sin ellos perderia el acceso a estos servicios por lo que quiero separar estos servicios en un contenedor facil de replicar y de recuperar si mi VM con CasaOS falla por cualquier motivo.
 
-## Process
+## Proceso
 
 Vamos a crear una LXC con Ubuntu24.04 ya que es el mas compatible y completo, la vamos a crear con la siguiente configuración.
 

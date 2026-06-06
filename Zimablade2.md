@@ -819,3 +819,7 @@ mail__from="'Tu Blog' <tuemail@ejemplo.com>"
 ```
 
 Con esto ya tenemos todo funcionando yo a mayores voy a añadir esta VM  a mi PBS para que haga Backups diarios de mi servidor por si pasa algo.
+
+## Network-Services
+
+Migre el servidor de mi PVE hacia mi PVE2 ya que con mi VM con ZimaOS mi PVE ya tiene mucha carga y mi PVE2 tiene menos carga, use la herramienta que viene integrada en Proxmox para migrar un contenedor de un cluster a otro.
