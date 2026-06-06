@@ -17,7 +17,7 @@
 
 ## 📖 Descripción
 
-En este repositorio voy a explicar como yo configure mi actual homelab, compartiré algunos archivos de configuración que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
+En este repositorio voy a explicar como yo configure mi actual Homelab, compartiré algunos archivos de configuración que pueden ser de ayuda para la gente que quiere hacer algo parecido en su propio servidor.
 
 Este proyecto tiene como objetivo construir una infraestructura doméstica orientada a:
 
@@ -175,7 +175,7 @@ DataCenter (Alta Disponibilidad)
 - [X] Integración VPN privada
 - [X] Monitorización avanzada
 - [ ] Añadir nodo para quorum
-- [ ] Migración a almacenamiento SSD
+- [ ] Migración/Expansión a almacenamiento SSD
 
 ### Automatización
 
@@ -226,3 +226,5 @@ Este proyecto funciona como:
 Proyecto desarrollado como laboratorio personal de infraestructura, virtualización y servicios autoalojados.
 
 Infraestructura en evolución constante 🚀
+
+@mateorzan
