@@ -36,7 +36,6 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ```mermaid
 graph TD
-
     Router --> Tailscale
     Tailscale --> ProxmoxCluster
     Tailscale --> RaspberryPi
@@ -44,12 +43,12 @@ graph TD
     subgraph DataCenter
         ProxmoxCluster --> Nodo1[ZimaBlade1 PVE]
         ProxmoxCluster --> Nodo2[ZimaBlade2 PVE2]
-        Nodo1 --> CasaOS
-        Nodo1 --> Network-Services
+        Nodo1 --> ZimaOS
         Nodo2 --> PBS[Backup Server]
-        Nodo2 --> Keepas
+  Nodo2 --> LXC_Keepas
+ Nodo2 --> LXC_Network_Services
+ Nodo2 --> GhostVM
     end
-
     RaspberryPi --> IA[Servicios IA]
 ```
 
@@ -118,17 +117,19 @@ DataCenter (Alta Disponibilidad)
 
 ### 🔹 Infraestructura
 
-| Servicio              | Función              |
-| --------------------- | --------------------- |
-| Proxmox VE            | Virtualización       |
-| Proxmox Backup Server | Backups               |
-| CasaOS                | Gestión de servicios |
-| Tailscale             | VPN privada           |
-| Portainer             | Gestión Docker       |
-| Beszel                | Monitorización       |
-| Uptime Kuma           | Monitorización       |
-| UpSnap                | WakeOnLAN             |
-| Glance                | Dashboard             |
+| Servicio              | Función                        |
+| --------------------- | ------------------------------- |
+| Proxmox VE            | Virtualización                 |
+| Proxmox Backup Server | Backups                         |
+| CasaOS                | Gestión de servicios Unificado |
+| Tailscale             | VPN privada                     |
+| Portainer             | Gestión Docker                 |
+| Beszel                | Monitorización                 |
+| Uptime Kuma           | Monitorización                 |
+| UpSnap                | WakeOnLAN                       |
+| Homepage              | Dashboard                       |
+| Glance                | Dashboard                       |
+| ZimaOS                | Gestión de servicios Unificado |
 
 ---
 
@@ -149,6 +150,7 @@ DataCenter (Alta Disponibilidad)
 | VaultWarden         | Gestor de contraseñas     |
 | Gotify              | Chat de alertas            |
 | N8N                 | Automatización            |
+| Ghost               | Blog Web                   |
 
 ---
 
@@ -183,8 +185,7 @@ DataCenter (Alta Disponibilidad)
 
 ### IA (Raspberry Pi 5)
 
-- [X] Pantalla de monitorización
-- [ ] Servidor IA local Asistente
+- [X] Servidor IA local Asistente
 - [ ] Automatización inteligente
 - [ ] Experimentos ML
 

@@ -52,7 +52,7 @@ Una vez iniciado nos saldrá el menu de instalación en nuestro caso seleccionar
 
 Una vez termina de instalar se nos reiniciara y antes de que se inicie hay que quitar el usb de instalación para que inicie con el disco con el que hicimos la instalación. Ahora nos pedirá meternos en la web para hacer la instalación inicial.
 
-## Configuración VM
+## VM CasaOS
 
 Una vez instalado Proxmox nos da una URL con la cual tenemos todo el panel de administración de el servidor.
 
@@ -252,21 +252,29 @@ lsblk
 
 Una vez desmontado retiramos el SSD externo y reiniciamos la VM ahora debería de arrancar bien con el HDD.
 
-## LXC Network-Services
+## LXC Network-Services / Migrada hacia PVE2
 
 Creamos esta LXC para descentralizar los servicios encargados de la exposición de ciertos servicios y asi sean mas accesibles y replicables el proceso de migración de estos servicios esta explicado en Migration.md de este Repositorio. Con esto vamos a aprovechar esta LXC para ademas crear un dashboard para poder ver que servicios hay en todo mi servidor y tener una vista general.
+
+### Ddns-Updater
+
+Actualiza la IP Pública la cual esta asociada a mi dominio.
+
+### NPM
+
+Gestor de URL públicas proxy, redirecciona las urls hacia los servicios que yo quiero que sean accesibles publicamente.
 
 ### Glance
 
 Como dashboard elegí [Glance](https://github.com/glanceapp/glance?tab=readme-ov-file#installation) ya que me gusta su estética y sus funcionalidades, aunque no es un dashboard fácil de configurar. Vamos a seguir la instalación recomendad a traves de docker compose.
 
-``` bash
+```bash
 mkdir glance && cd glance && curl -sL https://github.com/glanceapp/docker-compose-template/archive/refs/heads/main.tar.gz | tar -xzf - --strip-components 2
 ```
 
 Una vez instalado lanzamos el contenedor con docker compose.
 
-``` bash
+```bash
 docker compose up -d
 ```
 
@@ -280,7 +288,7 @@ Para acceder al dashboard es desde la url que hayas configurado en tu docker-com
 
 La configuración de server stats lo hice tanto usando el binaria como usando el docker-compose.yml para obtener las métricas de los contenedores.
 
-``` bash
+```bash
 services:
   glance-agent:
     container_name: glance-agent
@@ -298,3 +306,101 @@ services:
     ports:
       - "27973:27973"
 ```
+
+### Homepage Dashboard
+
+Vamos a crear un Dashboard para nuestro Homelab
+
+#### Docker
+
+Instalación con docker compose.
+
+```
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - 3000:3000
+    volumes:
+      - ./config:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: 192.168.1.55:3000 # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+    restart: unless-stopped
+
+```
+
+## OPNsense VM
+
+Ya empiezo a tener bastantes servicios y contenedores por lo que le voy a añadir una casa de seguridad más grande a mi red, por ello vamos a instalar un VM con [OPNsense]('https://opnsense.org/#'), un firewall Open-source muy potente.
+
+![1778061173417](image/Zimablade1/1778061173417.png)
+
+Como en nuestro caso vamos a crear un VM en Proxmox vamos a utilizar la imagen ISO que nos proporciona OPNsense en su web, una vez descargada y descomprimida subimos la ISO a uno de nuestros storages, yo en mi caso lo voy a subir en el storage local que viene por defecto.
+
+![1778061877363](image/Zimablade1/1778061877363.png)
+
+### Requisitos
+
+* 1 core
+* 4gb de ram o más
+* 8gb de almacenamiento en disco o más
+
+![1778062123943](image/Zimablade1/1778062123943.png)
+
+### Instalación
+
+![1778062468167](image/Zimablade1/1778062468167.png)
+
+Ahora una vez inicia nos da estas dos opciones , como nosotros queremos instalar vamos a loguear con 'installer', y la contraseña por defecto es 'opnsense'.
+
+Primero elegimos el idioma del teclado, como tengo teclado español vamos con Spanish
+
+![1778062846007](image/Zimablade1/1778062846007.png)
+
+Ahora vamos a instalar el sistema de archivos, ya que es una VM con pocos recursos vamos a ir por la opción UFS.
+
+![1778063031282](image/Zimablade1/1778063031282.png)
+
+Importante ahora seleccionar el disco no el cd, que es realmente la ISO de instalacion.
+
+![1778063082713](image/Zimablade1/1778063082713.png)
+
+Ahora instalara el OPNsense en nuestro disco de 20gb que asignamos a nuestra VM.
+
+![1778063533507](image/Zimablade1/1778063533507.png)
+
+Una vez instalado nos va a pedir cambiar la contraseña, la cambiamos y podemos completar la instalación.
+
+![1778064379672](image/Zimablade1/1778064379672.png)
+
+Una vez la completamos reiniciamos el sistema y quitamos el disco CD/ISO, y ahora nos iniciara desde el disco donde realizamos la instalación.
+
+Ahora ya podemos iniciar sesión con root y la contraseña que configuramos anteriormente.
+
+![1778064861621](image/Zimablade1/1778064861621.png)
+
+### Configuración
+
+Ahora lo primero que vamos a hacer es configurar la IP, el la opción 2).
+
+![1778064959655](image/Zimablade1/1778064959655.png)
+
+Asi es como configure la red IPV4
+
+![1778065269240](image/Zimablade1/1778065269240.png)
+
+Una vez tenemos configurada la IP del host ya podemos acceder a la GUI web de OPNsense
+
+![1778065487707](image/Zimablade1/1778065487707.png)
+
+Una vez dentro vamos a ir al wizard y vamos a revisar la configuración básica.
+
+![1778066810911](image/Zimablade1/1778066810911.png)
+
+## VM ZimaOS
+
+Migración de CasaOS hacia ZimaOS, evolucion de este sofware con multiples mejoras y soporte actual, ya que casaos ya no recibia actualizaciones ni mejoras. En el apartado de migraciones esta documentado todo el proceso de migración y como consegui mover un disco de 800gb de una VM a otra con sus particularidades, ya que ZimaOS es bastante mas restrictivo que su version antigua CasaOS.
+
+![1780744271486](image/Zimablade1/1780744271486.png)
