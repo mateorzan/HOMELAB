@@ -160,4 +160,92 @@ Una vez instalado configuramos y añadimos un proveedor de IA en mi caso estoy u
 
 Con este servicio actualmente me encuentro haciendo pruebas pero no tengo nada corriendo lo uso mas como un asistente ya que ahora mismo uso la raspberry como herramienta de monitorización de el resto de mis maquinas virtuales y servicios.
 
-### Opencode
+### Jellyfin
+
+Vamos a montar un Jellyfin en este servidor, con esto quiero ver el rendimiento de este servicio en una raspberry Pi 5. Actualmente tengo este servicio corriendo en mi ZimaOS, debido a la carga de otros servicios no funciona todo lo bien que esperaria.
+
+Para montar este jellyfin vamos a aprovechar la estructura que ya tengo montada en mi ZimaOS y vamos a crear un almacenamiento compartido entre mi raspberry Pi 5 y mi ZimaOS asi solo tengo que recrear mi servidor Jellyfin en este servidor.
+
+#### Requisitos
+
+- Docker
+- Docker Compose
+- smdbclient y cifs-utils
+
+#### Docker Compose
+
+Para crear nuestro servidor jellyfin vamos a usar el siguiente compose.yml
+
+```Dockerfile
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    # Optional - specify the uid and gid you would like Jellyfin to use instead of root
+    user: uid:gid
+    ports:
+      - 8096:8096/tcp
+      - 7359:7359/udp
+    volumes:
+      - /path/to/config:/config
+      - /path/to/cache:/cache
+      - type: bind
+        source: /path/to/media
+        target: /media
+      - type: bind
+        source: /path/to/media2
+        target: /media2
+        read_only: true
+      # Optional - extra fonts to be used during transcoding with subtitle burn-in
+      - type: bind
+        source: /path/to/fonts
+        target: /usr/local/share/fonts/custom
+        read_only: true
+    restart: 'unless-stopped'
+    # Optional - alternative address used for autodiscovery
+    environment:
+      - JELLYFIN_PublishedServerUrl=http://example.com
+    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+```
+
+Una vez creado y levantado ya podemos acceder al servidor desde nuestro navegador con la url
+
+`htpp://IP:8096`
+
+#### SMDB
+
+Ahora como explique antes vamos a aprovechar las peliculas que ya tengo en mi servidor y vamos a montar la carpeta compartida por SMDB en nuestra Raspberry.
+
+La ruta es la siguiente
+
+`//zimaos/media`
+
+Para poder usar esta ruta tenemos que instalar primero las herramientas para poder acceder al smbd.
+
+`sudo apt update`
+
+`sudo apt install samba-client cifs-utils -y`
+
+Ahora para montar esta nueva ruta de almacenamiento usamos el siguiente comando.
+
+`sudo mount -t cifs //IP_SERVIDOR/nombre_carpeta /home/mateorzan/media -o username=tu_usuario,password=tu_contraseña,uid=1000,gid=1000`
+
+Como lo estamos montando con nuestro usuario, para que se monte automaticamente siempre al arrancar necesitamos crear un archivo que guarde las credenciales.
+
+`sudo nano /etc/samba/credenciales`
+
+Luego protegemos el archivo
+
+`sudo chmod 600 /etc/samba/credenciales`
+
+Luego creamos el archivo que hace que se monte la ruta siempre.
+
+`sudo nano /etc/fstab`
+
+`//IP_SERVIDOR/nombre_carpeta  /home/mateorzan/media  cifs  credentials=/etc/samba/credenciales,uid=1000,gid=1000,_netdev  0  0`
+
+Y probamos con
+
+`sudo mount -a`
