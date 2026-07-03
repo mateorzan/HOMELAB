@@ -720,7 +720,6 @@ volumes:
   tinybird_files:
   tinybird_home:
   traffic_analytics_data:
-
 ```
 
 Tambien el ghost: vamos a añadir el puerto personalizado que le configuramos en el .env justo debajo de restart: always.
@@ -820,6 +819,30 @@ mail__from="'Tu Blog' <tuemail@ejemplo.com>"
 
 Con esto ya tenemos todo funcionando yo a mayores voy a añadir esta VM  a mi PBS para que haga Backups diarios de mi servidor por si pasa algo.
 
-## Network-Services
+# Network-Services
 
 Migre el servidor de mi PVE hacia mi PVE2 ya que con mi VM con ZimaOS mi PVE ya tiene mucha carga y mi PVE2 tiene menos carga, use la herramienta que viene integrada en Proxmox para migrar un contenedor de un cluster a otro.
+
+## Cloudfared
+
+Ahora cambiamos como estan expuestos mis servicios publicos, compre un dominio "homelabeiro.com" y a traves de tuneles de Cloudfare cree Routes y voy a cerrar los puertos de mi Router.
+
+### Docker
+
+Nos conectamos a traves de docker creando el servicio Cloudfared
+
+```
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token 
+```
+
+Luego simplemente creamos la ruta que apunta a todos nuestros nuevos subdominios que contengan nuestro dominio, y que esta apunte a nuestro NPM.
+
+![1783068845664](image/Zimablade2/1783068845664.png)
+
+Dentro de nuestro NPM creamos los nuevos Proxys con el nuevo dominio y el NPM redirige las conexiones a nuestros servicios.
+
+Con este sencillo cambio ganamos en seguridad , comodidad y autocontrol.
