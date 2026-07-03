@@ -218,11 +218,11 @@ Una vez creado y levantado ya podemos acceder al servidor desde nuestro navegado
 
 Ahora como explique antes vamos a aprovechar las peliculas que ya tengo en mi servidor y vamos a montar la carpeta compartida por SMDB en nuestra Raspberry.
 
-La ruta es la siguiente
+La ruta es la siguiente que compartimos en nuestro servidor es:
 
 `//zimaos/media`
 
-Para poder usar esta ruta tenemos que instalar primero las herramientas para poder acceder al smbd.
+Ahora para poder acceder a esta ruta tenemos que instalar primero las herramientas para poder acceder al smbd, lo hacemos con estos comandos.
 
 `sudo apt update`
 
@@ -236,7 +236,7 @@ Como lo estamos montando con nuestro usuario, para que se monte automaticamente 
 
 `sudo nano /etc/samba/credenciales`
 
-Luego protegemos el archivo
+Luego protegemos el archivo.
 
 `sudo chmod 600 /etc/samba/credenciales`
 
@@ -246,6 +246,6 @@ Luego creamos el archivo que hace que se monte la ruta siempre.
 
 `//IP_SERVIDOR/nombre_carpeta  /home/mateorzan/media  cifs  credentials=/etc/samba/credenciales,uid=1000,gid=1000,_netdev  0  0`
 
-Y probamos con
+Por ultimo probamos que todo funciona bien y no nos da ningun error de sintaxis.
 
 `sudo mount -a`
