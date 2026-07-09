@@ -4,12 +4,12 @@
 
 <p align="center">
 
-[![Virtualization](https://img.shields.io/badge/Virtualization-Proxmox%20VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white)](https://www.proxmox.com/en/proxmox-virtual-environment)
+[![Virtualization](<https://img.shields.io/badge/Virtualization-Proxmox%20VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white>)](https://www.proxmox.com/en/proxmox-virtual-environment)
 [![Containers](https://img.shields.io/badge/Containers-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![VPN](https://img.shields.io/badge/Network-Tailscale-000000?style=for-the-badge&logo=tailscale&logoColor=white)](https://tailscale.com/)
-[![Backups](https://img.shields.io/badge/Backups-Proxmox%20Backup%20Server-009688?style=for-the-badge&logo=proxmox&logoColor=white)](https://www.proxmox.com/en/proxmox-backup-server)
-[![ARM Node](https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.raspberrypi.com/products/raspberry-pi-5/)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)]()
+[![Backups](<https://img.shields.io/badge/Backups-Proxmox%20Backup%20Server-009688?style=for-the-badge&logo=proxmox&logoColor=white>)](https://www.proxmox.com/en/proxmox-backup-server)
+[![ARM Node](<https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white>)](https://www.raspberrypi.com/products/raspberry-pi-5/)
+[![Status](<https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge>)]()
 
 </p>
 
@@ -104,6 +104,7 @@ DataCenter (Alta Disponibilidad)
 - Acceso remoto seguro
 - Servicios expuestos mediante proxy inverso
 - Certificados SSL
+- Dominio propio
 
 ### 🔹 Orquestación
 
@@ -117,19 +118,20 @@ DataCenter (Alta Disponibilidad)
 
 ### 🔹 Infraestructura
 
-| Servicio              | Función                        |
+| Servicio              | Función                         |
 | --------------------- | ------------------------------- |
-| Proxmox VE            | Virtualización                 |
+| Proxmox VE            | Virtualización                  |
 | Proxmox Backup Server | Backups                         |
-| CasaOS                | Gestión de servicios Unificado |
+| CasaOS                | Gestión de servicios Unificado  |
 | Tailscale             | VPN privada                     |
-| Portainer             | Gestión Docker                 |
-| Beszel                | Monitorización                 |
-| Uptime Kuma           | Monitorización                 |
+| Portainer             | Gestión Docker                  |
+| Beszel                | Monitorización                  |
+| Uptime Kuma           | Monitorización                  |
 | UpSnap                | WakeOnLAN                       |
 | Homepage              | Dashboard                       |
 | Glance                | Dashboard                       |
-| ZimaOS                | Gestión de servicios Unificado |
+| ZimaOS                | Gestión de servicios Unificado  |
+| Clodufared            | Tunnel                          |
 
 ---
 

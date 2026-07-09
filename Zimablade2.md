@@ -421,13 +421,27 @@ Vamos a crear el contenedor en docker.
 
 ```bash
 docker volume create n8n_data
+nano docker-compose.yml
+"
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=automate.homelabeiro.com
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://automate.homelabeiro.com/
+      - N8N_EDITOR_BASE_URL=https://automate.homelabeiro.com/
+    volumes:
+      - n8n_data:/home/node/.n8n
 
-docker run -d \
-  --name n8n \
-  -p 5678:5678 \
-  --restart unless-stopped \
-  -v n8n_data:/home/node/.n8n \
-  docker.n8n.io/n8nio/n8n
+volumes:
+  n8n_data:
+    external: true
+"
 ```
 
 Este servicio necesita HTTPS por lo que le vamos a configurar un reserve proxy
