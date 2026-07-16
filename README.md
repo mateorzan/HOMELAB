@@ -118,19 +118,19 @@ DataCenter (Alta Disponibilidad)
 
 ### 🔹 Infraestructura
 
-| Servicio              | Función                         |
+| Servicio              | Función                        |
 | --------------------- | ------------------------------- |
-| Proxmox VE            | Virtualización                  |
+| Proxmox VE            | Virtualización                 |
 | Proxmox Backup Server | Backups                         |
-| CasaOS                | Gestión de servicios Unificado  |
+| CasaOS                | Gestión de servicios Unificado |
 | Tailscale             | VPN privada                     |
-| Portainer             | Gestión Docker                  |
-| Beszel                | Monitorización                  |
-| Uptime Kuma           | Monitorización                  |
+| Portainer             | Gestión Docker                 |
+| Beszel                | Monitorización                 |
+| Uptime Kuma           | Monitorización                 |
 | UpSnap                | WakeOnLAN                       |
 | Homepage              | Dashboard                       |
 | Glance                | Dashboard                       |
-| ZimaOS                | Gestión de servicios Unificado  |
+| ZimaOS                | Gestión de servicios Unificado |
 | Clodufared            | Tunnel                          |
 
 ---
@@ -153,6 +153,7 @@ DataCenter (Alta Disponibilidad)
 | Gotify              | Chat de alertas            |
 | N8N                 | Automatización            |
 | Ghost               | Blog Web                   |
+| Jelyseer            | Media Search               |
 
 ---
 
