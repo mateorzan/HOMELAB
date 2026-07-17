@@ -232,6 +232,10 @@ Ahora para montar esta nueva ruta de almacenamiento usamos el siguiente comando.
 
 `sudo mount -t cifs //IP_SERVIDOR/nombre_carpeta /home/mateorzan/media -o username=tu_usuario,password=tu_contraseña,uid=1000,gid=1000`
 
+Ejemplo
+
+`sudo mount -t cifs //zimaos/media /home/mateorzan/media -o username=****,password=******,uid=1000,gid=1000`
+
 Como lo estamos montando con nuestro usuario, para que se monte automaticamente siempre al arrancar necesitamos crear un archivo que guarde las credenciales.
 
 `sudo nano /etc/samba/credenciales`
