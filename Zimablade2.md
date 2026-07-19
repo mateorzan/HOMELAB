@@ -1,3 +1,40 @@
+services:
+  ttyd-casaoszima1:
+    image: tsl0922/ttyd
+    command: ttyd -W -c mateo:TU_PASSWORD ssh casaoszima1@192.168.1.38
+    ports: ["7681:7681"]
+    restart: unless-stopped
+
+  ttyd-ghostvm:
+    image: tsl0922/ttyd
+    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.54
+    ports: ["7682:7681"]
+    restart: unless-stopped
+
+  ttyd-network-services:
+    image: tsl0922/ttyd
+    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.55
+    ports: ["7683:7681"]
+    restart: unless-stopped
+
+  ttyd-raspberry:
+    image: tsl0922/ttyd
+    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.62
+    ports: ["7684:7681"]
+    restart: unless-stopped
+
+  ttyd-zimaos:
+    image: tsl0922/ttyd
+    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.38
+    ports: ["7685:7681"]
+    restart: unless-stopped
+
+  ttyd-root53:
+    image: tsl0922/ttyd
+    command: ttyd -W -c mateo:TU_PASSWORD ssh root@192.168.1.53
+    ports: ["7686:7681"]
+    restart: unless-stopped
+
 # Set Up Zimablade2 servidor secundario/BACKUP 👮
 
 ## Objetivo
@@ -850,7 +887,7 @@ Nos conectamos a traves de docker creando el servicio Cloudfared
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
     restart: unless-stopped
-    command: tunnel --no-autoupdate run --token 
+    command: tunnel --no-autoupdate run --token
 ```
 
 Luego simplemente creamos la ruta que apunta a todos nuestros nuevos subdominios que contengan nuestro dominio, y que esta apunte a nuestro NPM.
@@ -860,3 +897,28 @@ Luego simplemente creamos la ruta que apunta a todos nuestros nuevos subdominios
 Dentro de nuestro NPM creamos los nuevos Proxys con el nuevo dominio y el NPM redirige las conexiones a nuestros servicios.
 
 Con este sencillo cambio ganamos en seguridad , comodidad y autocontrol.
+
+## TTYD
+
+Vamos a crear un contenedor docker con TTYD lo cual es una herramienta que te permite ejecutar terminales via WEB.
+
+### Docker Compose
+
+```
+services:
+  ttyd:
+    image: tsl0922/ttyd
+    command: ttyd -W bash
+    ports: ["7681:7681"]
+    restart: unless-stopped
+```
+
+En mi caso voy a crear una terminal basica con bash
+
+Con esto corriendo ya podemos acceder a la terminal desde
+
+`http://IP-SERVER:7681/`
+
+En mi caso la voy a integrar en mi Notion
+
+![1784479018186](image/Zimablade2/1784479018186.png)
