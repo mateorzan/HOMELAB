@@ -12,19 +12,19 @@ Debido a los problemas y poco soporte viste en docker swarm vamos a empezar de 0
 
 Reinstalar CasaOS
 
-``` bash
+```bash
 curl -fsSL https://get.casaos.io/uninstall | bash
 ```
 
 Borrar CasaOS
 
-``` bash
+```bash
 curl -fsSL https://get.casaos.io | bash
 ```
 
 Instalar CasaOS
 
-``` bash
+```bash
 reboot
 ```
 
@@ -32,17 +32,17 @@ Reiniciar.
 
 *Si esto sigue sin funcionar y crees que es un problema de puertos.*
 
-``` bash
+```bash
 cd /etc/casaos
 ```
 
-``` bash
+```bash
 nano gateway.ini
 ```
 
 *Entramos a la configuración del puerto y lo cambiamos por uno disponible, ej: port=90.*
 
-``` bash
+```bash
 sudo systemctl restart casaos-gateway
 ```
 
@@ -50,20 +50,20 @@ sudo systemctl restart casaos-gateway
 
 Hay que primero crear la aplicación en CasaOS y luego hacer la sincronización de la carpeta DATA.
 
-``` bash
+```bash
 sudo systemctl stop casaos
 sudo systemctl stop docker
 ```
 
 Paramos los servicios.
 
-``` bash
+```bash
 sudo rsync -avh --progress /mnt/rpi/DATA/AppData/big-bear-nextcloud/ /DATA/AppData/big-bear-nextcloud/
 ```
 
 Copiamos la carpeta DATA pero en este caso solo la de Nextcloud, que el resto no tuvimos problemas de borrado.
 
-``` bash
+```bash
 sudo systemctl start casaos
 sudo systemctl start docker
 ```
@@ -74,7 +74,7 @@ Una vez copiado iniciamos todo y empezara a migrar los datos.
 
 Para que este servicio funcione como lo tenemos configurado en mi HOMELAB primero hay que abrir los puertos 80 y 443 del router para la ip de este servidor.
 
-``` bash
+```bash
 http://192.168.1.1/
 ```
 
@@ -90,7 +90,7 @@ Una vez configurado los pueros del router hay que modificar los Proxy Hosts ya q
 
 Para que el proxy de Nextcloud también funcione hay que editar el siguiente archivo de configuración con la ip de este servidor.
 
-``` bash
+```bash
 /DATA/AppData/big-bear-nextcloud/html/config/config.php
 ```
 
@@ -104,13 +104,13 @@ Para solucionar este error probamos a borrar la carpeta /pgdata de nextcloud, es
 
 Una vez borrado instalamos nextcloud otra vez y ahora no nos dio error, pero no consigue iniciar, esto se debe a que le falta los datos de las tablas para poder inicia, para ello tuvimos que copiar las tablas y los datos de la base de datos de la Raspberry.
 
-``` bash
+```bash
 docker exec -i db-postgres pg_dump -U nextcloud nextcloud > nextcloud.sql
 
 scp nextcloud.sql user@zima:/ruta/destino/
 ```
 
-``` bash
+```bash
 sed -i 's/oc_admin/casaos/g' /ruta/destino/nextcloud.sql
 
 docker exec -i db-nextcloud psql -U casaos nextcloud < /ruta/destino/nextcloud.sql
@@ -144,7 +144,7 @@ Con esto ya debería de funcionar luego ya puedes restablecer la configuración 
 
 No importaba los episodios por que le faltaba permisos en la carpeta /tv, para ello ejecutamos los siguientes comandos.
 
-``` bash
+```bash
 sudo chown -R 1000:1000 /DATA/Media/TV
 sudo chown -R 1000:1000 /DATA/Downloads
 sudo chmod -R 775 /DATA/Media/TV
@@ -157,14 +157,14 @@ sudo chmod -R 775 /DATA/Downloads
 
 Queremos aumentar el almacenamiento para esto tuvimos que usar estos comandos dentro de la terminal de la VM.
 
-``` bash
+```bash
 sudo systemctl stop docker
 sudo systemctl stop casaos
 ```
 
 Paramos tanto docker como casaos para asi evitar posibles problemas.
 
-``` bash
+```bash
 lsblk
 sudo growpart /dev/sda 3
 lsblk
@@ -172,14 +172,14 @@ lsblk
 
 Expandimos la partición.
 
-``` bash
+```bash
 sudo pvresize /dev/sda3
 sudo vgs
 ```
 
 Hacemos que la VM vea el nuevo almacenamiento.
 
-``` bash
+```bash
 sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
 
 sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
@@ -187,7 +187,7 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 
 Expandimos y redimensionamos el almacenamiento.
 
-``` bash
+```bash
 sudo systemctl start docker
 sudo systemctl start casaos
 ```
@@ -200,26 +200,26 @@ Al cambiar la red de mi PC a una ip fija local no conseguí acceder a mi CasaOS 
 
 Abrir el CMD como administrador y ejecutar los siguientes comandos
 
-``` bash
+```bash
 route print
 ```
 
 buscamos una linea como esta
 
-``` bash
+```bash
 192.168.1.0    255.255.255.0      En vínculo      192.168.1.50   281
 ```
 
 Si en puerta de enlace nos sale En vínculo tenemos que modificarla para q apunte a nuestro router con los siguientes comandos.
 
-``` bash
+```bash
 route delete 192.168.1.0 mask 255.255.255.0
 route add 192.168.1.0 mask 255.255.255.0 192.168.1.1 metric 1 -p
 ```
 
 Una vez echo esto hacemos ping a nuestro servidor y vemos que ya tenemos conexión
 
-``` bash
+```bash
 ping IP_CASAOS
 ```
 
@@ -227,13 +227,13 @@ ping IP_CASAOS
 
 ### Error no me deja instalar Tailscale en Proxmox, hay que editar el siguiente archivo para que instale los programas desde un repositorio gratuito
 
-``` bash
+```bash
 nano /etc/apt/sources.list.d/pve-enterprise.list
 ```
 
 Comente la linea que aparece en y añade el repositorio que no tiene subscription, luego actualiza los paquetes.
 
-``` bash
+```bash
 # deb https://enterprise.proxmox.com/debian/pve bookworm pve-enterprise
 
 echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
@@ -242,7 +242,7 @@ apt update
 
 Hay que hacer lo mismo con el siguiente archivo.
 
-``` bash
+```bash
 nano /etc/apt/sources.list.d/ceph.list
 
 # deb https://enterprise.proxmox.com/debian/ceph-quincy bookworm InRelease
@@ -262,3 +262,17 @@ VT-x is disabled in the BIOS
 Para que la VM funcione necesitamos activar esta opción en la BIOS, para esto hay que reiniciar el dispositivo y pulsar F2 o DEL o la tecla correspondiente de tu dispositivo para entrar en la BIOS todo esto mientras se inicia.
 
 En mi caso particular tuve que activar tanto Intel-VT-d y la virtualizacion.
+
+## RaspiTV
+
+### Solucionar error no cargan las series en Jellyfin, RaspiTV
+
+A veces al apagar las vms o contenedores el almacenamiento compartido por smdb no se comparte bien y nuestra raspberry no es capaz de acceder a los datos por lo que Jellyfin no reproduce las series.
+
+Para solucionarlo tenemos que, volver a lanzar comando CIFS para que se vuelva a montar.
+
+`sudo mount -t cifs //zimaos/media /home/mateorzan/media -o username=****,password=******,uid=1000,gid=1000`
+
+Reiniciar Docker Jellyfin.
+
+`sudo Docker restart Jellyfin`
