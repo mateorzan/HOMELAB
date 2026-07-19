@@ -919,6 +919,6 @@ Con esto corriendo ya podemos acceder a la terminal desde
 
 `http://IP-SERVER:7681/`
 
-En mi caso la voy a integrar en mi Notion
+En mi caso la voy a integrar en mi Notion, para que funcionara tuve que crear un proxy con URL HTTPS.
 
 ![1784479018186](image/Zimablade2/1784479018186.png)
