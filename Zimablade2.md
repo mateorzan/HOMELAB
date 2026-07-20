@@ -902,23 +902,45 @@ Con este sencillo cambio ganamos en seguridad , comodidad y autocontrol.
 
 Vamos a crear un contenedor docker con TTYD lo cual es una herramienta que te permite ejecutar terminales via WEB.
 
+Un problema que hay con estas terminales es la persistencia de la informacion si actualizas la web pierdes la sesion actual por lo que para solucionar este problema voy a crear una imagen personalizada que tenga tmux integrado.
+
+### DockerFile
+
+```
+FROM tsl0922/ttyd
+RUN apt update && apt install -y openssh-client tmux sudo && \
+    useradd -m -s /bin/bash mateo && \
+    echo "mateo:TU_PASSWORD" | chpasswd && \
+    usermod -aG sudo mateo
+
+USER mateo
+WORKDIR /home/mateo
+
+CMD ["ttyd", "-W", "tmux", "new-session", "-A", "-s", "main", "bash"]
+```
+
+Por seguridad vamos a crear un usuario no root llamada wetty y a root le vamos a poner una contraseña, esto es opcional.
+
 ### Docker Compose
 
 ```
 services:
   ttyd:
-    image: tsl0922/ttyd
-    command: ttyd -W bash
+    build: .
     ports: ["7681:7681"]
     restart: unless-stopped
 ```
 
-En mi caso voy a crear una terminal basica con bash
+En mi caso voy a crear una terminal basica con bash tmux para persistencia de la sesion.
 
-Con esto corriendo ya podemos acceder a la terminal desde
+Como es una imagen modificada con un Dockerfile tener que hacer un build
+
+`docker compose up -d --build`
+
+Con esto corriendo ya podemos acceder a la terminal desde.
 
 `http://IP-SERVER:7681/`
 
-En mi caso la voy a integrar en mi Notion, para que funcionara tuve que crear un proxy con URL HTTPS.
+En mi caso la voy a integrar en mi Notion, para que funcionara tuve que crear un proxy con URL HTTPS, a esta url le configure una access list para que solo fuera accesible desde mi red local.
 
-![1784479018186](image/Zimablade2/1784479018186.png)
+![1784552736436](image/Zimablade2/1784552736436.png)

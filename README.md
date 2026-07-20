@@ -154,6 +154,7 @@ DataCenter (Alta Disponibilidad)
 | N8N                 | Automatización            |
 | Ghost               | Blog Web                   |
 | Jelyseer            | Media Search               |
+| TTYD                | Web terminal               |
 
 ---
 
