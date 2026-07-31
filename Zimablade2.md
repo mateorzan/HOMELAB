@@ -944,3 +944,20 @@ Con esto corriendo ya podemos acceder a la terminal desde.
 En mi caso la voy a integrar en mi Notion, para que funcionara tuve que crear un proxy con URL HTTPS, a esta url le configure una access list para que solo fuera accesible desde mi red local.
 
 ![1784552736436](image/Zimablade2/1784552736436.png)
+
+## Whats Up Docker(WUD)
+
+WUD es una herramienta para monitorizar tus servidores y mantenerlos siempre actualizados de una forma comoda. Esto es útil cuando tienes muchos contenedores.
+
+### Docker Compose
+
+```
+services:
+  whatsupdocker:
+    image: getwud/wud
+    container_name: wud
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 3005:3000
+```
