@@ -276,3 +276,29 @@ Para solucionarlo tenemos que, volver a lanzar comando CIFS para que se vuelva a
 Reiniciar Docker Jellyfin.
 
 `sudo Docker restart Jellyfin`
+
+## Logical Volume PVE2
+
+### Solucionar error de arranque en volumenes logicos de PVE2
+
+Cuando los servidores se caen, al iniciarlos, el pve2 arranca mal sus volumenes logicas ya que espera por pve cuando el no esta arrancado y no lo reintenta una vez ya se arranco pve2 por lo que los volumenes no son accesibles por las maquinas virtuales y no hician. Para solucionar este problema hay que reiniciarlo manualmente ejecutando estos comandos en orden.
+
+```
+lvchange -an pve/data
+lvchange -an pve/data_tmeta
+lvchange -an pve/data_tdata
+
+lvchange -ay pve/data_tmeta
+lvchange -ay pve/data_tdata
+lvchange -ay pve/data
+```
+
+> Aviso esto tarda un rato en activarse, aprox 5 mins
+
+Si con esto no funciona puedes probar tambien con
+
+`vgchange -ay pve`
+
+Luego puedes verificar que todo este sano con
+
+`lvs -a -o+lv_health_status pve`
