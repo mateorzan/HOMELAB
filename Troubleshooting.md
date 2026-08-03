@@ -302,3 +302,13 @@ Si con esto no funciona puedes probar tambien con
 Luego puedes verificar que todo este sano con
 
 `lvs -a -o+lv_health_status pve`
+
+## Bad Sectors HDD PVE
+
+### Parchear sectores muertos HDD PVE
+
+Hace unos dias la copia de seguridad de mi VM fallaba y era por que mi HDD esta empezando a fallar y tiene 8 sectores muertos, equivale como a 500kb, ejecute `fstrim -av` para vaciar el espacio que no usar la VM y si en este espacio estaba este sector muerto deberia de hacer la copia de seguridad. En plan es cambiar todo lo que corre dia a dia al SSD nuevo y dejar este HDD com particion ext4 y usarla solo para los archivos pesados, fotos, videos, series, etc...
+
+Ahora mismo vamos a dejar todo parado hasta que hagamos el cambio de los SSD, lo que hay que hacer es ir revisando y monitorizando que estos sectores rotos no vayan a mas y se queden en 8. Ahora mismo tengo gotify que ya se encarga de avisar si hay algun fallo y sino se puede ir revisando desde la web.
+
+![1785751685200](image/Troubleshooting/1785751685200.png)
