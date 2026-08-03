@@ -12,9 +12,25 @@ El nodo `pve` presentó un fallo recurrente de backup (`vzdump` error `-61 - No 
 
 **Causa raíz probable:** el disco es **SMR** (Shingled Magnetic Recording), confirmado para la serie BarraCuda 2TB/4TB/8TB (ST2000DM008 = ST2000DMZ08, mismo producto con distinto sufijo de canal de venta). Los discos SMR son inadecuados para cargas de escritura aleatoria sostenida como un thin pool LVM sirviendo discos de VMs activas — su diseño está pensado para escritura secuencial (backups, archivo de fotos/vídeos), no para uso como storage de sistema.
 
-**RMA en curso con Seagate** — Serial: `ZFL8W4QH`, Modelo: `ST2000DM008-2UB102`.
+**Actualización — gestión con Amazon:** en vez de RMA con reemplazo físico de Seagate, Amazon resolvió con un **reembolso (parcial/total) sin necesidad de devolver el disco**. Esto significa que **el disco original se conserva** — no hay disco de reemplazo en camino. Cualquier HDD sano nuevo para el rol de almacenamiento de datos será una compra aparte, sin prisa, cuando se decida.
 
-**Decisión de arquitectura:** separar physically boot/sistema (SSD) de datos masivos (HDD), aplicando el tipo de disco correcto a cada carga de trabajo.
+**Intentos de reparación del sector (resultado: irreparable, confirmado):**
+- `dd` de lectura sobre el sector exacto (`1871035480`, sacado del log del kernel) → falló, `Input/Output error`, ni siquiera pudo leer para reescribir.
+- `dd if=/dev/zero` (escritura directa forzada) → también falló con I/O error.
+- `hdparm --repair-sector 1871035480 --yes-i-know-what-i-am-doing` → reportó "succeeded" pero el SMART confirmó que no cambió nada real.
+- En los 3 intentos, `Reallocated_Sector_Ct` se mantuvo en 0 (nunca reasignó) y `Reported_Uncorrect` solo subió (33→35→39) sin ningún beneficio.
+- **Conclusión: esos 8 sectores (1 bloque físico de 4K) están muertos de forma permanente.** No hay comando de Linux, Proxmox ni herramienta de fabricante (a nivel ATA estándar) que pueda revivirlos — el resto del disco (~2TB menos ese fragmento) sigue funcionando con normalidad.
+- **Decisión: dejar de intentar repararlo.** Cada intento adicional solo suma desgaste sin beneficio.
+
+**Mitigación aplicada — `fstrim` dentro del guest (ZimaOS, filesystem Btrfs):**
+```bash
+sudo fstrim -av
+```
+Liberó ~528GB en el disco de datos de la VM 105. Al desmapear ese espacio del thin pool, el backup de PBS dejó de intentar leer la zona dañada y **completó con éxito por primera vez**. Este es el paso que desbloqueó el backup, sin necesidad de excluir el disco.
+
+**Monitorización activa confirmada:** `smartd` + Gotify ya alertan automáticamente de cambios en el disco (aviso recibido el 22 de julio, antes incluso del diagnóstico manual). No hace falta comprobación manual periódica — solo prestar atención si aparece un atributo nuevo (ej. `Current_Pending_Sector` subiendo por encima de 8, o `Reallocated_Sector_Ct` > 0), señal de que el daño se ha extendido más allá de la zona ya conocida.
+
+**Decisión de arquitectura:** separar físicamente boot/sistema (SSD) de datos masivos (HDD), aplicando el tipo de disco correcto a cada carga de trabajo. Esto además reduce a casi cero la carga de escritura aleatoria sobre el HDD, ralentizando su desgaste futuro (aunque sin garantía de vida útil concreta).
 
 ---
 
@@ -39,8 +55,10 @@ reboot
 
 ## Fase 0 — Preparación
 
-- Backup de todo lo posible vía PBS antes de tocar nada.
-- **No tocar el HDD con datos** — se conserva intacto, no se rescata a un tercer sitio. El disco de reemplazo del RMA será el destino final para migrar los datos, evitando un paso intermedio innecesario.
+- **Backup COMPLETO de todo lo que hay en `pve` vía PBS, sin exclusiones de disco** — esto es obligatorio con la nueva estrategia (ver Fase 6/7), ya que el HDD se va a borrar por completo, no se va a preservar el LVM-thin existente.
+  - VM 105 (ZimaOs): confirmar que el backup incluye el disco de datos completo (`scsi2`), no solo boot/efidisk.
+  - VM 107 (OPNsense): también reside en el mismo disco `sdb` — no olvidar su backup.
+- No apagar/tocar nada más una vez confirmado el backup — dejar el disco en reposo hasta el día de la migración (un disco sin actividad no puede empeorar por sí solo).
 
 ---
 
@@ -113,35 +131,55 @@ No existe rol de "nodo maestro" en Proxmox — todos los nodos son pares una vez
 
 ---
 
-## Fase 6 — Reconectar el HDD y recuperar sus datos (sin reformatear)
+## Fase 6 — Reconectar el HDD y reformatear por completo (estrategia final adoptada)
 
-**Importante:** el HDD conserva sus datos intactos (VMs, discos de sistema y de datos) en su VG de LVM-thin original. No se reformatea ni se trata como storage vacío — se reimporta tal cual.
+**Decisión final para `pve`:** a diferencia del planteamiento inicial (conservar el LVM-thin existente), se opta por **borrar el HDD por completo y reformatear en ext4**, aprovechando el proceso para marcar los sectores dañados conocidos como bad blocks permanentes. Esto es posible porque ya se cuenta con backup completo vía PBS (Fase 0) y con esta operación se resuelve de raíz la duda sobre "bloques prohibidos" que no tiene solución limpia en LVM-thin.
 
 ```bash
-vgscan
-vgchange -ay <nombre_VG>
+# Confirmar el disco correcto antes de nada
+lsblk
+
+# Borrar toda la estructura anterior (tabla de particiones, LVM, todo)
+wipefs -a /dev/sdb
+
+# Crear partición limpia (fdisk o parted, una sola partición ocupando todo el disco)
+fdisk /dev/sdb
+# → n (nueva), p (primaria), enter, enter, enter, w (escribir)
+
+# Formatear en ext4 con test exhaustivo de lectura+escritura,
+# esto marca automáticamente los sectores dañados conocidos como bad blocks permanentes
+mkfs.ext4 -cc /dev/sdb1
 ```
 
-Añadir en Proxmox: **Datacenter → Storage → Add → LVM-Thin**, seleccionando el VG/pool ya existentes. Proxmox debería listar los volúmenes ya presentes.
+**Nota:** `-cc` es un test exhaustivo (lectura + escritura) y puede tardar varias horas en un disco de 2TB. Es el paso que sustituye por completo la necesidad de `dmsetup` o técnicas de exclusión a nivel de bloque de dispositivo — ext4 gestiona su propia lista de bad blocks de forma nativa y sencilla.
+
+Montar y añadir como storage:
+```bash
+mkdir /mnt/hdd-data
+mount /dev/sdb1 /mnt/hdd-data
+blkid /dev/sdb1   # obtener UUID para /etc/fstab
+```
+Añadir la entrada correspondiente en `/etc/fstab` con ese UUID, y en Proxmox: **Datacenter → Storage → Add → Directory**, path `/mnt/hdd-data`.
 
 ---
 
-## Fase 7 — Reconstruir configuración de VMs/LXC
+## Fase 7 — Restaurar VMs desde PBS
 
-Como los datos siguen físicamente en el HDD, **no hace falta restaurar desde backup** — solo reconstruir el archivo de configuración (`.conf`) que le dice a Proxmox cómo ensamblar cada VM/LXC a partir de discos ya existentes.
+Con el HDD limpio y montado, restaurar completo desde el backup de PBS (Fase 0):
 
 ```bash
-qm create <VMID> --name <nombre> --memory <RAM> --cores <cores> \
-  --scsi0 <storage>:vm-<VMID>-disk-1 \
-  --scsi2 <storage>:vm-<VMID>-disk-2 \
-  --efidisk0 <storage>:vm-<VMID>-disk-0
+qmrestore <archivo_backup_105> 105 --storage hdd-data
+qmrestore <archivo_backup_107> 107 --storage hdd-data
 ```
 
-Valores de RAM/cores/red se consultan del backup de PBS (como referencia de configuración, no para restaurar discos) o de los `.conf` guardados manualmente antes de reinstalar (ver Fase 8 para el caso de `pve2`, donde esto es obligatorio por depender de PBS).
+Opcional, una vez confirmado que todo arranca bien: mover el disco de boot de la VM 105 al SSD para aprovechar velocidad:
+```bash
+qm move-disk 105 scsi0 local-zfs
+```
 
-Arrancar y verificar funcionamiento antes de continuar.
+Arrancar ambas VMs y verificar funcionamiento completo antes de continuar.
 
-*(Opcional, más adelante: mover el disco de boot al SSD con `qm move-disk <VMID> scsi0 local-zfs` para aprovechar velocidad, una vez todo esté estable).*
+**Nota sobre `pve2`:** esta estrategia de reformateo completo se decidió específicamente para `pve` por el historial de sectores dañados confirmados. Para `pve2` (sin este problema), sigue aplicando el planteamiento original de la Fase 8 — preservar el LVM-thin existente sin reformatear, ya que no hay necesidad de marcar bad blocks ahí.
 
 ---
 
