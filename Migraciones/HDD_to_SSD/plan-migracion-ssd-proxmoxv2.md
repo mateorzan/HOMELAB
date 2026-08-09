@@ -5,6 +5,7 @@
 El nodo `pve` presentó un fallo recurrente de backup (`vzdump` error `-61 - No data available`) causado por sectores dañados en el disco físico `/dev/sdb` (Seagate BarraCuda ST2000DM008/DMZ08, 2TB).
 
 **Diagnóstico confirmado vía SMART:**
+
 - `Current_Pending_Sector: 8` — sectores irrecuperables
 - `Offline_Uncorrectable: 8`
 - `Reported_Uncorrect`: subiendo activamente (33 → 35 tras un solo intento de `dd`)
@@ -15,6 +16,7 @@ El nodo `pve` presentó un fallo recurrente de backup (`vzdump` error `-61 - No 
 **Actualización — gestión con Amazon:** en vez de RMA con reemplazo físico de Seagate, Amazon resolvió con un **reembolso (parcial/total) sin necesidad de devolver el disco**. Esto significa que **el disco original se conserva** — no hay disco de reemplazo en camino. Cualquier HDD sano nuevo para el rol de almacenamiento de datos será una compra aparte, sin prisa, cuando se decida.
 
 **Intentos de reparación del sector (resultado: irreparable, confirmado):**
+
 - `dd` de lectura sobre el sector exacto (`1871035480`, sacado del log del kernel) → falló, `Input/Output error`, ni siquiera pudo leer para reescribir.
 - `dd if=/dev/zero` (escritura directa forzada) → también falló con I/O error.
 - `hdparm --repair-sector 1871035480 --yes-i-know-what-i-am-doing` → reportó "succeeded" pero el SMART confirmó que no cambió nada real.
@@ -23,9 +25,11 @@ El nodo `pve` presentó un fallo recurrente de backup (`vzdump` error `-61 - No 
 - **Decisión: dejar de intentar repararlo.** Cada intento adicional solo suma desgaste sin beneficio.
 
 **Mitigación aplicada — `fstrim` dentro del guest (ZimaOS, filesystem Btrfs):**
+
 ```bash
 sudo fstrim -av
 ```
+
 Liberó ~528GB en el disco de datos de la VM 105. Al desmapear ese espacio del thin pool, el backup de PBS dejó de intentar leer la zona dañada y **completó con éxito por primera vez**. Este es el paso que desbloqueó el backup, sin necesidad de excluir el disco.
 
 **Monitorización activa confirmada:** `smartd` + Gotify ya alertan automáticamente de cambios en el disco (aviso recibido el 22 de julio, antes incluso del diagnóstico manual). No hace falta comprobación manual periódica — solo prestar atención si aparece un atributo nuevo (ej. `Current_Pending_Sector` subiendo por encima de 8, o `Reallocated_Sector_Ct` > 0), señal de que el daño se ha extendido más allá de la zona ya conocida.
@@ -40,11 +44,13 @@ Liberó ~528GB en el disco de datos de la VM 105. Al desmapear ese espacio del t
 - **1x HDD** (el actual, y tras el RMA el de reemplazo) → backups, fotos, vídeos, discos de datos masivos de VMs
 
 ZFS elegido para el SO por su checksumming activo (detección temprana de corrupción silenciosa) y posibilidad de ampliar a mirror en el futuro sin reinstalar, vía:
+
 ```bash
 zpool attach rpool <disco_actual> <disco_nuevo>
 ```
 
 ARC de ZFS limitado a 1GB inicialmente (RAM actual: 8GB por nodo), ampliable cuando se suba a 16GB:
+
 ```bash
 echo "options zfs zfs_arc_max=1073741824" >> /etc/modprobe.d/zfs.conf
 update-initramfs -u
@@ -67,6 +73,7 @@ reboot
 Con solo 2 nodos, si uno se apaga/reinstala, el otro pierde quórum (1 de 2 votos) y su `pmxcfs` puede quedar en solo lectura.
 
 Ejecutar **desde el nodo que se queda activo**:
+
 ```bash
 pvecm expected 1
 pvecm delnode <nombre_nodo_a_migrar>
@@ -101,12 +108,52 @@ pvecm delnode <nombre_nodo_a_migrar>
 5. Post-instalación: limitar ARC a 1GB (ver comandos en sección de arquitectura) + reboot.
 6. Verificar: `zpool status` → `rpool` ONLINE sin errores.
 7. **Cambiar repositorio a no-subscription** (evita error de `apt update` sin suscripción de pago):
+
 ```bash
 sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/pve-enterprise.list
 echo "deb http://download.proxmox.com/debian/pve <codename> pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list
 apt update && apt full-upgrade -y
 ```
+
 *(verificar `<codename>` de Debian correspondiente a la versión de Proxmox instalada)*
+
+#### *PROBLEMAS DURANTE LA INSTALACIÓN*
+
+Probe varios USBs que daban error a la hora de instalar hasta que consegui uno que pudiera realizar la instalacion. Al final para poder hacer pruebas acabe creando mi propia ISO personalizada con los datos de instalacion ya configurados para asi solo tener que conectar el USB y la instalacion pueda completarse automaticamente.
+
+Primero vamos a instalar la herramienta que nos va a permitir hacer esta ISO.
+
+```Shell
+apt update
+apt upgrade -y
+apt install proxmox-auto-install-assistant
+```
+
+Esto lo hice creando un archivo `answer.toml`
+
+```Shell
+[global]
+keyboard = "es"
+country = "es"
+fqdn = "pve.zimablade1"
+mailto = "tu-email@ejemplo.com"
+timezone = "Europe/Madrid"
+root-password = "TU_CONTRASEÑA_AQUI"
+
+[network]
+source = "from-dhcp"
+
+[disk-setup]
+filesystem = "zfs"
+zfs.raid = "raid0"
+disk-list = ["sda"]
+```
+
+Luego ejecute el comando para crear la nueva iso `proxmox-auto-install-assistant prepare-iso proxmox-ve_8.4-1.iso --fetch-from iso --answer-file answer.toml`
+
+Esto nos genera un archivo nuevo .ISO que podemos copiar a nuestro PC por SCP y luego crear un usb booteable con el.
+
+Con esto y configurando el arranque por usb en nuestro equipo ya configura la instalacion el mismo.
 
 ---
 
@@ -126,6 +173,7 @@ pvecm status
 No existe rol de "nodo maestro" en Proxmox — todos los nodos son pares una vez unidos.
 
 **Detalles externos a revisar tras reinstalar (no afectan al clúster pero sí a servicios):**
+
 - Tailscale generará nueva identidad de nodo aunque se mantenga la IP — reautenticar.
 - La clave SSH del host cambia — limpiar `known_hosts` en clientes que se conecten.
 
@@ -148,17 +196,20 @@ fdisk /dev/sdb
 
 # Formatear en ext4 con test exhaustivo de lectura+escritura,
 # esto marca automáticamente los sectores dañados conocidos como bad blocks permanentes
+tmux new -s formateo # Lo puedes lanzar desde tmux asi te aseguras que no se te corte el comando
 mkfs.ext4 -cc /dev/sdb1
 ```
 
 **Nota:** `-cc` es un test exhaustivo (lectura + escritura) y puede tardar varias horas en un disco de 2TB. Es el paso que sustituye por completo la necesidad de `dmsetup` o técnicas de exclusión a nivel de bloque de dispositivo — ext4 gestiona su propia lista de bad blocks de forma nativa y sencilla.
 
 Montar y añadir como storage:
+
 ```bash
 mkdir /mnt/hdd-data
 mount /dev/sdb1 /mnt/hdd-data
 blkid /dev/sdb1   # obtener UUID para /etc/fstab
 ```
+
 Añadir la entrada correspondiente en `/etc/fstab` con ese UUID, y en Proxmox: **Datacenter → Storage → Add → Directory**, path `/mnt/hdd-data`.
 
 ---
@@ -173,6 +224,7 @@ qmrestore <archivo_backup_107> 107 --storage hdd-data
 ```
 
 Opcional, una vez confirmado que todo arranca bien: mover el disco de boot de la VM 105 al SSD para aprovechar velocidad:
+
 ```bash
 qm move-disk 105 scsi0 local-zfs
 ```
@@ -188,6 +240,7 @@ Arrancar ambas VMs y verificar funcionamiento completo antes de continuar.
 **Consideración especial:** PBS corre como VM (VMID 102) dentro de `pve2`. Su datastore (`zfs_backup`) es un **zpool virtual creado por el propio guest OS de la VM PBS**, sobre un disco (`scsi1`) que a su vez vive en el LVM-thin del host — no hay zpool a nivel de host, todo es LVM-thin desde la perspectiva de `pve2`.
 
 **Paso previo obligatorio — sacar configs antes de reinstalar** (PBS no estará disponible durante el proceso, así que no sirve como referencia si no se guarda antes):
+
 ```bash
 mkdir -p ~/backup-configs
 cp /etc/pve/qemu-server/*.conf ~/backup-configs/
@@ -196,6 +249,7 @@ scp -r ~/backup-configs mateorzan@<IP_destino>:/ruta/destino
 ```
 
 Resto del proceso idéntico a Fases 1-7, con un matiz de orden en la Fase 7:
+
 1. Reconstruir primero la VM 102 (PBS) — apuntando `scsi0` y `scsi1` a los discos LVM-thin existentes.
 2. Arrancar PBS — el zpool interno se automonta solo (gestionado por el guest, no por el host).
 3. Verificar datastore `zfs_backup` con histórico de backups intacto.
@@ -206,6 +260,7 @@ Resto del proceso idéntico a Fases 1-7, con un matiz de orden en la Fase 7:
 ## Fase 9 — Verificación final y pendientes
 
 **Checklist de cierre:**
+
 - [ ] `pvecm status` en ambos nodos → quórum 2/2, ambos ONLINE
 - [ ] Todas las VMs/LXC arrancan y responden correctamente
 - [ ] `zpool status` (host) → `rpool` de cada SSD ONLINE sin errores
@@ -215,18 +270,17 @@ Resto del proceso idéntico a Fases 1-7, con un matiz de orden en la Fase 7:
 **Pendientes que quedan abiertos tras la migración:**
 
 1. **RMA Seagate (serial `ZFL8W4QH`)** — cuando llegue el reemplazo:
+
    - Migrar `vm-105-disk-2` del HDD viejo (dañado) al nuevo con `pvmove` o `qm move-disk`.
    - Retirar físicamente el HDD dañado.
    - Mientras tanto, monitorizar: `smartctl -a /dev/sdX | grep -E "Pending|Reallocated|Uncorrect"`.
-
 2. **`lvm-thin-fix.service` (pve2)** — la race condition de boot original debería desaparecer al migrar el SO a ZFS (ya no depende de la activación de `data_tmeta`/`data_tdata` en el arranque). Confirmar con varios reinicios de prueba antes de cerrar definitivamente este pendiente en la documentación.
-
 3. **Actualizar documentación** — repo GitHub (HOMELAB) y Notion: nueva arquitectura (SSD boot + HDD datos), decisión ZFS vs LVM-thin, lección aprendida sobre discos SMR y verificación de modelos antes de comprar.
 
 ---
 
 ## Lecciones aprendidas (para futuras compras de hardware)
 
-- **HDD:** verificar SMR vs CMR contra la lista oficial antes de comprar: https://www.seagate.com/products/cmr-smr-list/. SMR es válido para backups/archivo, inadecuado para storage activo de VMs.
+- **HDD:** verificar SMR vs CMR contra la lista oficial antes de comprar: [https://www.seagate.com/products/cmr-smr-list/](https://www.seagate.com/products/cmr-smr-list/). SMR es válido para backups/archivo, inadecuado para storage activo de VMs.
 - **SSD:** priorizar NAND TLC sobre QLC para cargas de VM con escritura sostenida. Cuidado con modelos que han cambiado de TLC a QLC silenciosamente en revisiones posteriores del mismo nombre comercial (ej. Kingston A400).
 - **Segunda mano:** aceptable con envío gestionado por Amazon + política de devolución amplia (30 días) + buenas reseñas del vendedor — verificar SMART/wear-leveling al recibir, dentro del plazo de devolución.
