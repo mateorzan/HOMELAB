@@ -219,17 +219,22 @@ Añadir la entrada correspondiente en `/etc/fstab` con ese UUID, y en Proxmox: *
 Con el HDD limpio y montado, restaurar completo desde el backup de PBS (Fase 0):
 
 ```bash
+pvesm list Backup_sever
 qmrestore <archivo_backup_105> 105 --storage hdd-data
-qmrestore <archivo_backup_107> 107 --storage hdd-data
+```
+
+Arrancar ambas VMs y verificar funcionamiento completo antes de continuar.
+
+```Shell
+qm start 105
 ```
 
 Opcional, una vez confirmado que todo arranca bien: mover el disco de boot de la VM 105 al SSD para aprovechar velocidad:
 
 ```bash
 qm move-disk 105 scsi0 local-zfs
+qm move-disk 105 efidisk0 local-zfs
 ```
-
-Arrancar ambas VMs y verificar funcionamiento completo antes de continuar.
 
 **Nota sobre `pve2`:** esta estrategia de reformateo completo se decidió específicamente para `pve` por el historial de sectores dañados confirmados. Para `pve2` (sin este problema), sigue aplicando el planteamiento original de la Fase 8 — preservar el LVM-thin existente sin reformatear, ya que no hay necesidad de marcar bad blocks ahí.
 
