@@ -240,7 +240,49 @@ qm move-disk 105 efidisk0 local-zfs
 
 ---
 
-## Fase 8 — Migración de pve2 (con PBS + Ghost + 2 LXCs)
+## Fase 8 — Configuracion ZimaOS
+
+Con la VM ya corriendo desde el dashboard de ZimaOS modificamos la estructura de los Storage dentro del sistema operativa. Vamos a mover las carpetas correspondientes a los datos de los propios contenedores (30gb aprox) al SSD ya que estos datos se esta accediendo a ellos constantemente y dejamos los datos mas pesados, fotos, videos, series en el almacenamiento correspondiente al HDD.
+
+Primera problematica que tuve al inspeccionar el AppData de mi ZimaOS que es donde almacena la informacion de las Apps me di cuenta que Nextcloud por defecto guarda los archivos en esta ubicacion asi que lo primero que tuve que hacer es mover estos datos de manera controlado y con backups por si algo salia mal.
+
+```
+# Listamos carpetas y lo que ocupa cada una
+du -sh /media/HDD-Storage/AppData/* 
+sudo du -sh /media/HDD-Storage/AppData/big-bear-nextcloud/*
+
+# Activamos modo manteniento y hacemos Backups por si acaso
+sudo docker exec -u www-data nextcloud php occ maintenance:mode --on
+sudo docker exec db-nextcloud pg_dumpall -U casaos > /tmp/nextcloud_backup_$(date +%Y%m%d).sql
+sudo cp /var/lib/casaos/apps/big-bear-nextcloud/docker-compose.yml ~/docker-compose.yml.backup
+sudo cp /media/HDD-Storage/AppData/big-bear-nextcloud/html/config/config.php /tmp/config.php.backup
+ls -lh /tmp/nextcloud_backup_*.sql /tmp/config.php.backup /DATA/docker-compose.yml.backup # Listamos para ver que estan
+
+# Apagamos Nextcloud
+sudo docker compose -f /var/lib/casaos/apps/big-bear-nextcloud/docker-compose.yml down
+```
+
+Para mover los datos use el propio fylesistem del dashboard de ZimaOS y migre la capeta de `~/AppData/big-bear-nextcloud/html/data` a `~/Nextcloud-data/data`. Este proceso tarde 1h30mins.
+
+Una vez copiado borramos los datos de AppData y modificamos el compose de Cron y de Nextcloud y anadimos a cada uno un nuevo volumen con referencia a esta nueva carpeta `~/Nextcloud-data/data`  -->  `/var/www/html/data`
+
+Con todo esto ya el almacenamiento de AppData se reducio a 2gb y simplemente desde la configuracion de ajustes de ZimaOS en Apss Migramos AppData de HDD-Storage a ZimaOS-HD. Con esto ya podemos arrancar los servicios sin problema
+
+El siguiente paso es pasar la carpeta docker que es la que almacena los contenedores, esta es hacer exactamente lo mismo. Ahora mismo no lo hice ya que tengo que aumentar el tamaño de mi disco ya que no me llega el espacio libre.
+
+#### PROBLEMAS DURANTE LA CONFIGURACIÓN
+
+Al copiar la carpeta data a nuesta nueva ubicacion se cambio el propietario de la carpeta por lo que nextcloud no tenia permisos, tuvimos que cambiar al propietario correspondiente que era www-data. Luego quitamos el modo mantenimiento de la base de datos y actualizamos Nextcloud a la ultima version.
+
+```
+sudo chown -R 33:33 /HDD-Storage/Nextcloud-data/data # Permisos www-data
+sudo docker exec -u www-data nextcloud php occ maintenance:mode --off # Mantemiento BD Off
+sudo docker exec -u www-data nextcloud php occ upgrade # Actualizamos Nextcloud
+```
+
+---
+
+## Fase 9 — Migración de pve2 (con PBS + Ghost + 2 LXCs)
 
 **Consideración especial:** PBS corre como VM (VMID 102) dentro de `pve2`. Su datastore (`zfs_backup`) es un **zpool virtual creado por el propio guest OS de la VM PBS**, sobre un disco (`scsi1`) que a su vez vive en el LVM-thin del host — no hay zpool a nivel de host, todo es LVM-thin desde la perspectiva de `pve2`.
 
@@ -262,7 +304,7 @@ Resto del proceso idéntico a Fases 1-7, con un matiz de orden en la Fase 7:
 
 ---
 
-## Fase 9 — Verificación final y pendientes
+## Fase 10 — Verificación final y pendientes
 
 **Checklist de cierre:**
 
