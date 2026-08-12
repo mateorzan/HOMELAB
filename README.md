@@ -163,7 +163,7 @@ DataCenter (Alta Disponibilidad)
 *(Sección preparada para actualizar con métricas reales)*
 
 - 🖥️ Nodos activos: 2
-- 💾 Tipo almacenamiento: HDD
+- 💾 Tipo almacenamiento: HDD y SSD
 - 🌐 Acceso remoto: VPN privada
 - 🔄 Backups: Incrementales diarios
 - ⏱️ Objetivo disponibilidad: 24/7
@@ -178,8 +178,8 @@ DataCenter (Alta Disponibilidad)
 - [X] Implementación de PBS
 - [X] Integración VPN privada
 - [X] Monitorización avanzada
+- [X] Migración/Expansión a almacenamiento SSD
 - [ ] Añadir nodo para quorum
-- [ ] Migración/Expansión a almacenamiento SSD
 
 ### Automatización
 
