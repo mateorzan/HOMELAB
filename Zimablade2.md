@@ -1,39 +1,3 @@
-services:
-  ttyd-casaoszima1:
-    image: tsl0922/ttyd
-    command: ttyd -W -c mateo:TU_PASSWORD ssh casaoszima1@192.168.1.38
-    ports: ["7681:7681"]
-    restart: unless-stopped
-
-  ttyd-ghostvm:
-    image: tsl0922/ttyd
-    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.54
-    ports: ["7682:7681"]
-    restart: unless-stopped
-
-  ttyd-network-services:
-    image: tsl0922/ttyd
-    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.55
-    ports: ["7683:7681"]
-    restart: unless-stopped
-
-  ttyd-raspberry:
-    image: tsl0922/ttyd
-    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.62
-    ports: ["7684:7681"]
-    restart: unless-stopped
-
-  ttyd-zimaos:
-    image: tsl0922/ttyd
-    command: ttyd -W -c mateo:TU_PASSWORD ssh mateorzan@192.168.1.38
-    ports: ["7685:7681"]
-    restart: unless-stopped
-
-  ttyd-root53:
-    image: tsl0922/ttyd
-    command: ttyd -W -c mateo:TU_PASSWORD ssh root@192.168.1.53
-    ports: ["7686:7681"]
-    restart: unless-stopped
 
 # Set Up Zimablade2 servidor secundario/BACKUP 👮
 

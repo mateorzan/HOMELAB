@@ -312,3 +312,13 @@ Hace unos dias la copia de seguridad de mi VM fallaba y era por que mi HDD esta 
 Ahora mismo vamos a dejar todo parado hasta que hagamos el cambio de los SSD, lo que hay que hacer es ir revisando y monitorizando que estos sectores rotos no vayan a mas y se queden en 8. Ahora mismo tengo gotify que ya se encarga de avisar si hay algun fallo y sino se puede ir revisando desde la web.
 
 ![1785751685200](image/Troubleshooting/1785751685200.png)
+
+## Fútbol
+
+### Bloqueo de dominios Web de Cloudfare
+
+Cuando hay futbol laliga bloqueas multiples IPs sobretodo de cloudfare de España por lo que mis servicios dejan de ser accesibles, para ver si tu IP ha sido afectada puedes entrar a la web.
+
+[Hay-futbol](https://hayahora.futbol/#sobre-los-bloqueos)
+
+Para solucionar esto nos tenemos que conectar a una VPN en mi caso Pronton VPN, con esto ya podemos acceder a nuestros dominios.
