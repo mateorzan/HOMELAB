@@ -862,6 +862,10 @@ Dentro de nuestro NPM creamos los nuevos Proxys con el nuevo dominio y el NPM re
 
 Con este sencillo cambio ganamos en seguridad , comodidad y autocontrol.
 
+Para añadir más seguridad aun añadi un control de acceso a todo mi dominio `*.homelabeiro.com`desde Cloudfare , Zero Trust, Access Control. Con esto si accedes a uno de mis dominios primero te tendras que autenticar via correo y un pin unico que te llegara al mismo.
+
+![1786828723350](image/Zimablade2/1786828723350.png)
+
 ## TTYD
 
 Vamos a crear un contenedor docker con TTYD lo cual es una herramienta que te permite ejecutar terminales via WEB.
