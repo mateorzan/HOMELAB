@@ -1,9 +1,8 @@
-
 # Set Up Zimablade2 servidor secundario/BACKUP 👮
 
 ## Objetivo
 
-Usaremos uno de los Zimablades como servidor secundario, en este servidor vamos a ejecutar las copias de seguridad diarias para asegurar que no se pierda información, ademas también replicaremos la VM por si el servidor principal cae este lo respalde.
+Usaremos uno de los Zimablades comuLo servidor secundario, en este servidor vamos a ejecutar las copias de seguridad diarias para asegurar que no se pierda información, ademas también replicaremos la VM por si el servidor principal cae este lo respalde.
 
 ## Requisitos
 
