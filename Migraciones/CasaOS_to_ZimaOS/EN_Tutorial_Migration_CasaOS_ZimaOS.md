@@ -34,6 +34,7 @@ kpartx -av /dev/pve/vm-<ID>-disk-<N>
 ```
 
 This creates devices like:
+
 ```
 /dev/mapper/pve-vm--<ID>--disk--<N>p1
 /dev/mapper/pve-vm--<ID>--disk--<N>p2
@@ -136,11 +137,11 @@ In the ZimaOS web interface, go to **Settings → Storage**. The disk should sho
 
 Go to **Settings → Apps** and configure the paths:
 
-| Path in ZimaOS | Folder |
-|---|---|
-| App data | `/media/HDD-Storage/AppData` |
-| App image (docker) | `/media/HDD-Storage/docker` |
-| User database | `/media/HDD-Storage/` |
+| Path in ZimaOS     | Folder                         |
+| ------------------ | ------------------------------ |
+| App data           | `/media/HDD-Storage/AppData` |
+| App image (docker) | `/media/HDD-Storage/docker`  |
+| User database      | `/media/HDD-Storage/`        |
 
 > **Note:** If ZimaOS won't let you point to folders with existing content, temporarily rename the folders (add `-casaos` at the end), change the path, then rename them back to their original name after deleting the empty folders ZimaOS creates.
 
@@ -230,6 +231,6 @@ networks:
 
 - ZimaOS (Buildroot) **doesn't have `lvm2`**, which is why all the LVM activation work is done from Proxmox.
 - The data disk ends up mounted on ZimaOS at `/media/HDD-Storage`, and is also accessible as `/DATA`.
-- CasaOS compose files include metadata under `x-casaos:` that needs to be removed before importing into ZimaOS.
+- CasaOS compose files include metadata under `x-casaos:` that may need to be removed before importing into ZimaOS.
 - linuxserver containers (`/srv/lsio/`) store their config outside of `/DATA`, so you need to use the full path when importing.
 - For linuxserver containers, the `/config` volume must point to the **parent** folder that contains `config/`, `data/`, `cache/`, etc. — not directly to the `config/` subfolder.
