@@ -34,23 +34,7 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ### 🔹 Diagrama de Infraestructura
 
-```mermaid
-graph TD
-    Router --> Tailscale
-    Tailscale --> ProxmoxCluster
-    Tailscale --> RaspberryPi
-
-    subgraph DataCenter
-        ProxmoxCluster --> Nodo1[ZimaBlade1 PVE]
-        ProxmoxCluster --> Nodo2[ZimaBlade2 PVE2]
-        Nodo1 --> ZimaOS
-        Nodo2 --> PBS[Backup Server]
-  Nodo2 --> LXC_Keepas
- Nodo2 --> LXC_Network_Services
- Nodo2 --> GhostVM
-    end
-    RaspberryPi --> IA[Servicios IA]
-```
+![1787749874297](image/README/1787749874297.png)
 
 ---
 
