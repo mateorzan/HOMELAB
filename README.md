@@ -40,14 +40,14 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ### 🔹 Estructura Actual
 
-```text
+```Markdown
 DataCenter (Proxmox Cluster)
 │
 ├── pve     → zimablade1 (Nodo 1 - Servicios)
 ├── pve2    → zimablade2 (Nodo 2 - Backup / Replicación / Servicios)
 │
 └── Raspberry Pi 5
-    └── Servidor independiente corriendo servicios de IA
+    └── Servidor independiente corriendo servicios
 ```
 
 ---
@@ -116,6 +116,7 @@ DataCenter (Alta Disponibilidad)
 | Glance                | Dashboard                       |
 | ZimaOS                | Gestión de servicios Unificado |
 | Clodufared            | Tunnel                          |
+| Ansible Semaphore     | Automatización                 |
 
 ---
 
