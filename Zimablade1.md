@@ -332,7 +332,7 @@ services:
     restart: unless-stopped
 ```
 
-## OPNsense VM / DEPECRATED
+## OPNsense VM
 
 Ya empiezo a tener bastantes servicios y contenedores por lo que le voy a añadir una casa de seguridad más grande a mi red, por ello vamos a instalar un VM con [OPNsense]('https://opnsense.org/#'), un firewall Open-source muy potente.
 
@@ -350,6 +350,8 @@ Como en nuestro caso vamos a crear un VM en Proxmox vamos a utilizar la imagen I
 
 ![1778062123943](image/Zimablade1/1778062123943.png)
 
+![1787755433916](image/Zimablade1/1787755433916.png)
+
 ### Instalación
 
 ![1778062468167](image/Zimablade1/1778062468167.png)
@@ -362,7 +364,7 @@ Primero elegimos el idioma del teclado, como tengo teclado español vamos con Sp
 
 Ahora vamos a instalar el sistema de archivos, ya que es una VM con pocos recursos vamos a ir por la opción UFS.
 
-![1778063031282](image/Zimablade1/1778063031282.png)
+![1787755937985](image/Zimablade1/1787755937985.png)
 
 Importante ahora seleccionar el disco no el cd, que es realmente la ISO de instalacion.
 
