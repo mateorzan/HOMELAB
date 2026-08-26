@@ -9,7 +9,7 @@
 [![VPN](https://img.shields.io/badge/Network-Tailscale-000000?style=for-the-badge&logo=tailscale&logoColor=white)](https://tailscale.com/)
 [![Backups](<https://img.shields.io/badge/Backups-Proxmox%20Backup%20Server-009688?style=for-the-badge&logo=proxmox&logoColor=white>)](https://www.proxmox.com/en/proxmox-backup-server)
 [![ARM Node](<https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white>)](https://www.raspberrypi.com/products/raspberry-pi-5/)
-[![Status](<https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge>)]()
+[![Status](<https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge>)](/README.md)
 
 </p>
 
