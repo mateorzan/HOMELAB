@@ -402,6 +402,10 @@ Una vez dentro vamos a ir al wizard y vamos a revisar la configuración básica.
 
 ![1778066810911](image/Zimablade1/1778066810911.png)
 
+Ahora aqui tenemos un problema y vamos a contextualizar mi caso, este Opnsense es un firewall mas teorico que realista yo en mi red au no tengo equipos dedicados a redes solo tengo el router de la compañia ISP y un switch "tonto" que solo sirve como puerto de conexion eth no tiene ningun tipo de tecnologia ni sowftware, para poder hacer lo que yo tengo pensado necesito conseguir un buen router y switch.
+
+Por esto me limita lo que puedo hacer con este Opnsense en mi Homelab por ahora vamos a usarlo simplemente para lo que podemos, que es como firewall para mi VM Zimaos, esto nos sirve ya que estan en el mismo nodo/maquina entonces no tengo problemas con que mi switch no etiquete las VLANs. Esto es simplemente una prueba probablemente no lo pueda implementar de manera definitiva ya que me va a dar mas problemas que seguridad, pero para aprender y ver como funciona Opnsense es buena práctica.
+
 ## VM ZimaOS
 
 Migración de CasaOS hacia ZimaOS, evolucion de este sofware con multiples mejoras y soporte actual, ya que casaos ya no recibia actualizaciones ni mejoras. En el apartado de migraciones esta documentado todo el proceso de migración y como consegui mover un disco de 800gb de una VM a otra con sus particularidades, ya que ZimaOS es bastante mas restrictivo que su version antigua CasaOS.

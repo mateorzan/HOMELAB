@@ -34,7 +34,7 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ### 🔹 Diagrama de Infraestructura
 
-![1787749874297](image/README/1787749874297.png)
+![1788172921746](image/README/1788172921746.png)
 
 ---
 
@@ -165,11 +165,13 @@ DataCenter (Alta Disponibilidad)
 - [X] Monitorización avanzada
 - [X] Migración/Expansión a almacenamiento SSD
 - [ ] Añadir nodo para quorum
+- [ ] Añadir equipos de red Router y Swicth con control de VLANs
 
 ### Automatización
 
 - [X] Backups automáticos verificados
-- [X] Alertas por caída de servicios
+- [X] Alertas por caída de servicios y servidores
+- [ ] Actualizaciones de maquinas automaticas
 - [ ] CI/CD para despliegues
 
 ### IA (Raspberry Pi 5)

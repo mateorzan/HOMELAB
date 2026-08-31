@@ -1,3 +1,5 @@
+es
+
 # TroubleShooting
 
 Como la raspberry y Zima tienen diferentes arquitecturas no todos los servicios se pueden ejecutar en los dos servidores, por lo que hay servicios que no son multi-arch que hay que ejecutar por separado.
@@ -322,3 +324,13 @@ Cuando hay futbol laliga bloqueas multiples IPs sobretodo de cloudfare de Españ
 [Hay-futbol](https://hayahora.futbol/#sobre-los-bloqueos)
 
 Para solucionar esto nos tenemos que conectar a una VPN en mi caso Pronton VPN, con esto ya podemos acceder a nuestros dominios.
+
+## Beszel-Agent
+
+### Error beszel agent no consigue obtener metricas de los contenedores
+
+Beszel-agent no era capaz de obtener las metricas en mis contenedores el primero que me dio este problema fue mi Jellyfin en mi Raspberry Pi 5, para esto fue muy sencillo ya que ya esta documentado. Seguir esta guia: [https://akashrajpurohit.com/blog/resolving-missing-memory-stats-in-docker-stats-on-raspberry-pi/](https://akashrajpurohit.com/blog/resolving-missing-memory-stats-in-docker-stats-on-raspberry-pi/) consiste en activar los cgroups.
+
+Luego tambien tengo este mismo problema en dos de mis LXC una alpine y la otra ubuntu. Para mi LXC de ubuntu la soluciona fue eliminar el binaria antiguo y instalar uno nuevo desde 0 con eso consegui solucionar el error, esta lxc la migre de pve a pve2 en su momento este error probablemente venga de ahi.
+
+Para el contenedor alpine tuve que activar los features: nesting=1,keyctl=1, ya que al ser un LXC no tiene Kernel propio entonces los cgroups hay que activarlos desde el host proxmox. No consegui que alpine muestre las estadisticas da muchos problemas al ser una lxc queda pendiente migrar esta lxc a ubuntu.
