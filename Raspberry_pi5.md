@@ -1,3 +1,4 @@
+
 # Configuración Raspberry Pi 5
 
 Este equipo lo vamos a centrar en IA, no es un equipo muy potente para esta tarea pero nos sirve para hacer pruebas. Este dispositivo presenta un problema ya que por su arquitectura ARM no es compatible con Proxmox VE por que lo no podremos instalar este sistema operativo y unirlo a nuestro nodo, pero aun asi podemos hacer y probar cosas y aplicarlas en nuestro nodo.
@@ -253,3 +254,51 @@ Luego creamos el archivo que hace que se monte la ruta siempre.
 Por ultimo probamos que todo funciona bien y no nos da ningun error de sintaxis.
 
 `sudo mount -a`
+
+### Homelab Nexus
+
+Cree mi imagen personalizada de un dashboard tipo Homepage pero que integras las Apis de Uptime-Kuma, Beszel y Gotify para asi de una vista ver toda la informacion de esos tres servicios en uno, le añadi links a los monitores para que puedas configurarlo y que haga el mismo uso que le doy a Homepage agragando que tengo un monitoreo avanzado y superior a Homepage. Sus funcionalidades estan explicadas en el repo pero tiene todo lo que necesito ahora mismo, monitorizacion y links para acceder a los servicios o servidores que necesito, ademas de bookmarks que puedo personalizar como quiera.
+
+#### Docker Compose
+
+```
+services:
+  homelab-nexus:
+    image: ghcr.io/mateorzan/homelab-nexus:latest
+    container_name: homelab-nexus
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - POLL_INTERVAL_MS=1000
+      - CACHE_TTL_MS=1000
+      - BG_IMAGE=
+      - BESZEL_URL=http://tu-beszel:8090
+      - BESZEL_USER_EMAIL=tu@email.com
+      - BESZEL_USER_PASSWORD=tu-password
+      - UPTIMEKUMA_URL=http://tu-uptimekuma:3001
+      - UPTIMEKUMA_STATUS_PAGE=tu-status-page
+      - GOTIFY_URL=http://tu-gotify:8081
+      - GOTIFY_TOKEN=tu-token
+    volumes:
+      - homelab-nexus-data:/app/data
+
+volumes:
+  homelab-nexus-data:
+```
+
+Funciona como cualquier compose, pero como por ahora la imagen es privada ya que estoy en testing hay que hacer login con
+
+```
+# LOGIN
+echo "TU_GITHUB_TOKEN" | docker login ghcr.io -u mateorzan --password-stdin
+
+# ARRANQUE
+docker-compose up -d
+```
+
+Con esto nos metemos a la url en el puerto :3000 y ya lo tenemos.
+
+![1788525588962](image/Raspberry_pi5/1788525588962.png)
