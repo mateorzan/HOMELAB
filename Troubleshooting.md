@@ -334,3 +334,32 @@ Beszel-agent no era capaz de obtener las metricas en mis contenedores el primero
 Luego tambien tengo este mismo problema en dos de mis LXC una alpine y la otra ubuntu. Para mi LXC de ubuntu la soluciona fue eliminar el binaria antiguo y instalar uno nuevo desde 0 con eso consegui solucionar el error, esta lxc la migre de pve a pve2 en su momento este error probablemente venga de ahi.
 
 Para el contenedor alpine tuve que activar los features: nesting=1,keyctl=1, ya que al ser un LXC no tiene Kernel propio entonces los cgroups hay que activarlos desde el host proxmox. No consegui que alpine muestre las estadisticas da muchos problemas al ser una lxc queda pendiente migrar esta lxc a ubuntu.
+
+## Timezone N8N
+
+### Solucion N8N usa por defecto otra timezone que no coincide con mi region
+
+Para solucionar este problema tenemos que indicar la TZ concreta que queremos en nuestro compose en las variables de entorno.
+
+```
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Europe/Madrid 
+      - TZ=Europe/Madrid
+      - N8N_HOST=automate.homelabeiro.com
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://automate.homelabeiro.com/
+      - N8N_EDITOR_BASE_URL=https://automate.homelabeiro.com/
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
+    external: true
+```
