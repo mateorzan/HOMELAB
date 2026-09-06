@@ -363,3 +363,7 @@ volumes:
   n8n_data:
     external: true
 ```
+
+Vamos a N8N y comprobamos que se aplico
+
+![1788701083816](image/Troubleshooting/1788701083816.png)
