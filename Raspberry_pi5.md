@@ -312,16 +312,16 @@ La version facil de todo esto es crear un almacenmiento en red por ejemplo NFS e
 
 #### Ventajas
 
-- Facilidad de configuracion y comodidad
-- Rapidez
-- Configurado todo desde la interfaz web de Proxmox
-- Restauracion de Backups desde la propia interfaz de Proxmox sin necesidad de comandos
+* Facilidad de configuracion y comodidad
+* Rapidez
+* Configurado todo desde la interfaz web de Proxmox
+* Restauracion de Backups desde la propia interfaz de Proxmox sin necesidad de comandos
 
 #### Desventajas
 
-- No son incrementales, es decir siempre copia la backup desde 0
-- Ocupa mucho mas espacio por lo que puedes mantener menos Backups lo que resulta en un menor historial
-- Mas carga para el Proxmox ya que ahora tiene que hacer el doble de Backups.
+* No son incrementales, es decir siempre copia la backup desde 0
+* Ocupa mucho mas espacio por lo que puedes mantener menos Backups lo que resulta en un menor historial
+* Mas carga para el Proxmox ya que ahora tiene que hacer el doble de Backups.
 
 Para hacer esto simplemente vamos a configurar un script bash que haga un restore de las copias de seguirdad que nosotros queramos, en mi caso hago copias de seguridad diarias de mis maquinas, por lo que voy a configurar que en mi rasp se guarden hasta 5 backups de cada maquina asi tengo un historial de 5 días de cada maquina.
 
@@ -343,17 +343,17 @@ sudo systemctl restart nfs-kernel-server # Reiniciamos el servidor para que se a
 
 En la interfaz web de Proxmox VE → Datacenter → Storage
 
-  Click Add NFS:
+ 	Click Add NFS:
 
-   Rellena:
+		 Rellena:
 
-     ID: el nomrbe que tu quieras en mi caso rasp_bks
+  			ID: el nomrbe que tu quieras en mi caso rasp_bks
 
-     **Server**: añades la IP de tu maquina.
+  			**Server**: añades la IP de tu maquina.
 
-   **Export**: ruta nfs compartida
+			**Export**: ruta nfs compartida
 
-   **Content**: Backup
+			**Content**: Backup
 
 **Guarda** — te va a mostrar el storage en tus PVEs
 
@@ -361,25 +361,25 @@ En la interfaz web de Proxmox VE → Datacenter → Storage
 
 En la interfaz web de Proxmox VE → Datacenter → Backup
 
-  Click Add NFS:
+ 	Click Add NFS:
 
-   Rellena:
+		 Rellena:
 
-     Storage: el nomrbe que tu quieras en mi caso rasp_bks
+  			Storage: el nomrbe que tu quieras en mi caso rasp_bks
 
-     **Schedule**: el que tu consideres
+  			**Schedule**: el que tu consideres
 
-   **Selection Mode**: eliges la vm o lxc que quieras.
+			**Selection Mode**: eliges la vm o lxc que quieras.
 
-   **Compresion**: ZSTD
+			**Compresion**: ZSTD
 
-   **Mode**: Snapshot
+			**Mode**: Snapshot
 
 **Create** — te va a mostar la tareada creada
 
 Ahora haz esto con todas las VMs o LXCs que quieras.
 
-#### Comporbacion
+#### Comprobación
 
 Como ultimo paso puedes ir a la ruta que compartiste en tu maquina y ver como se guardan las backups alli.
 
@@ -391,15 +391,15 @@ Esta es la segunda forma o version requiere de mas configuracion pero tiene cier
 
 #### Ventajas
 
-- Aqui las copias si son incrementales ya que usamos Borg.
-- Más Control y capacidad de tener un historial más grande.
-- Saca las copias del propio PBS por lo que no carga tanto el Proxmox VE.
+* Aqui las copias si son incrementales ya que usamos Borg.
+* Más Control y capacidad de tener un historial más grande.
+* Saca las copias del propio PBS por lo que no carga tanto el Proxmox VE.
 
 #### Desventajas
 
-- Mucha más configuración y mucho mas complejo.
-- No se puede restaurar las backups desde la interfaz de Proxmox.
-- Más incomodo cuando necesites recuperar una maquina.
+* Mucha más configuración y mucho mas complejo.
+* No se puede restaurar las backups desde la interfaz de Proxmox.
+* Más incomodo cuando necesites recuperar una maquina.
 
 Para hacer esto simplemente vamos a configurar un script bash que haga un restore de las copias de seguirdad que nosotros queramos, en mi caso hago copias de seguridad diarias de mis maquinas, por lo que voy a configurar que en mi rasp se guarden hasta 5 backups de cada maquina asi tengo un historial de 5 días de cada maquina.
 
@@ -514,25 +514,25 @@ Por ultimo comprobamos
 
 En la interfaz web de PBS → Configuration → Access Control → API Token
 
-  Click Add
+ 	Click Add
 
-   Rellena:
+		 Rellena:
 
-     **User**: root@pam (o crea un usuario dedicado solo para esto, más limpio)
+  			**User**: root@pam (o crea un usuario dedicado solo para esto, más limpio)
 
-     **Token Name**: algo como rasp-backup
+  			**Token Name**: algo como rasp-backup
 
 **Guarda** — te va a mostrar el secret del token una sola vez, cópialo ya que no se puede volver a ver.
 
 #### Dar permisos de lectura al token
 
- Ve a Access Control → Permissions, añade una entrada:
+	Ve a Access Control → Permissions, añade una entrada:
 
-   **Path**: /datastore/zfs_backup
+ 		**Path**: /datastore/zfs_backup
 
-   **API Token:** selecciona el que creaste (root@pam!rasp-backup)
+ 		**API Token:** selecciona el que creaste (root@pam!rasp-backup)
 
-   **Role**: DatastoreReader (permite listar snapshots y leer/restaurar, pero no borrar ni modificar)
+ 		**Role**: DatastoreReader (permite listar snapshots y leer/restaurar, pero no borrar ni modificar)
 
 ### Certificado
 
