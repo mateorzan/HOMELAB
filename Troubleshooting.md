@@ -367,3 +367,9 @@ volumes:
 Vamos a N8N y comprobamos que se aplico
 
 ![1788701083816](image/Troubleshooting/1788701083816.png)
+
+## Troubleshooting Ansible
+
+### Error borrado scripts en repositorio local recrearlos y crear repo en GitHub
+
+Creamos un repo en Github privado para almacenar todos los playbooks y asegurarnos que nunca se pierdan, esto fue debido a la perdida de los playbooks tras una caida de luz. Todo documentado en Zimablade1.md como crear repo en Ansible.

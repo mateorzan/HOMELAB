@@ -448,6 +448,16 @@ Luego tenemos que crear el repositorio para almacenar los playbooks yo voy a alm
 
 ![1787139065927](image/Zimablade1/1787139065927.png)
 
+Para mayor redundacia voy a crear un repo privado en Github y conectarlo aqui, para esto necesitas configurar la key store con la ssh key que configures en la maquina donde corre semaphore y conectar esa key a github.
+
+`ssh-keygen -t ed25519 -C "semaphore-homelab" -f ~/.ssh/semaphore_github -N ""`
+
+![1789127009991](image/Zimablade1/1789127009991.png)
+
+Luego simplemente creas el repositorio y añades las credenciales al repo que acabas de crear en github.
+
+![1789127109327](image/Zimablade1/1789127109327.png)
+
 Luego por ultimo configuramos el inventory que es donde especidficamos la IP y a donde se tiene que conectar
 
 ![1787141116285](image/Zimablade1/1787141116285.png)
@@ -468,6 +478,10 @@ EOF
 ```
 
 ![1787139488703](image/Zimablade1/1787139488703.png)
+
+Desde el repo es mas facil crear los playbooks, simplemente los creas tu a mano desde el dispositivo que quieras y subes los cambios al repo.
+
+![1789127486066](image/Zimablade1/1789127486066.png)
 
 Ahora a vamos al ultimo paso vamos a crear la Task Template esto es simplemente añadir todo lo que acabamos de crear
 
