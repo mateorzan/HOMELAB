@@ -1,7 +1,10 @@
-
 # Configuración base de Seguridad Maquinas Homelab
 
+Aqui voy a documentar todas las configuraciones basicas que tendrian que tener todos mis contenedroes para asegurarme de que sean seguros y den los menos errores posibles.
+
 ## Ubuntu
+
+En toda maquina se necesitan dos cosas basicas controlar quien accede a nuestro servidor y mantener la ultima version para evitar brechas de seguridad, por ello es basico tener un firewall(ufw), un control de conexiones ssh(fail2ban) y actualizaciones automáticas(unattended-upgrades).
 
 ```
 # Actualizar sistema
