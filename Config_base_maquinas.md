@@ -23,7 +23,22 @@ sudo ufw status verbose
 
 # fail2ban (bloqueo de fuerza bruta SSH)
 sudo systemctl enable fail2ban --now
+# Status servicio 
+sudo systemctl status fail2ban
+# Ver status de IPs baneadas ssh
+sudo fail2ban-client status sshd 
 
 # Actualizaciones automáticas de seguridad
 sudo dpkg-reconfigure --priority=low unattended-upgrades
 ```
+
+* [X] Network-Services
+
+  * [ ] UFW
+  * [X] Fail2Ban
+  * [X] Unattend-Upgrades
+* [ ] GhostVM
+
+  * [ ] UFW
+  * [ ] Fail2Ban
+  * [ ] Unattend-Upgrades
