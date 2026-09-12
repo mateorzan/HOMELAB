@@ -368,8 +368,14 @@ Vamos a N8N y comprobamos que se aplico
 
 ![1788701083816](image/Troubleshooting/1788701083816.png)
 
-## Troubleshooting Ansible
+## Ansible
 
 ### Error borrado scripts en repositorio local recrearlos y crear repo en GitHub
 
 Creamos un repo en Github privado para almacenar todos los playbooks y asegurarnos que nunca se pierdan, esto fue debido a la perdida de los playbooks tras una caida de luz. Todo documentado en Zimablade1.md como crear repo en Ansible.
+
+## Bloqueos Cloudfare Futbol VPS
+
+### Se bloquean todos mis tunneles los fines de semana por culpa de la LaLiga
+
+Vamos a configurar un dominio con un VPS externo para asi usar una IP personalizada que no sea bloqueada por LaLiga. Probamos con Oracle que ta un servicio Cloud Gratuito. La configuracion esta siendo documentada en [Zimablade2.mb](Zimablade2.md)
