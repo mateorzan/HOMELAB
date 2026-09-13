@@ -301,3 +301,49 @@ collections:
 - [ ] Autenticar Tailscale (`tailscale up`) — el playbook solo instala el binario, falta la conexión con auth key
 - [ ] Decidir cómo exponer el puerto de KeePass en Docker: **Docker se salta las reglas de `ufw`** al publicar puertos, así que hay que publicar el puerto solo en la interfaz de Tailscale (o instalar `ufw-docker`) para no exponerlo sin querer a la LAN/internet
 - [ ] Verificar funcionamiento completo antes de apagar/eliminar la LXC Alpine original
+
+## 6. Rsync desde alpine a ubuntu
+
+Vamos a copiar todos los datos de nuestros contenedores docker a la nueva LXC importante antes parar todos los servicios.
+
+```
+docker stop $(docker ps -q) # Para todos los contenedores en ejecución.
+
+# Ahora copiamos con rsync
+rsync -avz -e ssh \
+  --exclude='.ssh' \
+  --exclude='.ash_history' \
+  --exclude='.local' \
+  --exclude='.cache' \
+  --exclude='.docker' \
+  /root/ ubuntu-keepass@IP_NUEVA:/home/ubuntu-keepass/docker/
+
+# Tambien tenemos que copiar los volumenes de docker con los que cree mis servicios.
+
+rsync -avz -e ssh /var/lib/docker/volumes/ ubuntu-keepass@IP_NUEVA:/home/ubuntu-keepass/docker/volumes
+
+# Luego los podemos arrancar
+docker start $(docker ps -a -q)
+```
+
+Una vez copiado los volumenes hay que crearlos en la nueva maquina Ubuntu y moverlo a la carptea de docker con sudo
+
+```
+sudo su
+
+cp home/ubuntu-keepass/docker/volumes/<volume> /var/lib/docker/volumes/
+
+docker volume create <volume-name>
+
+docker volume list
+```
+
+### n8n
+
+Hay que cambiar los permios de root a usuario.
+
+```
+sudo chown -R 1000:1000 /var/lib/docker/volumes/n8n_data
+
+docker compose up -d y ya arranca el n8n
+```
