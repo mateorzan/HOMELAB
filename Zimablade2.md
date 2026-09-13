@@ -1179,6 +1179,8 @@ Resultado: `homelabeiro.com` resolviendo correctamente a `92.5.135.252` — prop
 
 **Estado actual de este dominio:** `homelabeiro.com` queda **dejado intencionalmente en modo prueba**, sirviendo en producción real a través del VPS + rathole + NPM, sin pasar por Cloudflare. El resto de dominios siguen sin tocar, detrás de Cloudflare Tunnel como siempre.
 
+**Nota — error transitorio tras el cambio (causa real):** justo después de desactivar el proxy, el navegador mostró un error `525 SSL handshake failed`. La causa real no fue caché DNS (esa teoría inicial se descartó): `homelabeiro.com` no pasaba por NPM hasta ahora — tenía su propio `cloudflared` instalado directamente en esa VM, apuntando al servicio sin pasar por el reverse proxy central. Al cambiar el DNS al VPS + rathole, el tráfico llegaba hasta NPM, pero NPM no tenía ningún **Proxy Host** configurado para ese dominio (sin backend ni certificado asociados), de ahí el fallo de handshake. Se resolvió creando el Proxy Host correspondiente en NPM — aprovechando el cambio para **centralizar `homelabeiro.com` en NPM** como el resto de dominios, en vez de mantener un `cloudflared` independiente en esa VM.
+
 **Para revertir `homelabeiro.com` a Cloudflare cuando se decida:**
 
 * Type: `A` → `CNAME`
