@@ -972,6 +972,226 @@ sudo dpkg-reconfigure --priority=low unattended-upgrades
 
 **Nota pendiente:** además del `ufw` interno, Oracle tiene su propio firewall de red (Security List de la VCN) — habrá que abrir ahí también los puertos 80/443 cuando se instale el reverse proxy.
 
+##### 11. Decisión de arquitectura: rathole sin Caddy
+
+Se descartó montar Caddy como reverse proxy en el VPS — ya existe **Nginx Proxy Manager (NPM)** en el homelab gestionando TLS y el routing por dominio para todos los servicios. `rathole` en el VPS actúa como **tubería TCP pura** (reenvía el puerto 80/443 tal cual), sin terminar TLS ni decidir dominios — esa lógica la sigue llevando NPM en destino, igual que hace ahora con Cloudflare Tunnel.
+
+```
+Internet → dominio (DNS) → VPS: rathole servidor (solo reenvía)
+                                    ↓ túnel saliente cifrado
+                               Homelab: rathole cliente
+                                    ↓
+                               NPM (TLS + routing por dominio, sin cambios)
+                                    ↓
+                               Ghost / web NBA / fredricwatch.com
+```
+
+Convive sin conflicto con `cloudflared`, que sigue corriendo en la misma máquina del homelab — ambos son solo clientes salientes, ninguno escucha puertos, así que no hay colisión. Mientras el DNS apunte a Cloudflare, el tráfico real pasa por ahí; el túnel de rathole queda listo pero inactivo hasta que se cambie el DNS.
+
+##### 12. Generación del token y elección del puerto de control
+
+```bash
+openssl rand -hex 32
+```
+
+Mismo token usado en servidor (VPS) y cliente (homelab) — es lo que autentica la conexión.
+
+Se decidió **no usar el 2333 por defecto** (el de la documentación oficial de rathole, muy predecible/escaneado) y usar en su lugar el puerto **58422**, como medida extra de seguridad por oscuridad.
+
+##### 13. Instalación de rathole en el VPS (servidor, arquitectura ARM)
+
+```bash
+cd ~
+wget https://github.com/rapiz1/rathole/releases/latest/download/rathole-aarch64-unknown-linux-musl.zip
+sudo apt install -y unzip
+unzip rathole-aarch64-unknown-linux-musl.zip
+sudo mv rathole /usr/local/bin/
+rathole --version
+```
+
+##### 15. Configuración del servidor y servicio systemd
+
+`/etc/rathole/server.toml`:
+
+```toml
+[server]
+bind_addr = "0.0.0.0:58422"
+
+[server.services.http]
+token = "TOKEN_GENERADO"
+bind_addr = "0.0.0.0:80"
+
+[server.services.https]
+token = "TOKEN_GENERADO"
+bind_addr = "0.0.0.0:443"
+```
+
+`/etc/systemd/system/rathole-server.service`:
+
+```ini
+[Unit]
+Description=Rathole Server
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/rathole --server /etc/rathole/server.toml
+Restart=always
+RestartSec=5
+User=root
+
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable rathole-server --now
+sudo systemctl status rathole-server
+```
+
+##### 16. Firewall interno del VPS (ufw) — puerto de control
+
+```bash
+sudo ufw allow 58422/tcp
+```
+
+(80 y 443 ya estaban abiertos desde el endurecimiento inicial, paso 10)
+
+##### 17. Security List de Oracle — apertura de los tres puertos
+
+Oracle tiene **dos capas de firewall** independientes: `ufw` (dentro de la instancia) y el **Security List** de la VCN (a nivel de red). Sin abrir esta segunda capa, nada llega aunque `ufw` esté bien configurado.
+
+En la consola: **Networking → Virtual Cloud Networks → [tu VCN]→  [tu subnet]→ Security Lists → Default Security List → Add Ingress Rules**
+
+![1789333912456](image/Zimablade2/1789333912456.png)
+
+Tres reglas (Source Port Range vacío/All en las tres — ese campo es el puerto de origen del visitante, no el destino):
+
+| Source CIDR | IP Protocol | Destination Port Range |
+| ------------- | ----------- | ---------------------- |
+| `0.0.0.0/0` | TCP | `80` |
+| `0.0.0.0/0` | TCP | `443` |
+| `0.0.0.0/0` | TCP | `58422` |
+
+##### 18. Cliente rathole en Docker (homelab)
+
+Instalado en la misma máquina donde ya corre `cloudflared` (Network-Services), en la misma red que NPM.
+
+`docker-compose.yml`:
+
+```yaml
+services:
+  rathole-client:
+    image: rapiz1/rathole:latest
+    container_name: rathole-client
+    restart: always
+    network_mode: host
+    volumes:
+      - ./client.toml:/app/config.toml
+    command: --client /app/config.toml
+```
+
+`client.toml`:
+
+```toml
+[client]
+remote_addr = "92.5.135.252:58422"
+
+[client.services.http]
+token = "TOKEN_GENERADO"
+local_addr = "127.0.0.1:80"
+
+[client.services.https]
+token = "TOKEN_GENERADO"
+local_addr = "127.0.0.1:443"
+```
+
+(NPM publica sus puertos como `80:80`/`443:443` en el mismo host, así que `127.0.0.1` es suficiente con `network_mode: host`)
+
+```bash
+docker compose up -d
+docker logs -f rathole-client
+```
+
+##### 19. Incidencia encontrada y resuelta: "No route to host"
+
+Al levantar el cliente, la conexión fallaba con:
+
+```
+Failed to connect to 92.5.135.252:58422: No route to host (os error 113)
+```
+
+**Diagnóstico realizado (todo correcto, no era la causa):**
+
+* `rathole-server` activo y escuchando en `0.0.0.0:58422` ✅
+* `ufw` del VPS con las reglas correctas ✅
+* IP pública confirmada con `curl ifconfig.me` ✅
+* `telnet` desde fuera confirmó que el puerto no respondía → problema de red, no de configuración de rathole
+
+**Causa probable:** al haber tenido fricción durante la creación de la VCN/subnet pública (paso 5), es posible que el Internet Gateway/routing no hubiera terminado de provisionarse correctamente.
+
+**Solución:** un `reboot` de la instancia del VPS resolvió el problema — tras el reinicio, el control channel se estableció correctamente (`Control channel established` en los logs del cliente).
+
+##### 20. Verificación end-to-end
+
+Pruebas con `curl`, sin tocar DNS, forzando la conexión a la IP del VPS:
+
+```bash
+# HTTP
+curl -H "Host: <dominio>" http://92.5.135.252
+
+# HTTPS (mantiene el SNI correcto para que NPM sirva el certificado adecuado)
+curl -v --resolve <dominio>:443:92.5.135.252 https://<dominio>
+```
+
+**Resultado:** confirmado funcionando correctamente para los dominios dados de alta en NPM — todo el camino (VPS → rathole → homelab → NPM → certificado → contenido) responde bien tanto en HTTP como HTTPS.
+
+---
+
+## Estado actual
+
+✅ VPS creado en Oracle Cloud Free Tier (Frankfurt), Ubuntu 24.04, shape Ampere A1.Flex (1 OCPU/6GB), IP pública fija `92.5.135.252`
+✅ Firewall, fail2ban y actualizaciones automáticas configurados
+✅ Túnel `rathole` activo (servidor en el VPS puerto 58422, cliente en Docker en el homelab) como tubería TCP hacia NPM
+✅ Firewall de Oracle (Security List) y `ufw` alineados
+✅ Tráfico HTTP/HTTPS verificado end-to-end contra NPM, sin tocar DNS
+✅ Convive sin conflicto con `cloudflared` (ambos activos a la vez)
+
+### 21. Prueba real de conmutación DNS (homelabeiro.com)
+
+Con el proceso manual ya claro (ver "Pendiente" más abajo), se hizo una prueba real sobre `homelabeiro.com` (dominio de menor criticidad, usado como conejillo de indias antes de tocar nba-analytics.com o fredricwatch.com).
+
+**Cambio realizado en Cloudflare** (DNS → Records → Edit sobre el registro de `homelabeiro.com`):
+
+* **Type**: de `CNAME` (apuntando al túnel `XXXXXXXXXXXXXXXXXXX.cfargotunnel.com`) → cambiado a `A`
+* **Target/Content**: `92.5.135.252` (IP del VPS)
+* **Proxy status**: desactivado el toggle "Proxied" (nube naranja 🟠 → gris ⚪ "DNS only")
+* Guardado con "Save"
+
+**Verificación de propagación:**
+
+```bash
+nslookup homelabeiro.com 1.1.1.1
+```
+
+Resultado: `homelabeiro.com` resolviendo correctamente a `92.5.135.252` — propagó en pocos minutos (TTL "Auto").
+
+**Estado actual de este dominio:** `homelabeiro.com` queda **dejado intencionalmente en modo prueba**, sirviendo en producción real a través del VPS + rathole + NPM, sin pasar por Cloudflare. El resto de dominios siguen sin tocar, detrás de Cloudflare Tunnel como siempre.
+
+**Para revertir `homelabeiro.com` a Cloudflare cuando se decida:**
+
+* Type: `A` → `CNAME`
+* Target: `92.5.135.252` → `xxxxxxxxxxxxxxx.cfargotunnel.com`
+* Proxy status: reactivar "Proxied"
+
+## Pendiente
+
+**Gestión del cambio de DNS para el resto de dominios** — decidir e implementar el modelo de conmutación entre Cloudflare (por defecto) y el VPS (fallback en días de bloqueo de LaLiga), ya validado con éxito en `homelabeiro.com`:
+
+* **Manual**: en el panel de Cloudflare (DNS → Records), cambiar el registro A/CNAME del dominio a `92.5.135.252` y desactivar el proxy (nube naranja 🟠 → gris ⚪ "DNS only"). Revertir del mismo modo cuando pase el bloqueo. Se hace por dominio, no hay interruptor global.
+* **Automático**: script (cron) que monitorice el dominio y cambie el DNS vía API de Cloudflare si detecta caída, revirtiendo cuando vuelva a responder — pendiente de diseñar si se decide ir por esta vía.
+
 # Network-Services
 
 Migre el servidor de mi PVE hacia mi PVE2 ya que con mi VM con ZimaOS mi PVE ya tiene mucha carga y mi PVE2 tiene menos carga, use la herramienta que viene integrada en Proxmox para migrar un contenedor de un cluster a otro.
