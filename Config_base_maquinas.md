@@ -34,11 +34,11 @@ sudo dpkg-reconfigure --priority=low unattended-upgrades
 
 * [X] Network-Services
 
-  * [ ] UFW
+  * [X] UFW
   * [X] Fail2Ban
   * [X] Unattend-Upgrades
-* [ ] GhostVM
+* [X] GhostVM
 
-  * [ ] UFW
-  * [ ] Fail2Ban
-  * [ ] Unattend-Upgrades
+  * [X] UFW
+  * [X] Fail2Ban
+  * [X] Unattend-Upgrades
