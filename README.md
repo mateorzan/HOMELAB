@@ -34,7 +34,7 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ### 🔹 Diagrama de Infraestructura
 
-![1788172921746](image/README/1788172921746.png)
+![1789385799446](image/README/1789385799446.png)
 
 ---
 
@@ -117,6 +117,7 @@ DataCenter (Alta Disponibilidad)
 | ZimaOS                | Gestión de servicios Unificado |
 | Clodufared            | Tunnel                          |
 | Ansible Semaphore     | Automatización                 |
+| Rathole               | Tunnel                          |
 
 ---
 
