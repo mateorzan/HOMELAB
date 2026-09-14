@@ -1,4 +1,5 @@
-# Set Up Zimablade2 servidor secundario/BACKUP 👮
+
+# et Up Zimablade2 servidor secundario/BACKUP 👮
 
 ## Objetivo
 
@@ -220,7 +221,7 @@ Ahora ya podemos hacer nuestro primer Backup para esto vamos a la VM que queremo
 
 ![1768652703900](image/Zimablade2/1768652703900.png)
 
-# KeePass Container LXC
+# KeePass Container LXC / DEPRECATED / MI
 
 ## Config CT
 
@@ -337,7 +338,9 @@ Una vez añadida con nuestra url concreta ya debería de mandar todas las notifi
 
 Para configurar las alertas vamos a usar un Servicio de Chat llamado Gotify, este es compatible y esta implementado en Proxmox por lo que simplemente tendremos que lanzar un docker y conectarlo a nuestro DataCenter.
 
-Docker
+### Gotify
+
+#### Docker
 
 ```bash
 docker run -d \

@@ -331,12 +331,24 @@ Una vez copiado los volumenes hay que crearlos en la nueva maquina Ubuntu y move
 ```
 sudo su
 
-cp home/ubuntu-keepass/docker/volumes/<volume> /var/lib/docker/volumes/
+cp -r /home/ubuntu-keepass/docker/volumes/<volume> /var/lib/docker/volumes/
 
 docker volume create <volume-name>
 
 docker volume list
 ```
+
+## 7. Migracion de cada servicio
+
+Ahora tenemos que migrar y volver a arrancar todos estos servicios.
+
+- [X] n8n
+- [X] vaultwarden
+- [X] beszel
+- [X] beszel-agent
+- [X] uptime-kuma
+- [X] Gotify
+- [X] Portainer
 
 ### n8n
 
@@ -347,3 +359,160 @@ sudo chown -R 1000:1000 /var/lib/docker/volumes/n8n_data
 
 docker compose up -d y ya arranca el n8n
 ```
+
+### Beszel
+
+Beszel funciono sin problemas solo que aproveche y cree un compose ya que usaba docker run antes
+
+```
+services:
+   beszel:
+      image: henrygd/beszel
+      container_name: beszel
+      restart: unless-stopped
+      environment:
+        - APP_URL:http://localhost:8090
+      ports:
+        - 8090:8090
+      volumes:
+        - beszel_data:/beszel_data
+volumes:
+  beszel_data:
+    external: true
+```
+
+### Gotify
+
+Con gotify tuve un problema y es que no tenia ningun volumen ni carpeta asignada asi que tuve que sacar los datos del propio contenedor copiarlos a esta maquina ubuntu y crear el compose con el volumen asignado.
+
+```
+# Sacamos los datos del contenedor
+docker exec gotify ls /app/data
+docker cp gotify:/app/data ./gotify_data
+
+# rsync para copiar los datos
+rsync -avz -e ssh ./gotify_data ubuntu-keepass@192.168.1.X:/home/ubuntu-keepass/docker/gotify/
+
+# docker-compose.yml
+services:
+   gotify:
+      image: gotify/server
+      container_name: gotify
+      restart: unless-stopped
+      ports:
+        - 8081:80
+      volumes:
+        - ./gotify_data:/app/data
+```
+
+### Uptime Kuma
+
+Con kuma me paso lo mismo que con n8n tuve problemas de permisos en el volumen y tuve que cambiarlos, ademas de crear el compose nuevo ya que lo lance con docker run en su momento.
+
+```
+sudo chown -R 1000:1000 /var/lib/docker/volumes/uptime-kuma
+
+services:
+   uptime-kuma:
+       image: louislam/uptime-kuma:2
+       container_name: uptime-kuma
+       restart: always
+       ports:
+         - 3001:3001
+       volumes:
+         - uptime-kuma:/app/data
+volumes:
+   uptime-kuma:
+     external: true
+```
+
+### Portainer
+
+Con portainer no tuve problemas solo tuve que crear el compose.
+
+```
+services:
+   portainer:
+      image: portainer/portainer-ce:latest
+      container_name: portainer
+      restart: always
+      ports:
+        - 9000:9443
+        - 8001:8001
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - portainer_data:/data
+volumes:
+   portainer_data:
+      external: true
+```
+
+### Vaultwarden
+
+En vaulwarden se me olvido copiar la carptea que guarda la data ya que no estaba en root estaba en /vw-data asi que tenemos que lanzar otro rsync.
+
+```
+# Copiamos la carpeta vw-data
+rsync -avz -e ssh /vw-data/ ubuntu-keepass@IP:/home/ubuntu-keepass/docker/vaultwarden/vw-data/
+
+# docker-compose.yml
+services:
+   vaultwarden:
+      image: vaultwarden/server:latest
+      container_name: vaultwarden
+      restart: unless-stopped
+      ports:
+        - 8000:80
+      environment:
+        - DOMAIN=http://192.168.1.60:8000
+      volumes:
+        - ./vw-data/:/data/
+```
+
+### Upsnasp
+
+Aqui no tuve que hacer nada ya tenia el compose solo lo levante
+
+```
+services:
+  upsnap:
+    container_name: upsnap
+    image: ghcr.io/seriousm4x/upsnap:5
+    restart: unless-stopped
+    ports:
+      - 8099:8099
+    volumes:
+      - ./data:/app/pb_data
+    environment:                          # _ indentaci_n corregida (estaba con 5 espacios extra)
+      - TZ=Europe/Madrid
+      - UPSNAP_HTTP_LISTEN=0.0.0.0:8099  # _ cambiado de 127.0.0.1 a 0.0.0.0
+      - UPSNAP_INTERVAL=*/10 * * * * *
+      - UPSNAP_SCAN_RANGE=192.168.1.0/24
+      - UPSNAP_SCAN_TIMEOUT=500ms
+      - UPSNAP_PING_PRIVILEGED=true
+      - UPSNAP_WEBSITE_TITLE=HOMELAB
+    entrypoint: /bin/sh -c "apk update && apk add --no-cache openssh-client && rm -rf /var/cache/apk/* && ./upsnap serve"
+```
+
+### Besezel-agent
+
+No tuve que hacer nada ya estaba el compose creado.
+
+## 8. Cambio de IP (Opcional)
+
+Debido a que esta es una migracion y la LXC de alpine se va a dejar de usar yo voy a restablecer la IP local que estaba usando asi mantengo las mismas urls y no tengo que cambiar mis accesos directos ni endpoint. Esto lo puedes hacer apagando las dos LXCs desde Proxmox y desde la LXC de Ubuntu vas a LXC-ubuntu --> Network --> net0.
+
+Tambien por último nos quedaria iniciar sesion en Tailscale esto tambien lo deje para el final ya que sabia que iba a hacer este cambio de IP
+
+`sudo tailscale up`
+
+## Resultado
+
+Ahora tenemos corriendo todo exactamente como lo teniamos en el mismo estado donde empezamos la migración. Objetivos conseguidos.
+
+- No se perdio ningún dato.
+- Todo sigue la misma configuración y funcionando igual.
+- Mejoramos la seguridad y el mantenimiento de nuestro servidor.
+- Ahora tenemos una distribucion mucho mas seguro y controlada aunque perdamos algo de rendimiento.
+
+Hasta aquí la migración con esto aprendi sobre como trabajar con Ansible Semaphore para la gestion automática de LXCs dentro de proxmox, me parece algo muy útil y que voy a seguir implementando en todo mi Homelab.
