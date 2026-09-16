@@ -1,4 +1,3 @@
-
 # et Up Zimablade2 servidor secundario/BACKUP 👮
 
 ## Objetivo
@@ -1099,7 +1098,7 @@ services:
 
 ```toml
 [client]
-remote_addr = "92.5.135.252:58422"
+remote_addr = "IP_ORACLE:58422"
 
 [client.services.http]
 token = "TOKEN_GENERADO"
@@ -1122,7 +1121,7 @@ docker logs -f rathole-client
 Al levantar el cliente, la conexión fallaba con:
 
 ```
-Failed to connect to 92.5.135.252:58422: No route to host (os error 113)
+Failed to connect to IP_ORACLE:58422: No route to host (os error 113)
 ```
 
 **Diagnóstico realizado (todo correcto, no era la causa):**
@@ -1142,10 +1141,10 @@ Pruebas con `curl`, sin tocar DNS, forzando la conexión a la IP del VPS:
 
 ```bash
 # HTTP
-curl -H "Host: <dominio>" http://92.5.135.252
+curl -H "Host: <dominio>" http://IP_ORACLE
 
 # HTTPS (mantiene el SNI correcto para que NPM sirva el certificado adecuado)
-curl -v --resolve <dominio>:443:92.5.135.252 https://<dominio>
+curl -v --resolve <dominio>:443:IP_ORACLE https://<dominio>
 ```
 
 **Resultado:** confirmado funcionando correctamente para los dominios dados de alta en NPM — todo el camino (VPS → rathole → homelab → NPM → certificado → contenido) responde bien tanto en HTTP como HTTPS.
