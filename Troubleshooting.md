@@ -519,3 +519,17 @@ Creamos un repo en Github privado para almacenar todos los playbooks y asegurarn
 ### Se bloquean todos mis tunneles los fines de semana por culpa de la LaLiga
 
 Vamos a configurar un dominio con un VPS externo para asi usar una IP personalizada que no sea bloqueada por LaLiga. Probamos con Oracle que ta un servicio Cloud Gratuito. La configuracion esta siendo documentada en [Zimablade2.mb](Zimablade2.md)
+
+## Error Network_Services no arranca contenedores docker
+
+### No conseguia arrancar los contenedores por un conflicto de una nueva actualizacion
+
+El error era el siguiente:
+
+```Shell
+mateorzan@Network-Services:~$ sudo docker start cloudflared
+Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: open sysctl net.ipv4.ip_unprivileged_port_start file: reopen fd 8: permission denied
+failed to start containers: cloudflared
+```
+
+ Con este error docker no era capaz de crear las interfaces de red aisladas de los contenedores por lo que tive que configurar todos como host `network_mode: host`
