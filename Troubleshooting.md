@@ -305,6 +305,146 @@ Luego puedes verificar que todo este sano con
 
 `lvs -a -o+lv_health_status pve`
 
+### Solucion definitiva Script bash configurado como systemd
+
+Para no tener que hacer este proceso a mano creamos un script bash que hace exactamente lo mismo pero automaticamente, y para hacerlo aun mas automatico lo añaidmos al systemctl para que lo haga automaticamente al arrancar.
+
+Script
+
+```Shell
+#!/usr/bin/env bash
+#
+# pve2-lv-recovery.sh
+#
+# Recicla (desactiva/reactiva) el thin pool pve/data en pve2 cuando arranca
+# mal porque no espera lo suficiente. Comprueba el estado con
+# lv_health_status y, si hace falta, reintenta con vgchange -ay.
+#
+# Se puede ejecutar a mano o vía el servicio systemd asociado.
+
+set -euo pipefail
+
+VG="pve"
+LV="data"
+LOG="/var/log/pve2-lv-recovery.log"
+MAX_WAIT=120       # segundos máximos esperando a que aparezca la VG
+POLL_INTERVAL=5
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') $*" | tee -a "$LOG"
+}
+
+get_health() {
+    lvs -a -o+lv_health_status --noheadings "$VG" 2>/dev/null | awk '{$1=$1};1'
+}
+
+is_healthy() {
+    local status
+    status=$(get_health || true)
+    if [ -z "$status" ]; then
+        return 1
+    fi
+    if echo "$status" | grep -qiE "unhealthy|partial|error"; then
+        return 1
+    fi
+    # además, el LV principal debe aparecer activo
+    if ! lvs -o lv_attr --noheadings "$VG/$LV" 2>/dev/null | grep -q '^\s*.\{4\}a'; then
+        return 1
+    fi
+    return 0
+}
+
+wait_for_vg() {
+    local waited=0
+    while ! vgs "$VG" >/dev/null 2>&1; do
+        if [ "$waited" -ge "$MAX_WAIT" ]; then
+            log "ERROR: la VG '$VG' no apareció tras ${MAX_WAIT}s"
+            return 1
+        fi
+        sleep "$POLL_INTERVAL"
+        waited=$((waited + POLL_INTERVAL))
+    done
+    return 0
+}
+
+recycle_lv() {
+    log "Desactivando $VG/$LV, ${LV}_tmeta, ${LV}_tdata..."
+    lvchange -an "$VG/$LV" || true
+    lvchange -an "$VG/${LV}_tmeta" || true
+    lvchange -an "$VG/${LV}_tdata" || true
+
+    log "Reactivando ${LV}_tmeta, ${LV}_tdata, $LV (esto puede tardar varios minutos)..."
+    lvchange -ay "$VG/${LV}_tmeta"
+    lvchange -ay "$VG/${LV}_tdata"
+    lvchange -ay "$VG/$LV"
+}
+
+main() {
+    log "=== Inicio de recuperación LVM $VG/$LV ==="
+
+    if ! wait_for_vg; then
+        exit 1
+    fi
+
+    if is_healthy; then
+        log "El volumen ya está sano, no hace falta hacer nada."
+        exit 0
+    fi
+
+    log "El volumen no está sano. Estado actual:"
+    get_health | tee -a "$LOG"
+
+    log "Iniciando ciclo de desactivación/reactivación..."
+    recycle_lv
+
+    if is_healthy; then
+        log "Recuperación OK tras el ciclo lvchange."
+        exit 0
+    fi
+
+    log "Sigue sin estar sano. Probando 'vgchange -ay $VG'..."
+    vgchange -ay "$VG" || true
+
+    if is_healthy; then
+        log "Recuperación OK tras vgchange."
+        exit 0
+    fi
+
+    log "ERROR: no se pudo recuperar el volumen automáticamente. Estado final:"
+    get_health | tee -a "$LOG"
+    exit 1
+}
+
+main
+```
+
+Service
+
+```Shell
+[Unit]
+Description=Recuperación automática de los LVs de Proxmox en pve2
+# Ajusta esto si tu retraso real es mayor: el problema es justo que
+# el arranque normal de LVM no espera lo suficiente ni reintenta.
+After=local-fs.target lvm2-activation.service
+Wants=lvm2-activation.service
+
+[Service]
+Type=oneshot
+# Margen extra antes de comprobar nada, por si la VG tarda en aparecer
+ExecStartPre=/bin/sleep 20
+ExecStart=/usr/local/bin/pve2-lv-recovery.sh
+StandardOutput=journal
+StandardError=journal
+# Si falla, reintenta un par de veces con margen entre intentos
+Restart=on-failure
+RestartSec=30
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ## Bad Sectors HDD PVE
 
 ### Parchear sectores muertos HDD PVE
