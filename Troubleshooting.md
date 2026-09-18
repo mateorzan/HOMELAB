@@ -418,6 +418,8 @@ main() {
 main
 ```
 
+Creamos el ejecutable `chmod +x pve2-lv-recovery.sh`
+
 Service
 
 ```Shell
@@ -443,6 +445,17 @@ StartLimitBurst=3
 
 [Install]
 WantedBy=multi-user.target
+```
+
+Creamos el servicio
+
+```
+# Movemos el archivo a la carpeta de servicios
+mv pve2-lv-recovery.service /etc/systemd/system/
+
+# Activamos el servicio y vemos que esta activo
+systemctl enable pve2-lv-recovery.service 
+systemctl status pve2-lv-recovery.service
 ```
 
 ## Bad Sectors HDD PVE
