@@ -34,7 +34,7 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ### 🔹 Diagrama de Infraestructura
 
-![1789385799446](image/README/1789385799446.png)
+![1789826707526](image/README/1789826707526.png)
 
 ---
 

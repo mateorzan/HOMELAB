@@ -546,3 +546,7 @@ failed to start containers: cloudflared
 ```
 
  Con este error docker no era capaz de crear las interfaces de red aisladas de los contenedores por lo que tive que configurar todos como host `network_mode: host`
+
+### Solución definitiva
+
+Actualizamos el nodo a Proxmox VE 9 esto solucionó este problema ya que era un error que se solucione en actualizaciones mós actuales ahora tenemos el nodo en la última versión de proxmox.
