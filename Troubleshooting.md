@@ -1,5 +1,3 @@
-es
-
 # TroubleShooting
 
 Como la raspberry y Zima tienen diferentes arquitecturas no todos los servicios se pueden ejecutar en los dos servidores, por lo que hay servicios que no son multi-arch que hay que ejecutar por separado.

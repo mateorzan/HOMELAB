@@ -26,7 +26,7 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 - 💾 Backups incrementales diarios
 - ⚖️ Balance estructural
 - 🌍 Servicios 24/7
-- 🤖 Nodo independiente para IA
+- 🤖 IA
 
 ---
 
