@@ -9,7 +9,7 @@
 [![VPN](https://img.shields.io/badge/Network-Tailscale-000000?style=for-the-badge&logo=tailscale&logoColor=white)](https://tailscale.com/)
 [![Backups](<https://img.shields.io/badge/Backups-Proxmox%20Backup%20Server-009688?style=for-the-badge&logo=proxmox&logoColor=white>)](https://www.proxmox.com/en/proxmox-backup-server)
 [![ARM Node](<https://img.shields.io/badge/ARM-Raspberry%20Pi%205-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white>)](https://www.raspberrypi.com/products/raspberry-pi-5/)
-[![Status](<https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge>)]()
+[![Status](<https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge>)](/README.md)
 
 </p>
 
@@ -26,7 +26,7 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 - 💾 Backups incrementales diarios
 - ⚖️ Balance estructural
 - 🌍 Servicios 24/7
-- 🤖 Nodo independiente para IA
+- 🤖 IA
 
 ---
 
@@ -34,36 +34,20 @@ Este proyecto tiene como objetivo construir una infraestructura doméstica orien
 
 ### 🔹 Diagrama de Infraestructura
 
-```mermaid
-graph TD
-    Router --> Tailscale
-    Tailscale --> ProxmoxCluster
-    Tailscale --> RaspberryPi
-
-    subgraph DataCenter
-        ProxmoxCluster --> Nodo1[ZimaBlade1 PVE]
-        ProxmoxCluster --> Nodo2[ZimaBlade2 PVE2]
-        Nodo1 --> ZimaOS
-        Nodo2 --> PBS[Backup Server]
-  Nodo2 --> LXC_Keepas
- Nodo2 --> LXC_Network_Services
- Nodo2 --> GhostVM
-    end
-    RaspberryPi --> IA[Servicios IA]
-```
+![1789826707526](image/README/1789826707526.png)
 
 ---
 
 ### 🔹 Estructura Actual
 
-```text
+```Markdown
 DataCenter (Proxmox Cluster)
 │
 ├── pve     → zimablade1 (Nodo 1 - Servicios)
 ├── pve2    → zimablade2 (Nodo 2 - Backup / Replicación / Servicios)
 │
 └── Raspberry Pi 5
-    └── Servidor independiente corriendo servicios de IA
+    └── Servidor independiente corriendo servicios
 ```
 
 ---
@@ -132,6 +116,8 @@ DataCenter (Alta Disponibilidad)
 | Glance                | Dashboard                       |
 | ZimaOS                | Gestión de servicios Unificado |
 | Clodufared            | Tunnel                          |
+| Ansible Semaphore     | Automatización                 |
+| Rathole               | Tunnel                          |
 
 ---
 
@@ -180,11 +166,13 @@ DataCenter (Alta Disponibilidad)
 - [X] Monitorización avanzada
 - [X] Migración/Expansión a almacenamiento SSD
 - [ ] Añadir nodo para quorum
+- [ ] Añadir equipos de red Router y Swicth con control de VLANs
 
 ### Automatización
 
 - [X] Backups automáticos verificados
-- [X] Alertas por caída de servicios
+- [X] Alertas por caída de servicios y servidores
+- [ ] Actualizaciones de maquinas automaticas
 - [ ] CI/CD para despliegues
 
 ### IA (Raspberry Pi 5)

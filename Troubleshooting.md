@@ -303,6 +303,159 @@ Luego puedes verificar que todo este sano con
 
 `lvs -a -o+lv_health_status pve`
 
+### Solucion definitiva Script bash configurado como systemd
+
+Para no tener que hacer este proceso a mano creamos un script bash que hace exactamente lo mismo pero automaticamente, y para hacerlo aun mas automatico lo añaidmos al systemctl para que lo haga automaticamente al arrancar.
+
+Script
+
+```Shell
+#!/usr/bin/env bash
+#
+# pve2-lv-recovery.sh
+#
+# Recicla (desactiva/reactiva) el thin pool pve/data en pve2 cuando arranca
+# mal porque no espera lo suficiente. Comprueba el estado con
+# lv_health_status y, si hace falta, reintenta con vgchange -ay.
+#
+# Se puede ejecutar a mano o vía el servicio systemd asociado.
+
+set -euo pipefail
+
+VG="pve"
+LV="data"
+LOG="/var/log/pve2-lv-recovery.log"
+MAX_WAIT=120       # segundos máximos esperando a que aparezca la VG
+POLL_INTERVAL=5
+
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') $*" | tee -a "$LOG"
+}
+
+get_health() {
+    lvs -a -o+lv_health_status --noheadings "$VG" 2>/dev/null | awk '{$1=$1};1'
+}
+
+is_healthy() {
+    local status
+    status=$(get_health || true)
+    if [ -z "$status" ]; then
+        return 1
+    fi
+    if echo "$status" | grep -qiE "unhealthy|partial|error"; then
+        return 1
+    fi
+    # además, el LV principal debe aparecer activo
+    if ! lvs -o lv_attr --noheadings "$VG/$LV" 2>/dev/null | grep -q '^\s*.\{4\}a'; then
+        return 1
+    fi
+    return 0
+}
+
+wait_for_vg() {
+    local waited=0
+    while ! vgs "$VG" >/dev/null 2>&1; do
+        if [ "$waited" -ge "$MAX_WAIT" ]; then
+            log "ERROR: la VG '$VG' no apareció tras ${MAX_WAIT}s"
+            return 1
+        fi
+        sleep "$POLL_INTERVAL"
+        waited=$((waited + POLL_INTERVAL))
+    done
+    return 0
+}
+
+recycle_lv() {
+    log "Desactivando $VG/$LV, ${LV}_tmeta, ${LV}_tdata..."
+    lvchange -an "$VG/$LV" || true
+    lvchange -an "$VG/${LV}_tmeta" || true
+    lvchange -an "$VG/${LV}_tdata" || true
+
+    log "Reactivando ${LV}_tmeta, ${LV}_tdata, $LV (esto puede tardar varios minutos)..."
+    lvchange -ay "$VG/${LV}_tmeta"
+    lvchange -ay "$VG/${LV}_tdata"
+    lvchange -ay "$VG/$LV"
+}
+
+main() {
+    log "=== Inicio de recuperación LVM $VG/$LV ==="
+
+    if ! wait_for_vg; then
+        exit 1
+    fi
+
+    if is_healthy; then
+        log "El volumen ya está sano, no hace falta hacer nada."
+        exit 0
+    fi
+
+    log "El volumen no está sano. Estado actual:"
+    get_health | tee -a "$LOG"
+
+    log "Iniciando ciclo de desactivación/reactivación..."
+    recycle_lv
+
+    if is_healthy; then
+        log "Recuperación OK tras el ciclo lvchange."
+        exit 0
+    fi
+
+    log "Sigue sin estar sano. Probando 'vgchange -ay $VG'..."
+    vgchange -ay "$VG" || true
+
+    if is_healthy; then
+        log "Recuperación OK tras vgchange."
+        exit 0
+    fi
+
+    log "ERROR: no se pudo recuperar el volumen automáticamente. Estado final:"
+    get_health | tee -a "$LOG"
+    exit 1
+}
+
+main
+```
+
+Creamos el ejecutable `chmod +x pve2-lv-recovery.sh`
+
+Service
+
+```Shell
+[Unit]
+Description=Recuperación automática de los LVs de Proxmox en pve2
+# Ajusta esto si tu retraso real es mayor: el problema es justo que
+# el arranque normal de LVM no espera lo suficiente ni reintenta.
+After=local-fs.target lvm2-activation.service
+Wants=lvm2-activation.service
+
+[Service]
+Type=oneshot
+# Margen extra antes de comprobar nada, por si la VG tarda en aparecer
+ExecStartPre=/bin/sleep 20
+ExecStart=/usr/local/bin/pve2-lv-recovery.sh
+StandardOutput=journal
+StandardError=journal
+# Si falla, reintenta un par de veces con margen entre intentos
+Restart=on-failure
+RestartSec=30
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Creamos el servicio
+
+```
+# Movemos el archivo a la carpeta de servicios
+mv pve2-lv-recovery.service /etc/systemd/system/
+
+# Activamos el servicio y vemos que esta activo
+systemctl enable pve2-lv-recovery.service 
+systemctl status pve2-lv-recovery.service
+```
+
 ## Bad Sectors HDD PVE
 
 ### Parchear sectores muertos HDD PVE
@@ -322,3 +475,76 @@ Cuando hay futbol laliga bloqueas multiples IPs sobretodo de cloudfare de Españ
 [Hay-futbol](https://hayahora.futbol/#sobre-los-bloqueos)
 
 Para solucionar esto nos tenemos que conectar a una VPN en mi caso Pronton VPN, con esto ya podemos acceder a nuestros dominios.
+
+## Beszel-Agent
+
+### Error beszel agent no consigue obtener metricas de los contenedores
+
+Beszel-agent no era capaz de obtener las metricas en mis contenedores el primero que me dio este problema fue mi Jellyfin en mi Raspberry Pi 5, para esto fue muy sencillo ya que ya esta documentado. Seguir esta guia: [https://akashrajpurohit.com/blog/resolving-missing-memory-stats-in-docker-stats-on-raspberry-pi/](https://akashrajpurohit.com/blog/resolving-missing-memory-stats-in-docker-stats-on-raspberry-pi/) consiste en activar los cgroups.
+
+Luego tambien tengo este mismo problema en dos de mis LXC una alpine y la otra ubuntu. Para mi LXC de ubuntu la soluciona fue eliminar el binaria antiguo y instalar uno nuevo desde 0 con eso consegui solucionar el error, esta lxc la migre de pve a pve2 en su momento este error probablemente venga de ahi.
+
+Para el contenedor alpine tuve que activar los features: nesting=1,keyctl=1, ya que al ser un LXC no tiene Kernel propio entonces los cgroups hay que activarlos desde el host proxmox. No consegui que alpine muestre las estadisticas da muchos problemas al ser una lxc queda pendiente migrar esta lxc a ubuntu.
+
+## Timezone N8N
+
+### Solucion N8N usa por defecto otra timezone que no coincide con mi region
+
+Para solucionar este problema tenemos que indicar la TZ concreta que queremos en nuestro compose en las variables de entorno.
+
+```
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Europe/Madrid 
+      - TZ=Europe/Madrid
+      - N8N_HOST=automate.homelabeiro.com
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://automate.homelabeiro.com/
+      - N8N_EDITOR_BASE_URL=https://automate.homelabeiro.com/
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
+    external: true
+```
+
+Vamos a N8N y comprobamos que se aplico
+
+![1788701083816](image/Troubleshooting/1788701083816.png)
+
+## Ansible
+
+### Error borrado scripts en repositorio local recrearlos y crear repo en GitHub
+
+Creamos un repo en Github privado para almacenar todos los playbooks y asegurarnos que nunca se pierdan, esto fue debido a la perdida de los playbooks tras una caida de luz. Todo documentado en Zimablade1.md como crear repo en Ansible.
+
+## Bloqueos Cloudfare Futbol VPS
+
+### Se bloquean todos mis tunneles los fines de semana por culpa de la LaLiga
+
+Vamos a configurar un dominio con un VPS externo para asi usar una IP personalizada que no sea bloqueada por LaLiga. Probamos con Oracle que ta un servicio Cloud Gratuito. La configuracion esta siendo documentada en [Zimablade2.mb](Zimablade2.md)
+
+## Error Network_Services no arranca contenedores docker
+
+### No conseguia arrancar los contenedores por un conflicto de una nueva actualizacion
+
+El error era el siguiente:
+
+```Shell
+mateorzan@Network-Services:~$ sudo docker start cloudflared
+Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: open sysctl net.ipv4.ip_unprivileged_port_start file: reopen fd 8: permission denied
+failed to start containers: cloudflared
+```
+
+ Con este error docker no era capaz de crear las interfaces de red aisladas de los contenedores por lo que tive que configurar todos como host `network_mode: host`
+
+### Solución definitiva
+
+Actualizamos el nodo a Proxmox VE 9 esto solucionó este problema ya que era un error que se solucione en actualizaciones mós actuales ahora tenemos el nodo en la última versión de proxmox.

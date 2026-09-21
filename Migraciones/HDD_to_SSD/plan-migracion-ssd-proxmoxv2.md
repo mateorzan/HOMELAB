@@ -302,15 +302,29 @@ Resto del proceso idéntico a Fases 1-7, con un matiz de orden en la Fase 7:
 3. Verificar datastore `zfs_backup` con histórico de backups intacto.
 4. **Solo entonces**, reconstruir Ghost y los 2 LXCs restantes, ya que sus backups dependen de que PBS esté operativo.
 
+Progreso
+
+SSD Conectado y corriendo Proxmox VE
+
+Maquinas VMs/LXCs corriendo sin problema
+
+Migrar maquinas a SSD
+
+Dejar backups en HDD.
+
+Limpiar disco HDD con sistema operativo antiguo
+
+Quitar estructura LVM-thin
+
 ---
 
 ## Fase 10 — Verificación final y pendientes
 
 **Checklist de cierre:**
 
-- [ ] `pvecm status` en ambos nodos → quórum 2/2, ambos ONLINE
-- [ ] Todas las VMs/LXC arrancan y responden correctamente
-- [ ] `zpool status` (host) → `rpool` de cada SSD ONLINE sin errores
+- [X] `pvecm status` en ambos nodos → quórum 2/2, ambos ONLINE
+- [X] Todas las VMs/LXC arrancan y responden correctamente
+- [X] `zpool status` (host) → `rpool` de cada SSD ONLINE sin errores
 - [ ] Dentro de la VM PBS: `zpool status` (guest) → datastore sano, histórico visible
 - [ ] Backup de prueba end-to-end desde cada VM crítica a PBS
 
