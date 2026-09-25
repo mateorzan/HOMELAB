@@ -22,12 +22,12 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 
 ### Servidores *LXCs/VMs*
 
-|      Nombre      | Tipo |       Utilidad       |  Estado  |
-| :--------------: | :--: | :-------------------: | :------: |
-|       PBS       |  VM  |        Backups        | Inactivo |
-|     Keepass     | LXC | Servicios y Monitoreo |  Activo  |
-|      Ghost      |  VM  |          CMS          |  Activo  |
-| Network-Services | LXC |   Servicios de Red   |  Activo  |
+|      Nombre      | Tipo |       Utilidad       | Estado |
+| :--------------: | :--: | :-------------------: | :----: |
+|       PBS       |  VM  |        Backups        | Activo |
+|     Keepass     | LXC | Servicios y Monitoreo | Activo |
+|      Ghost      |  VM  |          CMS          | Activo |
+| Network-Services | LXC |   Servicios de Red   | Activo |
 
 ### Servicios
 
