@@ -203,3 +203,21 @@ Tres reglas (Source Port Range vacío/All en las tres — ese campo es el puerto
 | `0.0.0.0/0` | TCP | `80` |
 | `0.0.0.0/0` | TCP | `443` |
 | `0.0.0.0/0` | TCP | `58422` |
+
+##### 17. Monitoreo y acceso remoto
+
+Por último  instalamos Tailscale y Beszel-agent para poder acceder remotamente al servidor a traves de la VPN si lo necesitamos y tambien para poder monitorizar su estado a traves de nuestro panel de beszel.
+
+```
+ssh -i ~/.ssh/oracle-vps.key ubuntu@IP-VPS
+
+# Tailscale
+
+curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key=********
+
+# Beszel-Agent
+
+curl -sL https://get.beszel.dev -o /tmp/install-agent.sh && chmod +x /tmp/install-agent.sh && /tmp/install-agent.sh -p 45876 -k "*****" -t "*****" -url "http://ubuntu-keepass:PORT"
+```
+
+Cree Politicas dentro de Tailscale para restringir su acceso y que desde VPS no te puedas conectar a ningun equipo de mi red pero si se pueda comunicar con Tailscale.
