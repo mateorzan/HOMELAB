@@ -31,14 +31,3 @@ sudo fail2ban-client status sshd
 # Actualizaciones automáticas de seguridad
 sudo dpkg-reconfigure --priority=low unattended-upgrades
 ```
-
-* [X] Network-Services
-
-  * [X] UFW
-  * [X] Fail2Ban
-  * [X] Unattend-Upgrades
-* [X] GhostVM
-
-  * [X] UFW
-  * [X] Fail2Ban
-  * [X] Unattend-Upgrades
