@@ -1,4 +1,3 @@
-
 # Configuración Rathole
 
 ##### 11. Decisión de arquitectura: rathole sin Caddy
@@ -170,7 +169,7 @@ curl -i http://test.midominio.com           # Con un dominio de prueba que el dn
 
 ##### 19. Script y automatizacion resgistro DNS
 
-Para esto vamos a usar un script de Bash que se conecte a la api de Cloudflare y haga el cambio de registro solo cuando la IP de Cloudflare sea bloqueada, es decir, los dias de Fútbol.
+Para esto vamos a usar un script que se conecte a la api de Cloudflare y haga el cambio de registro solo cuando la IP de Cloudflare sea bloqueada, es decir, los dias de Fútbol.
 
 La idea y la logica que vamos a seguir es usando un resgistro de dominio que siempre va a estar apuntando a cloudflare y con su proxy, este va a ser el dominio de control que nos va a indicar si cloduflare esta siendo bloqueado o no. Según el estado de este dominio , es decir, si esta caido activara el script y cambiará el resto de registros de dominios DNS a mi VPS y quitara el proxy "nube gris" y una vez recupere la conexion el dominio. el script se volvera a activar y cambiara otra vez el registro de dominios DNS a CNAME y Proxy activado "nube naranja". Para automatizar todo este proceso vamos a usar N8N el se encargara de estar siempre atento y decidir cuando activar el flujo y cuando no, segun las condiciones que le demos.
 
