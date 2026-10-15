@@ -548,3 +548,41 @@ failed to start containers: cloudflared
 ### Solución definitiva
 
 Actualizamos el nodo a Proxmox VE 9 esto solucionó este problema ya que era un error que se solucione en actualizaciones mós actuales ahora tenemos el nodo en la última versión de proxmox.
+
+## Troubleshooting PBS
+
+### No arranca TASK ERROR: volume 'Sistem:102/vm-102-disk-0.qcow2' does not exist
+
+El problema fue al hacer el cambio de Disco al SSD nueveo, Sistem al ser un Storage tipo Dir apunta a la ruta /var/lib/proxmoxbk pero del disco SSD nuevo que esta vacio, por lo que nuestro pbs al buscar Sistem:102/vm-102-disk-0.qcow2 y no encontrarlo da error para ello tuvimos que acceder y montar el disco antiguo HDD y buscar esta misma ruta /var/lib/proxmoxbk, ahi en /images/102 encontramos el disco, copiamos esta ruta del disco HDD al SSD y con esto ya se soluciono el error.
+
+```Shell
+# Comprobacion Config y si el disco esta montado
+cat /etc/pve/storage.cfg
+
+lsblk -f
+df -h
+
+# Creamos ruta de montaje y montamos el disco con Read-Only
+mkdir -p /mnt/old_root
+mount -o ro /dev/mapper/pve-root /mnt/old_root # Si /dev/pve/root no monta bien, usar /dev/mapper/pve-root
+
+# Listamos y vemos que esta el disco objetivo y comprobamos tamaño
+ls /mnt/old_root/var/lib/proxmoxbk/images/102
+
+du -sh /mnt/old_root/var/lib/proxmoxbk
+df -h /var/lib/proxmoxbk
+
+# Copiamos la ruta objetivo al disco nuevo
+rsync -avh --progress /mnt/old_root/var/lib/proxmoxbk/ /var/lib/proxmoxbk
+
+# Salimos una vez termine la copia y desmontamos
+cd /root
+umount /mnt/old_root # Desmontamos
+
+# Comprobamos y refrescamos 'Sistem' pra que salga el disco
+findmnt /mnt/old_root      # no debe devolver nada
+pvesh get /nodes/pve2/storage/Sistem/content
+
+# Por ultimo arrancamos PBS y vemos que no de ningun error y funcione como deberia.
+qm start 102
+```
