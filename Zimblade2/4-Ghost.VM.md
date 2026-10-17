@@ -1,4 +1,3 @@
-
 # Ghost VM
 
 Aquí vamos a crear una nueva VM el proceso es el mismo que en el resto, esta VM se va a usar para autohospedar nuestra web sobre nuestro Homelab y todos los tutoriales que publiquemos a traves de una newsletter. Usamos una VM ya que docker en las LXC tiene muchas limitaciones y funciona muy mal.
@@ -37,7 +36,7 @@ Una vez tenemos Docker y Docker compose ya podemos empezar la instalación de [G
 Empezamos instalando el repositorio.
 
 ```
-span
+git clone https://github.com/TryGhost/ghost-docker.git /opt/ghost && cd /opt/ghost
 ```
 
 Una vez clonado copiamos el archivo de ejemplo y lo configuramos para nuestro caso.
@@ -496,7 +495,7 @@ curl -v --resolve <dominio>:443:IP_ORACLE https://<dominio>
 
 ---
 
-## Estado actual
+#### Estado actual
 
 ✅ VPS creado en Oracle Cloud Free Tier (Frankfurt), Ubuntu 24.04, shape Ampere A1.Flex (1 OCPU/6GB), IP pública fija `92.5.135.252`
 ✅ Firewall, fail2ban y actualizaciones automáticas configurados
@@ -505,7 +504,7 @@ curl -v --resolve <dominio>:443:IP_ORACLE https://<dominio>
 ✅ Tráfico HTTP/HTTPS verificado end-to-end contra NPM, sin tocar DNS
 ✅ Convive sin conflicto con `cloudflared` (ambos activos a la vez)
 
-### 21. Prueba real de conmutación DNS (homelabeiro.com)
+##### 21. Prueba real de conmutación DNS (homelabeiro.com)
 
 Con el proceso manual ya claro (ver "Pendiente" más abajo), se hizo una prueba real sobre `homelabeiro.com` (dominio de menor criticidad, usado como conejillo de indias antes de tocar nba-analytics.com o fredricwatch.com).
 
@@ -534,9 +533,20 @@ Resultado: `homelabeiro.com` resolviendo correctamente a `92.5.135.252` — prop
 * Target: `92.5.135.252` → `xxxxxxxxxxxxxxx.cfargotunnel.com`
 * Proxy status: reactivar "Proxied"
 
-## Pendiente
+#### Pendiente
 
 **Gestión del cambio de DNS para el resto de dominios** — decidir e implementar el modelo de conmutación entre Cloudflare (por defecto) y el VPS (fallback en días de bloqueo de LaLiga), ya validado con éxito en `homelabeiro.com`:
 
 * **Manual**: en el panel de Cloudflare (DNS → Records), cambiar el registro A/CNAME del dominio a `92.5.135.252` y desactivar el proxy (nube naranja 🟠 → gris ⚪ "DNS only"). Revertir del mismo modo cuando pase el bloqueo. Se hace por dominio, no hay interruptor global.
 * **Automático**: script (cron) que monitorice el dominio y cambie el DNS vía API de Cloudflare si detecta caída, revirtiendo cuando vuelva a responder — pendiente de diseñar si se decide ir por esta vía.
+
+### TinyBird
+
+Configure TinyBird en mi contenedor Ghost, esto sirve para obtener metricas de tu blog, visitantes, blog mas vistos, etc...
+
+#### Requisitos
+
+* Ghost 6.X
+* TinyBird free acccount
+
+Por ahora estoy siguiendo el tutorial oficial. [Ghost&amp;TinyBird](https://docs.ghost.org/install/docker#install-ghost)
