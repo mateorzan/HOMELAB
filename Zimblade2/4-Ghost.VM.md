@@ -46,9 +46,11 @@ cp .env.example .env
 cp caddy/Caddyfile.example caddy/Caddyfile
 ```
 
-Yo en mi configuracion voy a comentar el SMTP temporalmente ya que no configure ninguno aun, ademas voy a usar Cloudfare que ya tengo configurado con mi dominio para que Ghost lo use por lo que no voy a hacer uso de Caddy.
+Yo en mi configuracion voy a comentar el SMTP temporalmente ya que no configure ninguno aun, ademas voy a usar Cloudfare que ya tengo configurado con mi dominio para que Ghost lo use.
 
-Voy a configurar el compose.yml a mi caso en concreto por lo que todo lo que tengo que ver con caddy lo voy a comentar.
+**Nota (actualización 19/10/2026):** en este primer paso dejé Caddy comentado pensando que Cloudflare hablaría directo con Ghost. Más adelante lo **volví a activar**, porque resultó ser imprescindible para las métricas de Tinybird — ver la sección [Métricas de visitas con Tinybird](#métricas-de-visitas-con-tinybird-ghost-6x--traffic-analytics). Caddy es ahora el receptor único interno del servidor Ghost.
+
+Por lo tanto, en este paso concreto, voy a dejar el bloque de caddy del compose.yml comentado:
 
 ```
 #  caddy:
@@ -503,6 +505,9 @@ curl -v --resolve <dominio>:443:IP_ORACLE https://<dominio>
 ✅ Firewall de Oracle (Security List) y `ufw` alineados
 ✅ Tráfico HTTP/HTTPS verificado end-to-end contra NPM, sin tocar DNS
 ✅ Convive sin conflicto con `cloudflared` (ambos activos a la vez)
+✅ `homelabeiro.com` vuelto a poner detrás de Cloudflare (19/10/2026); el VPS queda como fallback manual para los días de bloqueo de LaLiga
+✅ Caddy activo en la VM de Ghost como receptor único interno (puerto 80), repartiendo entre `ghost:2368` y `traffic-analytics:3000`
+✅ Métricas de Tinybird funcionando por las **dos** vías de entrada (Cloudflare y VPS + rathole + NPM)
 
 ##### 21. Prueba real de conmutación DNS (homelabeiro.com)
 
@@ -525,6 +530,8 @@ Resultado: `homelabeiro.com` resolviendo correctamente a `92.5.135.252` — prop
 
 **Estado actual de este dominio:** `homelabeiro.com` queda **dejado intencionalmente en modo prueba**, sirviendo en producción real a través del VPS + rathole + NPM, sin pasar por Cloudflare. El resto de dominios siguen sin tocar, detrás de Cloudflare Tunnel como siempre.
 
+**Actualización 19/10/2026:** `homelabeiro.com` **volvió a ponerse detrás de Cloudflare** (registro de vuelta a `CNAME` + proxy activo 🟠), con el origen del tunnel apuntando a `http://192.168.1.54:80`. El VPS + rathole queda como **fallback manual** para los días de bloqueo de LaLiga, igual que el resto de dominios. Se comprobó que el cambio de camino no rompía nada: `https://92.5.135.252/` con `Host: homelabeiro.com` seguía devolviendo `200` + `Via: 1.1 Caddy`, tracker incluido.
+
 **Nota — error transitorio tras el cambio (causa real):** justo después de desactivar el proxy, el navegador mostró un error `525 SSL handshake failed`. La causa real no fue caché DNS (esa teoría inicial se descartó): `homelabeiro.com` no pasaba por NPM hasta ahora — tenía su propio `cloudflared` instalado directamente en esa VM, apuntando al servicio sin pasar por el reverse proxy central. Al cambiar el DNS al VPS + rathole, el tráfico llegaba hasta NPM, pero NPM no tenía ningún **Proxy Host** configurado para ese dominio (sin backend ni certificado asociados), de ahí el fallo de handshake. Se resolvió creando el Proxy Host correspondiente en NPM — aprovechando el cambio para **centralizar `homelabeiro.com` en NPM** como el resto de dominios, en vez de mantener un `cloudflared` independiente en esa VM.
 
 **Para revertir `homelabeiro.com` a Cloudflare cuando se decida:**
@@ -540,13 +547,290 @@ Resultado: `homelabeiro.com` resolviendo correctamente a `92.5.135.252` — prop
 * **Manual**: en el panel de Cloudflare (DNS → Records), cambiar el registro A/CNAME del dominio a `92.5.135.252` y desactivar el proxy (nube naranja 🟠 → gris ⚪ "DNS only"). Revertir del mismo modo cuando pase el bloqueo. Se hace por dominio, no hay interruptor global.
 * **Automático**: script (cron) que monitorice el dominio y cambie el DNS vía API de Cloudflare si detecta caída, revirtiendo cuando vuelva a responder — pendiente de diseñar si se decide ir por esta vía.
 
-### TinyBird
+### Métricas de visitas con Tinybird (Ghost 6.x + traffic-analytics)
 
-Configure TinyBird en mi contenedor Ghost, esto sirve para obtener metricas de tu blog, visitantes, blog mas vistos, etc...
+Configuré Tinybird en mi contenedor Ghost para obtener métricas del blog: visitantes, posts más vistos, etc. Lo que no tenía documentado es **por qué al principio no aparecía nada** y **qué hubo que tocar para que funcionara por las dos vías de entrada** (Cloudflare entre semana y el VPS los fines de semana, cuando LaLiga bloquea las IPs de Cloudflare).
 
-#### Requisitos
+#### 0. Cómo funciona por dentro
+
+Ghost 6.x ya trae analítica propia en el panel **Stats**. Si además quieres guardar los eventos en un datasource que tú controcles, la fórmula oficial es:
+
+* El frontend de Ghost manda los eventos a `/.ghost/analytics/api/v1/page_hit` (un `POST` con JSON y cabecera `Access-Control-Allow-Origin: *`).
+* Un contenedor aparte, **traffic-analytics** (incluido en el perfil `analytics` del compose oficial), recibe esa ruta y la reenvía a un datasource de **Tinybird**.
+* Ghost consulta Tinybird para pintar la pestaña **Stats**.
+
+El meollo de todo esto es uno solo: **la ruta de analítica tiene que terminar en `traffic-analytics:3000`, no en `ghost:2368`**. Si el tráfico llega directo a Ghost, el contenedor de analytics queda huérfano y Stats sale vacío.
+
+#### 1. Cadena final
+
+```
+                        ┌─ /.ghost/analytics/* ─▶ traffic-analytics:3000 ─▶ Tinybird (europe-west2)
+visitante ──▶ :80 ─▶ CADDY ─┤
+                        └─ resto ──────────────▶ ghost:2368
+```
+
+Y cómo llega el visitante a ese `:80` según el día:
+
+| Día | Cadena completa |
+| --- | --- |
+| Entre semana | `navegador → Cloudflare:443 → cloudflared → 192.168.1.54:80 (Caddy)` |
+| Fin de semana (LaLiga) | `navegador → VPS:443 → rathole → NPM (homelab) → 192.168.1.54:80 (Caddy)` |
+
+**Clave: las dos vías terminan en Caddy.** Eso es lo que hace que las métricas funcionen el sábado igual que el lunes.
+
+#### 2. El problema que tuve
+
+Antes del arreglo, **los dos orígenes apuntaban al 2368**, es decir, directo a Ghost:
+
+```
+cloudflared → http://192.168.1.54:2368  → ghost   ❌ (traffic-analytics fuera de juego)
+NPM (finde) → http://192.168.1.54:2368  → ghost   ❌ (traffic-analytics fuera de juego)
+```
+
+Resultado: los eventos del navegador no se guardaban en ninguna parte — Stats vacío siempre, no solo el fin de semana. El contenedor `traffic-analytics` estaba levantado y sano, pero **nadie le mandaba nada**.
+
+#### 3. Requisitos
 
 * Ghost 6.X
-* TinyBird free acccount
+* Cuenta Tinybird (plan free)
+* `COMPOSE_PROFILES=analytics` en el `.env`
 
-Por ahora estoy siguiendo el tutorial oficial. [Ghost&amp;TinyBird](https://docs.ghost.org/install/docker#install-ghost)
+#### 4. Activar el perfil analytics
+
+En `/opt/ghost/.env`:
+
+```bash
+COMPOSE_PROFILES=analytics
+TINYBIRD_API_URL=https://api.europe-west2.gcp.tinybird.co
+TINYBIRD_ADMIN_TOKEN=<lo pega Tinybird al crear el datasource>
+```
+
+> ⚠️ El token va **solo** en `.env` (que está en `.gitignore`). Nunca en el compose ni en el Caddyfile. Para usarlo en un comando sin enseñarlo por pantalla:
+>
+> ```bash
+> TOK=$(grep -m1 '^TINYBIRD_ADMIN_TOKEN=' .env | cut -d= -f2-)
+> ```
+
+#### 5. Activar Caddy (la pieza que faltaba)
+
+**¿Por qué Caddy y no el Nginx Proxy Manager que ya tengo?** El NPM ya gestiona TLS y routing por dominio para todo lo demás, pero aquí no sirve: `traffic-analytics` escucha en el puerto `3000` de su contenedor y **ese puerto está sin publicar a propósito**. Para que el NPM llegara habría que publicarlo en el host y exponer el servicio de analytics a toda la LAN. Caddy, en cambio, va montado en el mismo `compose.yml` y entra por la red Docker `ghost_network`, así que alcanza `traffic-analytics:3000` directamente **sin publicar ningún puerto nuevo**. Además ya venía en el repositorio oficial de Ghost, comentado.
+
+**5.1 `compose.yml`** — descomentar el servicio `caddy` y los dos volúmenes. Queda igual que el ejemplo oficial:
+
+```yaml
+  caddy:
+    image: caddy:2.10.2-alpine@sha256:953131cfea8e12bfe1c631a36308e9660e4389f0c3dfb3be957044d3ac92d446
+    restart: always
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN environment variable is required}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN:-}
+      ACTIVITYPUB_TARGET: ${ACTIVITYPUB_TARGET:-https://ap.ghost.org}
+    volumes:
+      - ./caddy:/etc/caddy
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - ghost
+    networks:
+      - ghost_network
+
+volumes:
+  caddy_data:
+  caddy_config:
+```
+
+Caddy entra en la red Docker `ghost_network`, así que **alcanza `traffic-analytics:3000` sin publicar ese puerto**. Es la gran ventaja de tenerlo aquí dentro: no hay que abrir nada ni tocar el firewall.
+
+**5.2 `.env`** — ojo con los puertos, esto es un clavo. El `.env.example` de Ghost trae:
+
+```bash
+HTTP_PORT=2368
+HTTPS_PORT=2368
+```
+
+Es decir, **ambos en el 2368**, el puerto que ya ocupa Ghost. Se dejan en su valor por defecto:
+
+```bash
+HTTP_PORT=80
+HTTPS_PORT=443
+```
+
+**5.3 `caddy/Caddyfile`** — tres cambios sobre el `caddy/Caddyfile.example` oficial:
+
+```caddyfile
+http://{$DOMAIN} {
+	import snippets/Logging
+	import snippets/TrafficAnalytics
+	# import snippets/ActivityPub     ← DESCOMENTADO A PROPOSITO (ver 5.5)
+
+	handle {
+		reverse_proxy ghost:2368 {
+			header_up X-Forwarded-Proto https
+		}
+	}
+
+	encode gzip
+	import snippets/SecurityHeaders
+}
+```
+
+1. **`{$DOMAIN}` → `http://{$DOMAIN}`.** Con el bloque en HTTPS, Caddy intenta emitir un certificado con ACME/Let's Encrypt, algo que aquí no necesita (el TLS ya lo terminan Cloudflare por delante el resto del año, y el NPM el fin de semana). Forzar el esquema `http://` evita ese intento y también **el bucle de redirecciones**: Ghost redirige siempre a `https://`, así que si Caddy le hablara en claro, Ghost devolvería un `301` que Caddy reenviaría al cliente, que a su vez volvería a entrar por `http://`... bucle infinito.
+2. **`header_up X-Forwarded-Proto https`** — necesario por exactamente lo mismo. Ver 7.2.
+3. **ActivityPub comentado.** Ver 5.5.
+
+**5.4 `caddy/snippets/TrafficAnalytics`** — este snippet es el que hace la magia. No tocarlo, va tal cual en el repo oficial de Ghost:
+
+```caddyfile
+# Proxy analytics requests with any prefix (e.g. /.ghost/analytics/ or /blog/.ghost/analytics/)
+@analytics_paths path_regexp analytics_match ^(.*)/\.ghost/analytics(.*)$
+handle @analytics_paths {
+	rewrite * {re.analytics_match.2}
+	reverse_proxy traffic-analytics:3000
+}
+```
+
+La regex es genérica a propósito: caza `/.ghost/analytics` **con cualquier prefijo**, así que si algún día sirves el blog en un subdirectorio sigue funcionando. El `rewrite` se quita el prefijo para que `traffic-analytics` reciba la ruta limpia.
+
+**5.5 ¿Por qué ActivityPub queda comentado?** El ejemplo oficial lo trae activo, pero su variable `ACTIVITYPUB_TARGET` no está definida en el `.env` y su default es `https://ap.ghost.org`. Si se activa tal cual, Caddy se pone de proxy del protocolo federado de Ghost y las rutas `/.well-known/webfinger` y `/nodeinfo` pasan a apuntar a ap.ghost.org en vez de a tu instancia → ActivityPub roto. Mientras no se use el fediverso, **comentado**.
+
+**5.6 Origen del tunnel de Cloudflare** — en el panel **Zero Trust → Networks → Tunnels → [tú tunnel] → Configure → Public Hostname → Edit**, el origen del `homelabeiro.com` cambia de:
+
+```
+http://192.168.1.54:2368   →   http://192.168.1.54:80
+```
+
+**5.7 Upstream del NPM (la vía del fin de semana)** — en el Proxy Host de `homelabeiro.com` del Nginx Proxy Manager, mismo cambio de upstream:
+
+```
+192.168.1.54:2368   →   192.168.1.54:80
+```
+
+**Este es el cambio que arregla el fin de semana.** Sin él, Cloudflare reparte métricas pero el sábado vuelven a no aparecer.
+
+**5.8 Backups y arranque**
+
+Antes de tocar nada, copias de seguridad:
+
+```bash
+cd /opt/ghost
+sudo cp compose.yml compose.yml.bak-20261019
+sudo cp caddy/Caddyfile caddy/Caddyfile.bak-20261019
+sudo cp .env .env.bak-20261019
+```
+
+Y después:
+
+```bash
+sudo docker compose config -q    # valida el compose sin levantar nada
+sudo docker compose pull
+sudo docker compose up -d
+```
+
+#### 6. Verificación paso a paso
+
+Todo desde `/opt/ghost` con `sudo`. Los `Host:` forzados permiten probar sin tocar el DNS.
+
+**6.1 — Caddy responde en el 80**
+
+```bash
+curl -sI -H 'Host: homelabeiro.com' http://127.0.0.1:80/ | head -3
+# HTTP/1.1 200 OK
+```
+
+**6.2 — La ruta de analítica cae en traffic-analytics y no en Ghost**
+
+```bash
+curl -sI -H 'Host: homelabeiro.com' http://127.0.0.1:80/.ghost/analytics/api/v1/page_hit
+# HTTP/1.1 404 Not Found
+# Content-Type: application/json; charset=utf-8
+# Access-Control-Allow-Origin: *
+```
+
+El `404` es **esperado**: el tracker solo acepta `POST`. La señal real de que llegó al contenedor correcto son las dos últimas cabeceras (`application/json` + CORS `*`). Si en cambio la respuesta viene de Ghost (HTML, o un `301` a `https://`), es que la ruta no la está cogiendo el snippet.
+
+**6.3 — La vía del fin de semana llega a Caddy**
+
+```bash
+curl -kSI -H 'Host: homelabeiro.com' https://92.5.135.252/ | grep -iE '^(HTTP|via)'
+# HTTP/1.1 200 OK
+# Via: 1.1 Caddy
+```
+
+`Via: 1.1 Caddy` es la firma inconfundible de que pasaste por Caddy. Lo mismo con el tracker por esa vía:
+
+```bash
+curl -kSI -H 'Host: homelabeiro.com' https://92.5.135.252/.ghost/analytics/api/v1/page_hit | grep -iE '^(HTTP|content-type|access-control)'
+```
+
+Y comprobando también la vía pública (que es la que usan de verdad los visitantes):
+
+```bash
+curl -sI https://homelabeiro.com/ | grep -iE '^(HTTP|via)'
+```
+
+**6.4 — Tinybird está recibiendo**
+
+```bash
+TOK=$(grep -m1 '^TINYBIRD_ADMIN_TOKEN=' .env | cut -d= -f2-)
+API=$(grep -m1 '^TINYBIRD_API_URL=' .env | cut -d= -f2-)
+curl -s -H "Authorization: Bearer $TOK" "$API/v0/datasources/analytics_events" | grep -o '"row_count":[0-9]*'
+```
+
+Visita la web, vuelve a ejecutarlo y el `row_count` debe subir (en la prueba subió de 7 a 9).
+
+**6.5 — El evento se registró**
+
+```bash
+sudo docker compose logs --since 10m traffic-analytics | grep page_hit
+# POST /api/v1/page_hit?name=analytics_events   →   status: 202
+```
+
+El `202` (accepted) viene del endpoint de eventos de Tinybird, es la confirmación de que el evento se guardó.
+
+Y lo que de verdad importa: entrar en **Ghost Admin → Stats** y ver los visitantes.
+
+#### 7. Incidencias encontradas
+
+**7.1 — `HTTP_PORT`/`HTTPS_PORT` ambos en 2368.** El contenedor de Caddy intentaba publicar el puerto 2368, ocupado por Ghost. Solución: `HTTP_PORT=80` y `HTTPS_PORT=443`.
+
+**7.2 — Ghost devolvía `301` a `https://` a todo.** Ghost redirige siempre según su `url` configurada. Como Caddy le hablaba en claro, cualquier petición se convertía en un bucle. Solución: `header_up X-Forwarded-Proto https`, que le hace creer a Ghost que el cliente ya llegó por https y deja de redirigir. Sirve igualmente para las dos vías de entrada, porque **Cloudflare y el NPM hablan con Caddy en claro** (el TLS lo terminan ellos).
+
+**7.3 — ActivityPub roto.** Probando con el import activo, `/.well-known/webfinger` y `/nodeinfo` dejaron de responder. Causa: `ACTIVITYPUB_TARGET` sin definir, con default `https://ap.ghost.org`. Solución: dejar el import comentado (ver 5.5).
+
+**7.4 — Bucle de expulsión en rathole (~51 reconexiones/min).** Monté un segundo cliente rathole en la propia VM de Ghost (servicios `http2`/`https2`) pensando en redundancia, pero con el **mismo nombre de servicio** que el cliente que ya corría en la otra máquina (la del NPM). En rathole **un servicio = un cliente**: no hace balanceo, y dos clientes con el mismo nombre y token se van expulsando en bucle (`Failed to read cmd: early eof`). Se solucionó renombrando los servicios a `http2`/`https2` para separarlos.
+
+**7.5 — Se retiró el cliente redundante.** Aun separados, el segundo cliente no aportaba nada: si la máquina del NPM se cae, se cae también el que termina el TLS con el certificado de Let's Encrypt, así que el túnel de respaldo no serviría para entrar por `https://`. Además, al no tener el NPM delante, ese `:8080` dejaba el **panel `/ghost/` accesible en HTTP plano**. Se paró y se borró el contenedor, se limpiaron `http2`/`https2` del `server.toml` del VPS y se cerraron los puertos 8080/8443 en el `ufw`. Los ficheros de configuración de rathole quedaron guardados en la VM de Ghost (`/home/mateorzan/rathole/`) por si se quieren reutilizar, pero **sin contenedor no hay nada corriendo**.
+
+**7.6 — Geo/IP del visitante.** traffic-analytics registra como `remoteIp` la IP del NPM (`192.168.1.55`), no la del visitante, porque el NPM se queda la `X-Forwarded-For` original. Puede afectar a las métricas de país/idioma, sobre todo el fin de semana. Pendiente de mirar si el NPM puede reenviar esa cabecera.
+
+#### 8. Comandos del día a día
+
+```bash
+cd /opt/ghost
+
+# estado de los contenedores
+sudo docker compose ps
+
+# logs
+sudo docker compose logs --since 30m caddy
+sudo docker compose logs --since 30m traffic-analytics
+sudo docker compose logs --since 30m ghost
+
+# validar y recargar el Caddyfile tras tocarlo
+sudo docker compose exec caddy caddy validate --config /etc/caddy/Caddyfile
+sudo docker compose restart caddy
+
+# comprobar las dos vías de entrada
+curl -sI  -H 'Host: homelabeiro.com' http://127.0.0.1:80/.ghost/analytics/api/v1/page_hit
+curl -kSI -H 'Host: homelabeiro.com' https://92.5.135.252/.ghost/analytics/api/v1/page_hit
+```
+
+#### 9. Pendiente
+
+* **Test real el sábado** con el DNS apuntando al VPS: visitar la web y comprobar Stats + `row_count` de Tinybird.
+* **Geo/IP del visitante** el fin de semana (ver 7.6).
+* Si algún día se quiere usar el fediverso: descomentar `snippets/ActivityPub` **y** definir bien `ACTIVITYPUB_TARGET`.
+* **Dependencia de la otra máquina:** la vía del fin de semana depende de que esté encendida la máquina donde corren el cliente rathole y el NPM. Si algún día se quiere eliminar esa dependencia habría que mover el NPM al VPS.
