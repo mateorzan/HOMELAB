@@ -1,3 +1,4 @@
+
 # Network-Services
 
 Migre el servidor de mi PVE hacia mi PVE2 ya que con mi VM con ZimaOS mi PVE ya tiene mucha carga y mi PVE2 tiene menos carga, use la herramienta que viene integrada en Proxmox para migrar un contenedor de un cluster a otro.
@@ -198,14 +199,81 @@ WUD es una herramienta para monitorizar tus servidores y mantenerlos siempre act
 
 ```
 services:
+services:
   whatsupdocker:
     image: getwud/wud
     container_name: wud
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
     ports:
       - 3005:3000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./wud-store:/store
+    environment:
+      # Comprobación diaria a las 6:00
+      - WUD_WATCHER_LOCAL_CRON=0 6 * * *
+      # Que mire también los contenedores parados
+      - WUD_WATCHER_LOCAL_WATCHBYDEFAULT=true
+      - WUD_TRIGGER_DOCKERCOMPOSE_LOCAL_AUTO=false
+
+      # Notificación a Gotify
+      - WUD_TRIGGER_GOTIFY_HOMELAB_URL=https://gotify.tudominio.com
+      - WUD_TRIGGER_GOTIFY_HOMELAB_TOKEN=TU_TOKEN_DE_APP
+      # Solo avisar de cada actualización una vez
+      - WUD_TRIGGER_GOTIFY_HOMELAB_MODE=simple
+      - WUD_TRIGGER_GOTIFY_HOMELAB_ONCE=trueÇ
+      - WUD_AUTH_ADMIN_USER=Admin
+      - WUD_AUTH_ADMIN_PASSWORD=password
 ```
+
+Con esta configuracion hacemos `docker compose up -d` y ya tenemos nuestro WUD corriendo en nuestro servidor.
+
+![1793095241065](image/5-Network-Services.LXC/1793095241065.png)
+
+Con esta configuracion tambien dejamos configurasd que las alertas se nos enviaran a nuestro servicio de mensajeria, Gotify, cuando haya actualizaciones pendientes.
+
+![1793095303121](image/5-Network-Services.LXC/1793095303121.png)
+
+**Importante** los contenedores que usen :latest tenemos que añadir la siguiente label ya que sino no va a detectar cuando tenga una version nueva.
+
+```Dockerfile
+    labels:
+      wud.watch.digest: "true"
+```
+
+Ahora vamos a configurar un proxy para poder ver los contenedores y sus versiones en otros servidores
+
+```
+services:
+  dockerproxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: dockerproxy
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - IMAGES=1
+      - POST=0
+    ports:
+      - 100.x.x.x:2375:2375
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+```
+
+Lo levantamos `docker compose up -d`
+
+Desde el servidor con WUD probamos con `curl http://100.x.x.x:2375/containers/json` si da salida entonces funciona y añadimos esto al compose
+
+```
+      - WUD_WATCHER_PRUEBA_HOST=100.x.x.x
+      - WUD_WATCHER_PRUEBA_PORT=2375
+      - WUD_WATCHER_PRUEBA_CRON=0 6 * * *
+```
+
+Recreamos el conteiner con `docker compose up -d`
+
+Con esto ya nos tendria que ir.
+
+![1793098059574](image/5-Network-Services.LXC/1793098059574.png)
 
 ## Rathole
 
