@@ -586,3 +586,55 @@ pvesh get /nodes/pve2/storage/Sistem/content
 # Por ultimo arrancamos PBS y vemos que no de ningun error y funcione como deberia.
 qm start 102
 ```
+
+## Certificados NPM Cloudflare
+
+### Error al renovar certificado en NPM Some challenges have failed
+
+El error era el siguiente:
+
+```Shell
+Certbot failed: Failed to renew certificate npm-24 with error: Some challenges have failed.
+```
+
+NPM por defecto valida el certificado con HTTP-01, para esto Let's Encrypt tiene que entrar por el puerto 80 y como tengo los puertos del router cerrados y todo entra por el tunnel de Cloudflare o por el VPS con rathole no es capaz de validarlo. No podemos quitar el certificado ya que cuando Cloudflare esta bloqueado es NPM el que sirve el HTTPS desde el VPS.
+
+Para solucionarlo creamos un token en Cloudflare con la plantilla "Edit zone DNS" solo para homelabeiro.com y creamos un certificado nuevo en NPM con DNS Challenge, asi valida con un registro TXT y no necesita ningun puerto abierto.
+
+```Shell
+# SSL Certificates -> Add SSL Certificate -> Let's Encrypt
+# Domain Names: homelabeiro.com y *.homelabeiro.com
+# Use a DNS Challenge -> Cloudflare
+dns_cloudflare_api_token = TU_TOKEN
+# Propagation Seconds: 60
+```
+
+Luego asignamos el certificado nuevo en todos los Proxy Hosts y borramos el antiguo npm-24.
+
+### Error ERR_TOO_MANY_REDIRECTS al activar Force SSL
+
+Al poner el certificado nuevo con Force SSL las paginas entraban en bucle, esto se debe a que el tunnel de Cloudflare le mandaba el trafico a NPM por HTTP y NPM lo redirigia siempre a HTTPS.
+
+Para solucionarlo en Zero Trust -> Tunnels -> Routes editamos la ruta `*.homelabeiro.com` para que vaya por HTTPS.
+
+```Shell
+# Service URL
+http://192.168.1.55:80  ->  https://192.168.1.55:443
+# Additional application settings -> TLS
+Match SNI to Host: activado
+```
+
+Importante todos los Proxy Hosts tienen que tener el certificado wildcard si no dejan de funcionar.
+
+### Canary test.homelabeiro.com sale caido en Uptime Kuma
+
+Despues de cambiar el tunnel a HTTPS el canary salia caido en Kuma, al no tener ruta propia lo cogia el wildcard y NPM le devolvia un 502 ya que no tiene host para el. El flujo de n8n seguia funcionando bien ya que cualquier respuesta de Cloudflare le vale.
+
+Para solucionarlo creamos una ruta propia en el tunnel encima del wildcard que apunta a la pagina por defecto de NPM.
+
+```Shell
+# test.homelabeiro.com
+http://192.168.1.55:80
+```
+
+Con esto ya vuelve a salir bien en Kuma.

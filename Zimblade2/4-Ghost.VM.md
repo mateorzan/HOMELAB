@@ -511,7 +511,7 @@ curl -v --resolve <dominio>:443:IP_ORACLE https://<dominio>
 
 ##### 21. Prueba real de conmutación DNS (homelabeiro.com)
 
-Con el proceso manual ya claro (ver "Pendiente" más abajo), se hizo una prueba real sobre `homelabeiro.com` (dominio de menor criticidad, usado como conejillo de indias antes de tocar nba-analytics.com o fredricwatch.com).
+Con el proceso manual ya claro (ver "Pendiente" más abajo), se hizo una prueba real sobre `homelabeiro.com` (dominio de menor criticidad, usado como conejillo de indias antes de tocar nba-analytics.com).
 
 **Cambio realizado en Cloudflare** (DNS → Records → Edit sobre el registro de `homelabeiro.com`):
 
@@ -572,7 +572,7 @@ visitante ──▶ :80 ─▶ CADDY ─┤
 Y cómo llega el visitante a ese `:80` según el día:
 
 | Día | Cadena completa |
-| --- | --- |
+| ---------------------- | ------------------------------------------------------------------------------- |
 | Entre semana | `navegador → Cloudflare:443 → cloudflared → 192.168.1.54:80 (Caddy)` |
 | Fin de semana (LaLiga) | `navegador → VPS:443 → rathole → NPM (homelab) → 192.168.1.54:80 (Caddy)` |
 
@@ -662,18 +662,18 @@ HTTPS_PORT=443
 
 ```caddyfile
 http://{$DOMAIN} {
-	import snippets/Logging
-	import snippets/TrafficAnalytics
-	# import snippets/ActivityPub     ← DESCOMENTADO A PROPOSITO (ver 5.5)
+ import snippets/Logging
+ import snippets/TrafficAnalytics
+ # import snippets/ActivityPub     ← DESCOMENTADO A PROPOSITO (ver 5.5)
 
-	handle {
-		reverse_proxy ghost:2368 {
-			header_up X-Forwarded-Proto https
-		}
-	}
+ handle {
+  reverse_proxy ghost:2368 {
+   header_up X-Forwarded-Proto https
+  }
+ }
 
-	encode gzip
-	import snippets/SecurityHeaders
+ encode gzip
+ import snippets/SecurityHeaders
 }
 ```
 
@@ -687,8 +687,8 @@ http://{$DOMAIN} {
 # Proxy analytics requests with any prefix (e.g. /.ghost/analytics/ or /blog/.ghost/analytics/)
 @analytics_paths path_regexp analytics_match ^(.*)/\.ghost/analytics(.*)$
 handle @analytics_paths {
-	rewrite * {re.analytics_match.2}
-	reverse_proxy traffic-analytics:3000
+ rewrite * {re.analytics_match.2}
+ reverse_proxy traffic-analytics:3000
 }
 ```
 

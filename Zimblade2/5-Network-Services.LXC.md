@@ -1,4 +1,3 @@
-
 # Network-Services
 
 Migre el servidor de mi PVE hacia mi PVE2 ya que con mi VM con ZimaOS mi PVE ya tiene mucha carga y mi PVE2 tiene menos carga, use la herramienta que viene integrada en Proxmox para migrar un contenedor de un cluster a otro.
@@ -47,6 +46,48 @@ services:
     #network_mode: host
     command: tunnel --no-autoupdate run --token
 ```
+
+### Certificado wildcard con DNS Challenge (17/11/2026)
+
+#### Problema
+
+```
+Certbot failed: Failed to renew certificate npm-24 with error: Some challenges have failed.
+```
+
+NPM usa HTTP-01, que necesita el puerto 80 abierto. Con el router cerrado (túnel de Cloudflare / VPS + rathole) no puede validar. El certificado de NPM es necesario porque por la vía del VPS es NPM quien sirve el HTTPS.
+
+#### Solución: DNS Challenge con la API de Cloudflare
+
+**1. Token** (My Profile → API Tokens → plantilla "Edit zone DNS"):
+
+* Permissions: `Zone → DNS → Edit` (añadir `Zone → Zone → Read` si no encuentra la zona)
+* Zone Resources: solo `homelabeiro.com`
+* Sin filtro de IP ni TTL
+
+> ⚠️ NPM guarda el token en texto plano: permisos mínimos y panel de NPM (puerto 81) sin exponer.
+
+**2. Certificado nuevo en NPM** (SSL Certificates → Add → Let's Encrypt):
+
+* Dominios: `homelabeiro.com` y `*.homelabeiro.com` en el mismo certificado
+* Use a DNS Challenge → Cloudflare → `dns_cloudflare_api_token = TU_TOKEN`
+* Propagation Seconds: 60
+
+**3.** Asignarlo a todos los Proxy Hosts (pestaña SSL) y borrar `npm-24`.
+
+#### Incidencias
+
+**`ERR_TOO_MANY_REDIRECTS` con Force SSL.** El túnel llegaba a NPM por HTTP, así que Force SSL redirigía en bucle.
+Solución: en la ruta `*.homelabeiro.com` del túnel, Service URL `https://192.168.1.55:443` + TLS → **Match SNI to Host** (cloudflared conecta por IP y el certificado es para el dominio). Todos los Proxy Hosts tienen que tener el certificado wildcard.
+
+**Canary caído en Uptime Kuma.** `test.homelabeiro.com` caía en la ruta wildcard y NPM, sin host para él, devolvía 502 (el flujo de n8n no se ve afectado).
+Solución: ruta propia en el túnel, **por encima del wildcard**: `test.homelabeiro.com` → `http://192.168.1.55:80` (página por defecto de NPM, 200).
+
+#### Estado
+
+✅ Certificado wildcard renovándose por DNS, sin puertos abiertos
+✅ Túnel → NPM por HTTPS, Force SSL sin bucles
+✅ Canary en verde
 
 ## Dashboards
 
