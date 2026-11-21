@@ -173,6 +173,10 @@ Por ultimo probamos que todo funciona bien y no nos da ningun error de sintaxis.
 
 `sudo mount -a`
 
+#### Almacenamiento en la Raspberry
+
+Cuando ZimaOS se empezó a quedar sin espacio monté el camino inverso, compartir el disco de la Raspberry con ZimaOS para que Radarr y Sonarr puedan mover películas y series aquí. Todo explicado en [Almacenamiento Media](./5-Almacenamiento_Media.md).
+
 ### Homelab Nexus
 
 Cree mi imagen personalizada de un dashboard tipo Homepage pero que integras las Apis de Uptime-Kuma, Beszel y Gotify para asi de una vista ver toda la informacion de esos tres servicios en uno, le añadi links a los monitores para que puedas configurarlo y que haga el mismo uso que le doy a Homepage agragando que tengo un monitoreo avanzado y superior a Homepage. Sus funcionalidades estan explicadas en el repo pero tiene todo lo que necesito ahora mismo, monitorizacion y links para acceder a los servicios o servidores que necesito, ademas de bookmarks que puedo personalizar como quiera.
