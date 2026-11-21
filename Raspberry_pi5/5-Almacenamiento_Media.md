@@ -5,7 +5,7 @@ Mi ZimaOS se estaba quedando sin espacio con tantas películas y series, y en la
 Hasta ahora el flujo era ZimaOS → Raspberry, es decir, ZimaOS comparte la carpeta de media por SMB y la Rasp la monta por CIFS para que Jellyfin la lea (explicado en [Servicios](./2-Servicios.md)). Ahora vamos a montar también el camino inverso, Raspberry → ZimaOS, para que Radarr y Sonarr puedan mover las pelis al disco de la Rasp.
 
 ```text
-ZimaOS    ── SMB/CIFS ──▶  Raspberry: /home/mateorzan/media      (lo de siempre)
+ZimaOS    ── SMB/CIFS ──▶  Raspberry: /home/tu_usuario/media      (lo de siempre)
 Raspberry ── Samba    ──▶  ZimaOS:    /DATA/media-pi             (lo nuevo)
 
 Radarr   : /movies  (ZimaOS)  +  /movies-pi  (Raspberry)
@@ -37,7 +37,7 @@ Hasta ahora ZimaOS hacía de servidor (trae Samba integrado) y la Rasp de client
 Creamos la carpeta que vamos a compartir con la estructura de películas y series.
 
 ```bash
-mkdir -p "/home/mateorzan/media-pi/Movies" "/home/mateorzan/media-pi/TV Shows"
+mkdir -p "/home/tu_usuario/media-pi/Movies" "/home/tu_usuario/media-pi/TV Shows"
 ```
 
 Instalamos Samba.
@@ -57,17 +57,17 @@ Añadimos al final del archivo.
 
 ```Shell
 [media-pi]
-   path = /home/mateorzan/media-pi
+   path = /home/tu_usuario/media-pi
    browseable = yes
    read only = no
-   valid users = mateorzan
-   force user = mateorzan
+   valid users = tu_usuario
+   force user = tu_usuario
    create mask = 0664
    directory mask = 0775
 ```
 
 * **valid users**: solo nuestro usuario puede conectarse.
-* **force user**: todo lo que llegue por Samba se guarda a nombre de `mateorzan` (uid 1000), que es el mismo usuario con el que corre Jellyfin, así no hay líos de permisos.
+* **force user**: todo lo que llegue por Samba se guarda a nombre de `tu_usuario` (uid 1000), que es el mismo usuario con el que corre Jellyfin, así no hay líos de permisos.
 * **create mask 0664**: archivos de lectura y escritura para el dueño y el grupo, y solo lectura para el resto.
 * **directory mask 0775**: igual pero para carpetas, que además necesitan permiso de ejecución para poder entrar en ellas.
 
@@ -83,7 +83,7 @@ En el mismo archivo comentamos con `;` las secciones `[homes]`, `[printers]` y `
 Creamos la contraseña de Samba para nuestro usuario. Es una contraseña aparte de la del sistema y es la que usaremos desde ZimaOS.
 
 ```bash
-sudo smbpasswd -a mateorzan
+sudo smbpasswd -a tu_usuario
 ```
 
 Comprobamos que la configuración está bien, reiniciamos y lo dejamos activo al arranque.
@@ -97,7 +97,7 @@ sudo systemctl enable smbd
 Probamos desde la propia Rasp. Si salen `Movies` y `TV Shows` está todo listo.
 
 ```bash
-smbclient //localhost/media-pi -U mateorzan -c 'ls'
+smbclient //localhost/media-pi -U tu_usuario -c 'ls'
 ```
 
 ### Montaje en ZimaOS
@@ -111,7 +111,7 @@ mount | grep cifs
 ```
 
 ```text
-//192.168.1.62/media-pi on /media/192.168.1.62/media-pi type cifs (rw,...,uid=0,gid=0,...,file_mode=0755,dir_mode=0755,...)
+//IP_RASPBERRY/media-pi on /media/IP_RASPBERRY/media-pi type cifs (rw,...,uid=0,gid=0,...,file_mode=0755,dir_mode=0755,...)
 ```
 
 ZimaOS lo monta como **root** (`uid=0,gid=0`) con permisos `0755`, es decir, solo root puede escribir. Radarr y Sonarr corren con `PUID=1000` así que no pueden mover nada ahí.
@@ -127,7 +127,7 @@ sudo mount -t cifs //IP_RASPBERRY/media-pi /DATA/media-pi -o username=tu_usuario
 
 Ejemplo
 
-`sudo mount -t cifs //192.168.1.62/media-pi /DATA/media-pi -o username=****,uid=1000,gid=1000,file_mode=0664,dir_mode=0775,vers=3.1.1,iocharset=utf8`
+`sudo mount -t cifs //IP_RASPBERRY/media-pi /DATA/media-pi -o username=****,uid=1000,gid=1000,file_mode=0664,dir_mode=0775,vers=3.1.1,iocharset=utf8`
 
 Comprobamos que ahora las carpetas son de nuestro usuario.
 
@@ -137,7 +137,7 @@ ls -la /DATA/media-pi
 
 Así nos quedan dos montajes:
 
-* `/media/192.168.1.62/media-pi` → como root, solo para verlo desde la app de Archivos.
+* `/media/IP_RASPBERRY/media-pi` → como root, solo para verlo desde la app de Archivos.
 * `/DATA/media-pi` → como 1000, el que usan Radarr y Sonarr.
 
 #### Montaje automático
@@ -178,7 +178,7 @@ Añadimos el nuevo volumen en el compose de cada uno (en mi caso desde la interf
 | Radarr | `/DATA/media-pi/Movies` | `/movies-pi` |
 | Sonarr | `/DATA/media-pi/TV Shows` | `/series-pi` |
 
-> No uses la ruta que te enseña la app de Archivos (`/192.168.1.62/media-pi/...`), esa ruta no existe en el sistema y Docker monta una carpeta vacía. La ruta real se saca con `mount | grep cifs`.
+> No uses la ruta que te enseña la app de Archivos (`/IP_RASPBERRY/media-pi/...`), esa ruta no existe en el sistema y Docker monta una carpeta vacía. La ruta real se saca con `mount | grep cifs`.
 
 Comprobamos que el contenedor puede escribir con su usuario.
 
@@ -236,15 +236,15 @@ services:
       - /srv/jellyfin/config:/config
       - /srv/jellyfin/cache:/cache
       - type: bind
-        source: /home/mateorzan/media
+        source: /home/tu_usuario/media
         target: /media
       - type: bind
-        source: /home/mateorzan/media-pi
+        source: /home/tu_usuario/media-pi
         target: /media-pi
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
-      - JELLYFIN_PublishedServerUrl=https://RaspiTV.example.com/
+      - JELLYFIN_PublishedServerUrl=https://tu-dominio.example.com/
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -264,7 +264,7 @@ En Jellyfin añadimos las rutas nuevas a las bibliotecas que ya tenemos, **no cr
 Después de mover la primera peli:
 
 ```bash
-ls "/home/mateorzan/media-pi/Movies"
+ls "/home/tu_usuario/media-pi/Movies"
 ```
 
 * En la Rasp aparece la carpeta de la peli.

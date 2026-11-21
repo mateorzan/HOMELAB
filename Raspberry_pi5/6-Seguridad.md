@@ -50,7 +50,7 @@ El NFS de los [Backups](./3-Backups.md) estaba compartido con toda la red local 
 `sudo nano /etc/exports`
 
 ```Shell
-/ruta/backups 192.168.1.47(rw,sync,no_subtree_check,no_root_squash) 192.168.1.48(rw,sync,no_subtree_check,no_root_squash)
+/ruta/backups IP_PVE(rw,sync,no_subtree_check,no_root_squash) IP_PVE2(rw,sync,no_subtree_check,no_root_squash)
 ```
 
 ```bash
@@ -85,11 +85,11 @@ sudo ufw default allow outgoing
 
 sudo ufw allow in on tailscale0                                   # todo lo que llega por Tailscale
 sudo ufw allow from 192.168.1.0/24 to any port 22 proto tcp       # SSH desde la LAN
-sudo ufw allow from 192.168.1.38 to any port 445 proto tcp        # Samba solo desde ZimaOS
-sudo ufw allow from 192.168.1.47 to any port 2049 proto tcp       # NFS backups pve
-sudo ufw allow from 192.168.1.48 to any port 2049 proto tcp       # NFS backups pve2
-sudo ufw allow from 192.168.1.47 to any port 5403 proto tcp       # QDevice pve
-sudo ufw allow from 192.168.1.48 to any port 5403 proto tcp       # QDevice pve2
+sudo ufw allow from IP_ZIMAOS to any port 445 proto tcp        # Samba solo desde ZimaOS
+sudo ufw allow from IP_PVE to any port 2049 proto tcp       # NFS backups pve
+sudo ufw allow from IP_PVE2 to any port 2049 proto tcp       # NFS backups pve2
+sudo ufw allow from IP_PVE to any port 5403 proto tcp       # QDevice pve
+sudo ufw allow from IP_PVE2 to any port 5403 proto tcp       # QDevice pve2
 sudo ufw allow from 192.168.1.0/24 to any port 5353 proto udp     # mDNS
 
 sudo ufw --force enable
@@ -106,17 +106,17 @@ To                          Action      From
 --                          ------      ----
 Anywhere on tailscale0      ALLOW IN    Anywhere
 22/tcp                      ALLOW IN    192.168.1.0/24
-445/tcp                     ALLOW IN    192.168.1.38
-2049/tcp                    ALLOW IN    192.168.1.47
-2049/tcp                    ALLOW IN    192.168.1.48
-5403/tcp                    ALLOW IN    192.168.1.47
-5403/tcp                    ALLOW IN    192.168.1.48
+445/tcp                     ALLOW IN    IP_ZIMAOS
+2049/tcp                    ALLOW IN    IP_PVE
+2049/tcp                    ALLOW IN    IP_PVE2
+5403/tcp                    ALLOW IN    IP_PVE
+5403/tcp                    ALLOW IN    IP_PVE2
 5353/udp                    ALLOW IN    192.168.1.0/24
 Anywhere (v6) on tailscale0 ALLOW IN    Anywhere (v6)
 ```
 
 * **VNC**: el puerto 5900 solo queda accesible por Tailscale. Si lo necesitas desde la LAN: `sudo ufw allow from 192.168.1.0/24 to any port 5900 proto tcp`.
-* **Docker**: los puertos que publica un contenedor (`8096:8096`) **se saltan UFW** porque Docker mete sus propias reglas en iptables. Si queremos restringirlos hay que publicarlos en una IP concreta (`192.168.1.62:8096:8096`) o usar `ufw-docker`. Con los puertos del router cerrados no es grave pero hay que saberlo.
+* **Docker**: los puertos que publica un contenedor (`8096:8096`) **se saltan UFW** porque Docker mete sus propias reglas en iptables. Si queremos restringirlos hay que publicarlos en una IP concreta (`IP_RASPBERRY:8096:8096`) o usar `ufw-docker`. Con los puertos del router cerrados no es grave pero hay que saberlo.
 
 ### Fail2ban
 
@@ -194,7 +194,7 @@ Cuando quiera pasar a solo clave:
 
 Desde mi PC copiamos la clave.
 
-> `ssh-copy-id mateorzan@IP_RASPBERRY`
+> `ssh-copy-id tu_usuario@IP_RASPBERRY`
 
 Comprobamos que entramos con clave y creamos el archivo.
 
