@@ -14,29 +14,11 @@ sudo ss -tulpn                           # qué puertos escuchan
 sudo sshd -T | grep -E "passwordauthentication|permitrootlogin|pubkeyauthentication"
 ```
 
-En mi caso:
-
-* La cadena `INPUT` estaba en `policy accept`, solo con las reglas que mete Docker y Tailscale, es decir, sin ningún filtro.
-* Ni UFW ni fail2ban instalados.
-* SSH con `passwordauthentication yes`.
-
-Y estos eran los puertos abiertos.
-
-|   Puerto   |        Servicio        |                    Qué hacemos                    |
-| :---------: | :--------------------: | :------------------------------------------------: |
-|     22     |          SSH          |                Solo LAN y Tailscale                |
-|  445 / 139  |          Samba          |                  Solo desde ZimaOS                  |
-|  137 / 138  |      nmbd (NetBIOS)      |                    Desactivado                    |
-|    5403    |     corosync-qnetd     | Solo pve y pve2 ([QDevice](./4-QDevice.md)) |
-| 2049, 111... |    NFS + rpcbind    | Solo pve y pve2 ([Backups](./3-Backups.md)) |
-|    5900    |      wayvnc (VNC)      |                  Solo Tailscale                  |
-|     631     |          CUPS          |                    Desactivado                    |
-| 8096, 7359, 3000, 3100 |      Docker      |   Accesibles en la LAN (Docker se salta UFW)   |
-| 11434, 18789 | Ollama, OpenClaw |           Solo localhost, no expuestos           |
+En una instalación recién hecha lo normal es que la cadena `INPUT` esté en `policy accept` (solo con las reglas que meten Docker y Tailscale) y que no haya ni UFW ni fail2ban, es decir, sin ningún filtro. Con `ss -tulpn` vemos qué servicios escuchan y cuáles sobran. Los servicios que necesitan acceso desde otros equipos (SSH, Samba, NFS para los [Backups](./3-Backups.md), el [QDevice](./4-QDevice.md)) los dejamos solo para las IPs que los usan y el resto se bloquea.
 
 ### Desactivar servicios
 
-Apagamos lo que no usamos.
+Apagamos lo que no usamos (NetBIOS, impresión...).
 
 ```bash
 sudo systemctl disable --now nmbd                 # NetBIOS, no hace falta
@@ -45,7 +27,7 @@ sudo systemctl disable --now cups cups-browsed    # impresión
 
 ### NFS
 
-El NFS de los [Backups](./3-Backups.md) estaba compartido con toda la red local y con `no_root_squash`, lo que quiere decir que cualquier equipo de mi casa podía escribir como root en esa carpeta. Lo limitamos solo a los dos nodos de Proxmox.
+El NFS de los [Backups](./3-Backups.md) no debería estar compartido con toda la red local, y menos con `no_root_squash`, porque cualquier equipo podría escribir como root en esa carpeta. Lo limitamos solo a los dos nodos de Proxmox.
 
 `sudo nano /etc/exports`
 
@@ -60,7 +42,7 @@ sudo exportfs -v
 
 > `no_root_squash` se mantiene porque Proxmox escribe las backups como root, sin él da errores de permisos.
 
-Antes de tocar nada comprobé que había clientes conectados, así vi que pve y pve2 lo estaban usando.
+Antes de tocar nada conviene comprobar qué clientes están conectados para no cortar a nadie.
 
 ```bash
 sudo ss -tn state established '( sport = :2049 )'
@@ -96,27 +78,8 @@ sudo ufw --force enable
 sudo ufw status verbose
 ```
 
-Resultado.
-
-```text
-Status: active
-Default: deny (incoming), allow (outgoing), deny (routed)
-
-To                          Action      From
---                          ------      ----
-Anywhere on tailscale0      ALLOW IN    Anywhere
-22/tcp                      ALLOW IN    192.168.1.0/24
-445/tcp                     ALLOW IN    IP_ZIMAOS
-2049/tcp                    ALLOW IN    IP_PVE
-2049/tcp                    ALLOW IN    IP_PVE2
-5403/tcp                    ALLOW IN    IP_PVE
-5403/tcp                    ALLOW IN    IP_PVE2
-5353/udp                    ALLOW IN    192.168.1.0/24
-Anywhere (v6) on tailscale0 ALLOW IN    Anywhere (v6)
-```
-
-* **VNC**: el puerto 5900 solo queda accesible por Tailscale. Si lo necesitas desde la LAN: `sudo ufw allow from 192.168.1.0/24 to any port 5900 proto tcp`.
-* **Docker**: los puertos que publica un contenedor (`8096:8096`) **se saltan UFW** porque Docker mete sus propias reglas en iptables. Si queremos restringirlos hay que publicarlos en una IP concreta (`IP_RASPBERRY:8096:8096`) o usar `ufw-docker`. Con los puertos del router cerrados no es grave pero hay que saberlo.
+* **Servicios extra**: cualquier otro servicio (por ejemplo VNC) queda bloqueado hasta que lo abras con su propia regla.
+* **Docker**: los puertos que publica un contenedor (`8096:8096`) **se saltan UFW** porque Docker mete sus propias reglas en iptables. Si queremos restringirlos hay que publicarlos en una IP concreta (`IP_RASPBERRY:8096:8096`) o usar `ufw-docker`.
 
 ### Fail2ban
 
@@ -186,13 +149,11 @@ sudo unattended-upgrade --dry-run --debug
 
 ### SSH
 
-Por ahora mantengo el acceso con contraseña, queda limitado a la LAN y Tailscale y con fail2ban activo así que el riesgo es bajo.
+Lo recomendable es acceder solo con clave, limitar SSH a la LAN y Tailscale (ya hecho con UFW) y tener fail2ban activo.
 
-`PermitRootLogin` lo dejo en `without-password` (root solo con clave) ya que Proxmox lo usa si hay que volver a hacer `pvecm qdevice setup`, explicado en [QDevice](./4-QDevice.md).
+`PermitRootLogin` se deja en `without-password` (root solo con clave), ya que Proxmox lo usa si hay que volver a hacer `pvecm qdevice setup`, explicado en [QDevice](./4-QDevice.md).
 
-Cuando quiera pasar a solo clave:
-
-Desde mi PC copiamos la clave.
+Para pasar a solo clave, desde nuestro PC copiamos la clave.
 
 > `ssh-copy-id tu_usuario@IP_RASPBERRY`
 
@@ -225,9 +186,8 @@ Y desde pve comprobamos que el QDevice sigue votando y lanzamos una backup manua
 pvecm status
 ```
 
-### Pendiente
+### Mejoras posibles
 
-* Ver la versión de NFS con `mount | grep nfs` en pve. Si es v4 desactivar `rpcbind` (`sudo systemctl disable --now rpcbind rpcbind.socket && sudo systemctl mask rpcbind rpcbind.socket`), si es v3 forzar antes `options vers=4.2` en el storage de Proxmox.
-* Jellyfin: cambiar `7359:7359` por `7359:7359/udp`, el autodescubrimiento va por UDP.
+* Si el NFS va por v4, desactivar `rpcbind` (`sudo systemctl disable --now rpcbind rpcbind.socket && sudo systemctl mask rpcbind rpcbind.socket`). Si va por v3, forzar antes `options vers=4.2` en el storage de Proxmox.
 * Publicar los puertos de Docker solo en la IP de la LAN.
 * Pasar SSH a solo clave.

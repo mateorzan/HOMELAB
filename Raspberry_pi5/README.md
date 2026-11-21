@@ -34,6 +34,5 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 |         UFW         |       Activo       |
 |       Fail2ban       |       Activo       |
 | Unattended-upgrades |       Activo       |
-|   SSH solo clave   |      Pendiente      |
 
 Más información en [Almacenamiento Media](./5-Almacenamiento_Media.md) y [Seguridad](./6-Seguridad.md).
