@@ -14,7 +14,7 @@ sudo ss -tulpn                           # qué puertos escuchan
 sudo sshd -T | grep -E "passwordauthentication|permitrootlogin|pubkeyauthentication"
 ```
 
-En una instalación recién hecha lo normal es que la cadena `INPUT` esté en `policy accept` (solo con las reglas que meten Docker y Tailscale) y que no haya ni UFW ni fail2ban, es decir, sin ningún filtro. Con `ss -tulpn` vemos qué servicios escuchan y cuáles sobran. Los servicios que necesitan acceso desde otros equipos (SSH, Samba, NFS para los [Backups](./3-Backups.md), el [QDevice](./4-QDevice.md)) los dejamos solo para las IPs que los usan y el resto se bloquea.
+En una instalación recién hecha lo normal es que la cadena `INPUT` esté en `policy accept` (solo con las reglas que meten Docker y Tailscale) y que no haya ni UFW ni fail2ban, es decir, sin ningún filtro. Con `ss -tulpn` vemos qué servicios escuchan y cuáles sobran. Los servicios que necesitan acceso desde otros equipos (SSH, Samba, NFS para los [Backups](./3-Backups.md) con los puertos 2049 y 111, el [QDevice](./4-QDevice.md)) los dejamos solo para las IPs que los usan y el resto se bloquea.
 
 ### Desactivar servicios
 
@@ -48,6 +48,20 @@ Antes de tocar nada conviene comprobar qué clientes están conectados para no c
 sudo ss -tn state established '( sport = :2049 )'
 ```
 
+#### NFSv4 en Proxmox
+
+Con NFSv3 el servidor usa puertos aleatorios para `mountd`, y habría que fijarlos y abrirlos en UFW. Para no tener que hacerlo forcé NFSv4 en el storage, que solo necesita el 2049 (más el 111 de rpcbind, explicado en [UFW](#ufw)). Estos comandos se ejecutan en pve.
+
+```bash
+pvesm set Rasp_bks --options vers=4.2
+rpcinfo -T tcp IP_RASPBERRY nfs 4
+pvesm status | grep Rasp_bks
+```
+
+El storage debe salir como `active`.
+
+> `rpcbind` se queda activo en la Raspberry aunque usemos NFSv4, porque Proxmox lo sigue necesitando para comprobar el storage.
+
 ### UFW
 
 Instalamos UFW.
@@ -70,6 +84,8 @@ sudo ufw allow from 192.168.1.0/24 to any port 22 proto tcp       # SSH desde la
 sudo ufw allow from IP_ZIMAOS to any port 445 proto tcp        # Samba solo desde ZimaOS
 sudo ufw allow from IP_PVE to any port 2049 proto tcp       # NFS backups pve
 sudo ufw allow from IP_PVE2 to any port 2049 proto tcp       # NFS backups pve2
+sudo ufw allow from IP_PVE to any port 111                   # rpcbind pve (Proxmox comprueba el NFS)
+sudo ufw allow from IP_PVE2 to any port 111                  # rpcbind pve2
 sudo ufw allow from IP_PVE to any port 5403 proto tcp       # QDevice pve
 sudo ufw allow from IP_PVE2 to any port 5403 proto tcp       # QDevice pve2
 sudo ufw allow from 192.168.1.0/24 to any port 5353 proto udp     # mDNS
@@ -77,6 +93,10 @@ sudo ufw allow from 192.168.1.0/24 to any port 5353 proto udp     # mDNS
 sudo ufw --force enable
 sudo ufw status verbose
 ```
+
+> IMPORTANTE: Aunque el 2049 esté abierto, hay que abrir también el **111** (rpcbind). Proxmox comprueba cada ~20 segundos si el servidor NFS está disponible preguntando a rpcbind, y si UFW bloquea ese puerto marca el storage como inactivo (`Active: No`) y las backups fallan con `could not activate storage`. Yo lo detecté mirando el log del firewall, donde salían bloqueos con `DPT=111` desde pve:
+>
+> `sudo journalctl -k --since "today" | grep "UFW BLOCK" | grep -E "SRC=IP_PVE|SRC=IP_PVE2"`
 
 * **Servicios extra**: cualquier otro servicio (por ejemplo VNC) queda bloqueado hasta que lo abras con su propia regla.
 * **Docker**: los puertos que publica un contenedor (`8096:8096`) **se saltan UFW** porque Docker mete sus propias reglas en iptables. Si queremos restringirlos hay que publicarlos en una IP concreta (`IP_RASPBERRY:8096:8096`) o usar `ufw-docker`.
@@ -188,6 +208,5 @@ pvecm status
 
 ### Mejoras posibles
 
-* Si el NFS va por v4, desactivar `rpcbind` (`sudo systemctl disable --now rpcbind rpcbind.socket && sudo systemctl mask rpcbind rpcbind.socket`). Si va por v3, forzar antes `options vers=4.2` en el storage de Proxmox.
 * Publicar los puertos de Docker solo en la IP de la LAN.
 * Pasar SSH a solo clave.
