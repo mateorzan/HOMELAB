@@ -40,6 +40,12 @@ Y el tiempo, con las próximas 24 horas y los 7 días siguientes.
 
 ![dock_tiempo](image/Raspberry_pi5/dock_tiempo.png)
 
+Las estadísticas de una cuenta de Instagram: seguidores nuevos y alcance de los últimos 30 días, y la audiencia por edad, género, ciudades y países. Hay una tercera pestaña con las últimas publicaciones.
+
+![dock_instagram_evolucion](image/Raspberry_pi5/dock_instagram_evolucion.png)
+
+![dock_instagram_audiencia](image/Raspberry_pi5/dock_instagram_audiencia.png)
+
 ### Requisitos
 
 - Docker y Docker Compose en la Raspberry (explicado en [Servicios](./2-Servicios.md)).
@@ -222,6 +228,7 @@ git tag v0.1.0 && git push origin v0.1.0
 * **Impresora Bambu Lab**: el hub se conecta por MQTT con TLS (puerto 8883) con el usuario `bblp` y el código de acceso que sale en la pantalla de la impresora, y la cámara por el puerto 6000. Es **solo lectura**, no puede pausar ni parar nada. Como el hub usa la red del host, está en la misma LAN que la impresora.
 * **Claude Code**: el agente del portátil lee el archivo que mi *statusline* ya genera con el porcentaje usado de las ventanas de 5 horas y semanal, y los registros locales para los tokens y modelos. No usa credenciales ni llama a ningún servicio.
 * **GitHub**: las contribuciones salen de `gh api graphql` con mi propia sesión, el proyecto no guarda ningún token.
+* **Instagram**: la API oficial de Meta, solo lectura, con una cuenta profesional. El token se guarda únicamente en la configuración del hub y nunca llega al navegador del móvil. Hay que añadir la cuenta de Instagram a un portfolio empresarial de Meta y generar el token desde una app en modo desarrollo; no hace falta pasar la revisión de Meta porque solo leo mi propia cuenta. Instagram solo da la audiencia con más de 100 seguidores.
 
 ### Seguridad
 
