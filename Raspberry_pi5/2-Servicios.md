@@ -228,3 +228,37 @@ Con esto nos metemos a la url en el puerto :3000 y ya lo tenemos.
 ### Dock Dashboard
 
 Dashboard para un móvil viejo que uso como tercera pantalla bajo el monitor, sustituye a MacroDeck. El servidor (hub) corre aquí en Docker y se conecta a unos agentes que corren en mi PC y en mi portátil. Todo el montaje, la configuración y el despliegue automático están explicados en [Dock Dashboard](./7-Dock_Dashboard.md).
+
+### LinkStack
+
+Servicio autoalojado para compartir todos tus links de interes en redes sociales o portales. El servidor corre completamente autoalojado en docker, se configura simplemente creando un compose con tus credenciales. Ver documentacion. [LinkStackOrg](https://github.com/linkstackorg/linkstack-docker)
+
+#### Docker Compose
+
+```
+version: "3.8"
+
+services:
+
+  linkstack:
+    hostname: 'linkstack'
+    image: 'linkstackorg/linkstack:latest'
+    environment:
+      TZ: 'Europe/Berlin'
+      SERVER_ADMIN: 'admin@example.com'
+      HTTP_SERVER_NAME: 'example.com'
+      HTTPS_SERVER_NAME: 'example.com'
+      LOG_LEVEL: 'info'
+      PHP_MEMORY_LIMIT: '256M'
+      UPLOAD_MAX_FILESIZE: '8M'
+    volumes:
+      - 'linkstack_data:/htdocs'
+    ports:
+      - '8190:443'
+    restart: unless-stopped
+
+volumes:
+  linkstack_data:
+```
+
+Luego simplemente entras a las URL que configuraste en el compose con HTTPS y deberas seguir los pasos de configuracion de la propia web.

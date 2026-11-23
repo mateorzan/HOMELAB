@@ -19,21 +19,22 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 
 ### Servicios
 
-|   Servicio   |   Tipo   |  Maquina  | Estado |
-| :-----------: | :-------: | :-------: | :-----: |
-|   Jellyfin   |   Media   | Raspberry | Activo |
-|    Ollama    |    IA    | Raspberry | Desuso |
-|   OpenClaw   |    IA    | Raspberry | Desuso  |
-| Homelab Nexus | Dashboard | Raspberry | Activo |
-| Dock Dashboard | Dashboard | Raspberry | Activo |
-|     Samba     | Almacenamiento | Raspberry | Activo |
+|    Servicio    |      Tipo      |  Maquina  |      Estado      |
+| :------------: | :------------: | :-------: | :--------------: |
+|    Jellyfin    |     Media     | Raspberry |      Activo      |
+|     Ollama     |       IA       | Raspberry |      Desuso      |
+|    OpenClaw    |       IA       | Raspberry |      Desuso      |
+| Homelab Nexus |   Dashboard   | Raspberry |      Activo      |
+| Dock Dashboard |   Dashboard   | Raspberry |      Activo      |
+|     Samba     | Almacenamiento | Raspberry |      Activo      |
+|   LinkStack   |    Linktree    | Raspberry | En Construcción |
 
 ### Seguridad
 
-| Medida | Estado |
-| :------------------: | :-----------------: |
-|         UFW         |       Activo       |
-|       Fail2ban       |       Activo       |
-| Unattended-upgrades |       Activo       |
+|       Medida       | Estado |
+| :-----------------: | :----: |
+|         UFW         | Activo |
+|      Fail2ban      | Activo |
+| Unattended-upgrades | Activo |
 
 Más información en [Almacenamiento Media](./5-Almacenamiento_Media.md), [Seguridad](./6-Seguridad.md) y [Dock Dashboard](./7-Dock_Dashboard.md).
