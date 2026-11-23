@@ -51,3 +51,5 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 | Ddns-Updater |      IP      | LXC.Network-Services |   Activo   |
 |   Rathole   |    Tunnel    | LXC.Network-Services |   Activo   |
 | Cloudflared |    Tunnel    | LXC.Network-Services |   Activo   |
+
+Más información sobre la protección de los paneles y los ajustes de Cloudflare en [Cloudflare y seguridad web](./6-Cloudflare-Seguridad.md).

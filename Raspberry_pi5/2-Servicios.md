@@ -262,3 +262,5 @@ volumes:
 ```
 
 Luego simplemente entras a las URL que configuraste en el compose con HTTPS y deberas seguir los pasos de configuracion de la propia web.
+
+El tema propio, la caché, el rendimiento y los problemas con Instagram y Cloudflare están en [LinkStack](./8-LinkStack.md).

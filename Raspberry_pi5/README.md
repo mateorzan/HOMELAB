@@ -27,7 +27,7 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 | Homelab Nexus |   Dashboard   | Raspberry |      Activo      |
 | Dock Dashboard |   Dashboard   | Raspberry |      Activo      |
 |     Samba     | Almacenamiento | Raspberry |      Activo      |
-|   LinkStack   |    Linktree    | Raspberry | En Construcción |
+|   LinkStack   |    Linktree    | Raspberry |      Activo      |
 
 ### Seguridad
 
@@ -37,4 +37,4 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 |      Fail2ban      | Activo |
 | Unattended-upgrades | Activo |
 
-Más información en [Almacenamiento Media](./5-Almacenamiento_Media.md), [Seguridad](./6-Seguridad.md) y [Dock Dashboard](./7-Dock_Dashboard.md).
+Más información en [Almacenamiento Media](./5-Almacenamiento_Media.md), [Seguridad](./6-Seguridad.md), [Dock Dashboard](./7-Dock_Dashboard.md) y [LinkStack](./8-LinkStack.md).
