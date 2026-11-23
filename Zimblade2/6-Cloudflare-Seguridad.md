@@ -59,4 +59,4 @@ Con el ajuste por defecto, Cloudflare impone un `max-age` de varias horas a los 
 
 ### Registro DNS comodín
 
-Tengo un registro `*` con proxy, así que **cualquier** subdominio, exista o no, resuelve a Cloudflare y devuelve `502` si no hay un servicio detrás. Es inofensivo, pero se nota con `www`. No lo borro porque puede que algo del túnel dependa de él. Si quiero evitar ese error, se puede crear una regla en *Rules → Redirect Rules*: si el host es `www.example.com`, redirigir con `301` a `https://example.com` conservando la ruta y los parámetros.
+Tengo un registro `*` con proxy, así que **cualquier** subdominio, exista o no, resuelve a Cloudflare y devuelve `502` si no hay un servicio detrás. Es inofensivo, pero se nota con `www`. No lo borro porque puede que algo del túnel dependa de él. Decidí dejarlo como está: el error solo lo ve quien escriba `www`. Si se quisiera evitar, bastaría una regla en *Rules → Redirect Rules* que redirija `www.example.com` a `https://example.com` con un `301`.

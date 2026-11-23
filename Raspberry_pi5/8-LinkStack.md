@@ -25,6 +25,8 @@ Quise que el linktree fuera igual que mis carruseles de Instagram: papel crema c
 
 Escritorio y móvil se ven igual: una única columna centrada.
 
+Cada tarjeta lleva un pequeño LED verde en la esquina de la celda negra, como el LED de enlace de un puerto del switch de mi rack, y parpadea un instante al pulsarla. El avatar usa el mismo naranja que el resto de mi marca.
+
 ### Instalar el tema
 
 Los temas viven en el volumen persistente del contenedor, así que sobreviven a reinicios y actualizaciones de la imagen. Copio la carpeta al contenedor y le doy el propietario correcto.
