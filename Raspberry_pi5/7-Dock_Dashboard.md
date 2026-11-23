@@ -20,6 +20,26 @@ Móvil (Chrome / app instalada) ── HTTPS por Tailscale ──▶ HUB en la R
 * **Agente**: un programa pequeño que corre en cada ordenador, con un adaptador por sistema operativo. Lee métricas, música, volumen y atajos de *esa* máquina. El del PC es el **principal** (música, volumen, mezclador, atajos, GPU) y el del portátil aporta su pestaña de estadísticas y el uso de Claude Code.
 * **Móvil**: solo es la pantalla, nunca ejecuta comandos. Manda el nombre de un atajo y es el agente quien ejecuta el comando que tiene en su propia configuración.
 
+### Así se ve
+
+Capturas con datos de ejemplo. La pantalla de inicio junta lo más importante, con el próximo evento del calendario bajo la fecha, y cada widget abre su pestaña al tocarlo.
+
+![dock_home](image/Raspberry_pi5/dock_home.png)
+
+Estadísticas de cada equipo, con una pestaña por dispositivo y la temperatura dentro de cada medidor.
+
+![dock_estadisticas](image/Raspberry_pi5/dock_estadisticas.png)
+
+El calendario junta varias cuentas de Google con un color para cada una, en vista de agenda y de mes. Las chips de arriba ocultan o muestran cada cuenta.
+
+![dock_calendario_agenda](image/Raspberry_pi5/dock_calendario_agenda.png)
+
+![dock_calendario_mes](image/Raspberry_pi5/dock_calendario_mes.png)
+
+Y el tiempo, con las próximas 24 horas y los 7 días siguientes.
+
+![dock_tiempo](image/Raspberry_pi5/dock_tiempo.png)
+
 ### Requisitos
 
 - Docker y Docker Compose en la Raspberry (explicado en [Servicios](./2-Servicios.md)).
