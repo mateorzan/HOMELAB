@@ -224,3 +224,7 @@ docker-compose up -d
 Con esto nos metemos a la url en el puerto :3000 y ya lo tenemos.
 
 ![1788525588962](image/Raspberry_pi5/1788525588962.png)
+
+### Dock Dashboard
+
+Dashboard para un móvil viejo que uso como tercera pantalla bajo el monitor, sustituye a MacroDeck. El servidor (hub) corre aquí en Docker y se conecta a unos agentes que corren en mi PC y en mi portátil. Todo el montaje, la configuración y el despliegue automático están explicados en [Dock Dashboard](./7-Dock_Dashboard.md).

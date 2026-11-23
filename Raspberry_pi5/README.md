@@ -25,6 +25,7 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 |    Ollama    |    IA    | Raspberry | Desuso |
 |   OpenClaw   |    IA    | Raspberry | Desuso  |
 | Homelab Nexus | Dashboard | Raspberry | Activo |
+| Dock Dashboard | Dashboard | Raspberry | Activo |
 |     Samba     | Almacenamiento | Raspberry | Activo |
 
 ### Seguridad
@@ -35,4 +36,4 @@ Aqui voy a ir documentando el estado actual y todo lo que se va montando en este
 |       Fail2ban       |       Activo       |
 | Unattended-upgrades |       Activo       |
 
-Más información en [Almacenamiento Media](./5-Almacenamiento_Media.md) y [Seguridad](./6-Seguridad.md).
+Más información en [Almacenamiento Media](./5-Almacenamiento_Media.md), [Seguridad](./6-Seguridad.md) y [Dock Dashboard](./7-Dock_Dashboard.md).

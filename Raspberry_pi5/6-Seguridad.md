@@ -99,7 +99,7 @@ sudo ufw status verbose
 > `sudo journalctl -k --since "today" | grep "UFW BLOCK" | grep -E "SRC=IP_PVE|SRC=IP_PVE2"`
 
 * **Servicios extra**: cualquier otro servicio (por ejemplo VNC) queda bloqueado hasta que lo abras con su propia regla.
-* **Docker**: los puertos que publica un contenedor (`8096:8096`) **se saltan UFW** porque Docker mete sus propias reglas en iptables. Si queremos restringirlos hay que publicarlos en una IP concreta (`IP_RASPBERRY:8096:8096`) o usar `ufw-docker`.
+* **Docker**: los puertos que publica un contenedor (`8096:8096`) **se saltan UFW** porque Docker mete sus propias reglas en iptables. Si queremos restringirlos hay que publicarlos en una IP concreta (`IP_RASPBERRY:8096:8096`) o usar `ufw-docker`. Otra opción es usar `network_mode: host` en el contenedor, así el puerto sí lo filtra UFW, como en el [Dock Dashboard](./7-Dock_Dashboard.md).
 
 ### Fail2ban
 
