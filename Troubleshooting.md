@@ -638,3 +638,108 @@ http://192.168.1.55:80
 ```
 
 Con esto ya vuelve a salir bien en Kuma.
+
+### PBS lleno al 100%, no deja ejecutar el Garbage Collect
+
+Borré un backup grande y el PBS seguía sin espacio. Borrar un backup solo elimina los índices, el espacio real está en `.chunks` y solo se libera con el Garbage Collect, pero el GC necesita escribir (atime de los chunks y ficheros de lock), así que con el pool al 100% no arrancaba.
+
+El pool no tenía snapshots, quotas ni reservas, así que la salida fue reducir temporalmente el slop de ZFS (la reserva interna, 1/32 del pool):
+
+```bash
+# Valor actual (normalmente 5)
+cat /sys/module/zfs/parameters/spa_slop_shift
+
+# Reducir la reserva y liberar unos 20 GB
+echo 6 > /sys/module/zfs/parameters/spa_slop_shift
+
+# Lanzar el GC
+proxmox-backup-manager garbage-collection start <datastore>
+
+# Dejar el valor como estaba
+echo 5 > /sys/module/zfs/parameters/spa_slop_shift
+```
+
+El GC solo borra chunks con más de 24h y 5 minutos, así que si el backup borrado es reciente no libera nada hasta pasado ese tiempo.
+
+Para que no vuelva a pasar dejé una reserva de emergencia en un dataset vacío. Si se vuelve a llenar, la quito, lanzo el GC y la vuelvo a poner:
+
+```bash
+zfs create -o refreservation=20G zfs_backup/reserva
+zfs set refreservation=none zfs_backup/reserva
+zfs set refreservation=20G zfs_backup/reserva
+```
+
+### Backup de ZimaOS falla al 75% con write failed: Bad address (os error 14)
+
+El backup completo de ZimaOS (1.5 TiB, sin backup previo, unas 29 horas) falló casi al final con este error:
+
+```
+POST /fixed_chunk: 400 Bad Request: inserting chunk on store 'zfs_backup' failed ... write failed: Bad address (os error 14)
+```
+
+No es el error de falta de espacio (sería `No space left on device`) y el pool estaba `ONLINE` con 168 GB libres. Lo que me dio la pista fue `dmesg` dentro del PBS:
+
+```
+I/O error, dev sda, sector 4563680 op 0x0:(READ)
+Read-error on swap-device (252:0:3511008)
+```
+
+`sda` no es el disco del datastore, es el disco de sistema del PBS, donde está la swap. Ese disco es un qcow2 en el storage `Sistem`, que es un directorio dentro de `rpool`, el SSD de pve2. Al fallar la lectura de la swap el kernel no podía completar la escritura del chunk y devolvía `Bad address`.
+
+En pve2 el SSD tenía cortes continuos del enlace SATA:
+
+```
+ata2: SError: { CommWake DevExch }
+ata2: SATA link up 1.5 Gbps (SStatus 113 SControl 310)
+```
+
+Y `zpool status -v rpool` marcaba un error permanente en `vm-102-disk-0.qcow2`, el disco del PBS.
+
+Descarté el cable porque los contadores SMART del SSD no tenían errores CRC ni caídas de PHY (`smartctl -x /dev/sda`), y porque al cambiar los discos de conector en el cable Y los errores seguían al SSD. Lo que sí encajaba era la política de ahorro de energía del enlace SATA, que estaba en `med_power_with_dipm`, y los errores `CommWake` van con esa política.
+
+```bash
+cat /sys/class/scsi_host/host*/link_power_management_policy
+```
+
+La solución fue poner `max_performance` y hacerlo persistente con un fichero de tmpfiles:
+
+```bash
+# Probar sin reiniciar
+for h in /sys/class/scsi_host/host*/link_power_management_policy; do echo max_performance > $h; done
+
+# Hacerlo persistente
+echo 'w /sys/class/scsi_host/host*/link_power_management_policy - - - - max_performance' > /etc/tmpfiles.d/sata-lpm.conf
+systemd-tmpfiles --create /etc/tmpfiles.d/sata-lpm.conf
+```
+
+Tras reiniciar los dos enlaces subieron a 6.0 Gbps y los cortes pararon. Para vigilar si vuelven:
+
+```bash
+journalctl -k --since "<hora del reinicio>" | grep -iE "ata[0-9]+: .*(error|link up)"
+```
+
+Todavía lo considero una causa probable y no confirmada, hasta que pase más tiempo sin cortes.
+
+### El disco del PBS (qcow2) quedó dañado y no se puede mover de storage
+
+`qemu-img check` decía que no había errores, pero solo valida los metadatos del qcow2, no los datos. Al intentar moverlo con `qm move-disk` falló leyendo siempre en el mismo byte:
+
+```
+qemu-img: error while reading at byte 2336227328: Input/output error
+```
+
+Ese offset (sector 4562944) cae justo al lado de los sectores de la swap que fallaban en el PBS. Un scrub de `rpool` confirmó que ese era el único archivo dañado de todo el SSD:
+
+```bash
+zpool clear rpool
+zpool scrub rpool
+zpool status -v rpool
+```
+
+Como en el PBS no había nada de valor (el backup falló y no se guardó ningún snapshot) decidí reinstalarlo desde cero. El disco de datos (`scsi1`, 1.4T) está en otro disco y no se ve afectado. Al reinstalar hay que desconectarlo con Detach, nunca con Remove, para que el instalador no lo toque. Ojo con los nombres, porque tanto el qcow2 dañado como el disco de datos se llaman `vm-102-disk-0` y solo se distinguen por el storage (`Sistem:` frente a `local-lvm:`).
+
+### Retención y modo de backup en el PBS
+
+Con `keep-last 1` si el siguiente backup falla no queda ninguna copia anterior, así que lo cambié a `keep-last 2`. Con el modo `stop` se pierde el dirty bitmap y cada backup relee el disco entero aunque luego solo suba los chunks nuevos, en modo `snapshot` el bitmap se mantiene y los backups incrementales tardan minutos en vez de horas.
+
+Los storages `KeePass-LVMthin`, `LXC_*`, `VM_ghost` y `local-lvm` apuntan todos al mismo thin pool (`pve/data`), son restos de antes de migrar a ZFS. Todo lo de `rpool` (SSD) es la raíz de pve2 y los CT 103 y 107, y el HDD tiene el datastore del PBS y la VM de la web.
