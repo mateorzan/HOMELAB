@@ -27,8 +27,8 @@ Seerr    : no se toca nada
 
 Al principio me lió esto así que lo dejo apuntado. SMB/CIFS es el mismo protocolo para compartir carpetas en red, lo que cambia es el lado:
 
-* **Samba** es el servidor, el programa que comparte la carpeta.
-* **cifs** es el cliente, el tipo de montaje que usas para conectarte (`mount -t cifs`).
+- **Samba** es el servidor, el programa que comparte la carpeta.
+- **cifs** es el cliente, el tipo de montaje que usas para conectarte (`mount -t cifs`).
 
 Hasta ahora ZimaOS hacía de servidor (trae Samba integrado) y la Rasp de cliente. Ahora la Rasp también tiene que compartir, por lo que necesita instalar Samba.
 
@@ -66,10 +66,10 @@ Añadimos al final del archivo.
    directory mask = 0775
 ```
 
-* **valid users**: solo nuestro usuario puede conectarse.
-* **force user**: todo lo que llegue por Samba se guarda a nombre de `tu_usuario` (uid 1000), que es el mismo usuario con el que corre Jellyfin, así no hay líos de permisos.
-* **create mask 0664**: archivos de lectura y escritura para el dueño y el grupo, y solo lectura para el resto.
-* **directory mask 0775**: igual pero para carpetas, que además necesitan permiso de ejecución para poder entrar en ellas.
+- **valid users**: solo nuestro usuario puede conectarse.
+- **force user**: todo lo que llegue por Samba se guarda a nombre de `tu_usuario` (uid 1000), que es el mismo usuario con el que corre Jellyfin, así no hay líos de permisos.
+- **create mask 0664**: archivos de lectura y escritura para el dueño y el grupo, y solo lectura para el resto.
+- **directory mask 0775**: igual pero para carpetas, que además necesitan permiso de ejecución para poder entrar en ellas.
 
 En el mismo archivo comentamos con `;` las secciones `[homes]`, `[printers]` y `[print$]`. `[homes]` viene activado de serie y comparte todo el `/home` del usuario, cosa que no queremos.
 
@@ -121,8 +121,14 @@ ZimaOS lo monta como **root** (`uid=0,gid=0`) con permisos `0755`, es decir, sol
 La solución es montar el mismo recurso otra vez en otra ruta pero con nuestro usuario (uid 1000). CIFS permite montar lo mismo varias veces sin problema.
 
 ```bash
+#Para no tener que copiar la contraseña vamos a crear un archivo oculto con las credenciales SMB
+nano /DATA/.smb-media-pi
+
+username=*****
+password=******
+
 sudo mkdir -p /DATA/media-pi
-sudo mount -t cifs //IP_RASPBERRY/media-pi /DATA/media-pi -o username=tu_usuario,uid=1000,gid=1000,file_mode=0664,dir_mode=0775,vers=3.1.1,iocharset=utf8
+sudo mount -t cifs //192.168.1.62/media-pi /DATA/media-pi -o credentials=/DATA/.smb-mediapi,uid=1000,gid=1000,file_mode=0664,dir_mode=0775,vers=3.1.1,iocharset=utf8
 ```
 
 Ejemplo
@@ -137,14 +143,14 @@ ls -la /DATA/media-pi
 
 Así nos quedan dos montajes:
 
-* `/media/IP_RASPBERRY/media-pi` → como root, solo para verlo desde la app de Archivos.
-* `/DATA/media-pi` → como 1000, el que usan Radarr y Sonarr.
+- `/media/IP_RASPBERRY/media-pi` → como root, solo para verlo desde la app de Archivos.
+- `/DATA/media-pi` → como 1000, el que usan Radarr y Sonarr.
 
 #### Montaje automático
 
 Igual que hicimos en la Rasp, creamos un archivo para las credenciales. Lo dejo en `/DATA` que es la parte de ZimaOS que se mantiene.
 
-`sudo nano /DATA/.smb-mediapi`
+`sudo nano /DATA/.smb-media-pi`
 
 ```Shell
 username=tu_usuario
@@ -153,13 +159,13 @@ password=tu_contraseña_samba
 
 Lo protegemos.
 
-`sudo chmod 600 /DATA/.smb-mediapi`
+`sudo chmod 600 /DATA/.smb-media-pi`
 
 Y lo añadimos al fstab.
 
 `sudo nano /etc/fstab`
 
-`//IP_RASPBERRY/media-pi  /DATA/media-pi  cifs  credentials=/DATA/.smb-mediapi,uid=1000,gid=1000,file_mode=0664,dir_mode=0775,vers=3.1.1,iocharset=utf8,_netdev,nofail  0  0`
+`//IP_RASPBERRY/media-pi  /DATA/media-pi  cifs  credentials=/DATA/.smb-media-pi,uid=1000,gid=1000,file_mode=0664,dir_mode=0775,vers=3.1.1,iocharset=utf8,_netdev,nofail  0  0`
 
 Probamos que no da ningún error.
 
@@ -173,9 +179,9 @@ Probamos que no da ningún error.
 
 Añadimos el nuevo volumen en el compose de cada uno (en mi caso desde la interfaz de ZimaOS, en la sección Mount).
 
-| App | Host | Container |
-| :----: | :-----------------------: | :----------: |
-| Radarr | `/DATA/media-pi/Movies` | `/movies-pi` |
+|  App  |            Host            |   Container   |
+| :----: | :-------------------------: | :------------: |
+| Radarr |  `/DATA/media-pi/Movies`  | `/movies-pi` |
 | Sonarr | `/DATA/media-pi/TV Shows` | `/series-pi` |
 
 > No uses la ruta que te enseña la app de Archivos (`/IP_RASPBERRY/media-pi/...`), esa ruta no existe en el sistema y Docker monta una carpeta vacía. La ruta real se saca con `mount | grep cifs`.
@@ -256,8 +262,8 @@ docker compose up -d
 
 En Jellyfin añadimos las rutas nuevas a las bibliotecas que ya tenemos, **no creamos bibliotecas nuevas** así Seerr sigue viendo lo mismo sin tocar nada.
 
-* Películas → añadir carpeta `/media-pi/Movies`
-* Series → añadir carpeta `/media-pi/TV Shows`
+- Películas → añadir carpeta `/media-pi/Movies`
+- Series → añadir carpeta `/media-pi/TV Shows`
 
 ### Comprobación
 
@@ -267,8 +273,8 @@ Después de mover la primera peli:
 ls "/home/tu_usuario/media-pi/Movies"
 ```
 
-* En la Rasp aparece la carpeta de la peli.
-* En Jellyfin escaneamos la biblioteca y la peli sigue apareciendo y se reproduce.
-* En Seerr sigue apareciendo como disponible.
+- En la Rasp aparece la carpeta de la peli.
+- En Jellyfin escaneamos la biblioteca y la peli sigue apareciendo y se reproduce.
+- En Seerr sigue apareciendo como disponible.
 
 Si todo va bien ya podemos ir moviendo por lotes.
